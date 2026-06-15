@@ -1,0 +1,333 @@
+#!/usr/bin/env python3
+"""
+Project-local TARS launcher.
+
+Run `tars` or `./tars` to see the command list.
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+
+VERSION = "0.2.0"
+COMMAND = "tars"
+ROOT = Path.cwd()
+DOCS = ROOT / "docs"
+SERVICE_DEFINITION = DOCS / "service-definition.md"
+MVP_TODO = DOCS / "mvp-todo.md"
+START_SESSION = DOCS / "start-session.md"
+
+
+HELP = f"""TARS - New Service MVP Launcher (v{VERSION})
+
+Welcome to TARS.
+Turn a service idea into a repeatable MVP execution harness.
+
+Start here:
+  tars init                            Ask kickoff questions and create docs/service-definition.md
+  tars start                           Print the Codex kickoff prompt and next-step guide
+
+Usage:
+  tars                                 Show this message
+  tars --help                          Show this message
+  tars --version                       Print launcher version
+  tars init                            Ask project kickoff questions and write docs/service-definition.md
+  tars init --force                    Re-enter the service definition
+  tars start                           Print the Codex kickoff prompt, or run init first if needed
+  tars prompt                          Print the Codex kickoff prompt from existing docs
+  tars status                          Check starter document readiness
+  tars next                            Show the next unchecked MVP todo
+  tars doctor                          Verify this project has the required starter files
+
+What TARS sets up:
+  1. Service definition and persona
+  2. G-Stack and Superpowers
+  3. MVP todo loop
+  4. Design tone and frontend quality rules
+  5. AI, analytics, QA, and decision gates
+
+Examples:
+  tars init                            Start a new service MVP by answering questions
+  tars start                           Continue from the current service definition
+  tars next                            See what the agent should do next
+
+Notes:
+  TARS is a shell CLI. Your current shell is usually zsh on macOS.
+  Copy `tars` and `docs/` into a new project to reuse this starter.
+"""
+
+
+def read_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
+def write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def is_placeholder_value(value: str) -> bool:
+    stripped = value.strip()
+    return not stripped or stripped.startswith("[") or stripped.startswith("`[")
+
+
+def extract_section(markdown: str, heading: str) -> str:
+    pattern = rf"^## {re.escape(heading)}\n(?P<body>.*?)(?=^## |\Z)"
+    match = re.search(pattern, markdown, flags=re.MULTILINE | re.DOTALL)
+    if not match:
+        return ""
+    body = match.group("body").strip().replace("`", "").strip()
+    lines = [line.strip("- ").strip() for line in body.splitlines() if line.strip()]
+    return " ".join(lines).strip()
+
+
+def load_service_definition() -> dict[str, str]:
+    markdown = read_text(SERVICE_DEFINITION)
+    return {
+        "definition": extract_section(markdown, "One-Line Definition"),
+        "persona": extract_section(markdown, "Persona"),
+        "pain": extract_section(markdown, "Core Pain"),
+        "transformation": extract_section(markdown, "Desired Transformation"),
+        "mechanism": extract_section(markdown, "Core Mechanism"),
+    }
+
+
+def has_service_definition() -> bool:
+    values = load_service_definition()
+    required = ["definition", "persona", "pain", "transformation"]
+    return all(not is_placeholder_value(values.get(key, "")) for key in required)
+
+
+def ask(label: str, hint: str = "") -> str:
+    print(f"\n{label}")
+    if hint:
+        print(f"  {hint}")
+    while True:
+        value = input("> ").strip()
+        if value:
+            return value
+        print("값을 입력해주세요.")
+
+
+def build_service_definition(values: dict[str, str]) -> str:
+    return f"""# Service Definition
+
+## One-Line Definition
+{values["definition"]}
+
+## Persona
+{values["persona"]}
+
+## Core Pain
+{values["pain"]}
+
+## Desired Transformation
+Before:
+- {values["before"]}
+
+After:
+- {values["after"]}
+
+## Core Mechanism
+{values["mechanism"]}
+"""
+
+
+def build_kickoff_prompt(values: dict[str, str]) -> str:
+    transformation = f"{values.get('before', '')} -> {values.get('after', '')}".strip()
+    if not transformation or transformation == "->":
+        transformation = values.get("transformation", "")
+
+    return f"""이 프로젝트는 신규 서비스 MVP야.
+docs/new-service-starter-protocol.md와 docs/agent-runbook.md를 기준으로 시작해줘.
+
+서비스 정의:
+{values["definition"]}
+
+페르소나:
+{values["persona"]}
+
+핵심 pain:
+{values["pain"]}
+
+원하는 변화:
+{transformation}
+
+먼저 브레인스토밍으로 기획을 정리하고,
+G-Stack, Superpowers, MVP todo, 디자인 톤앤매너, 개발 하네스, AI/QA/analytics 기준을 만든 뒤,
+중요 의사결정 지점은 물어보고,
+그 외에는 MVP core loop가 끝날 때까지 계속 진행해줘.
+"""
+
+
+def command_init(force: bool = False) -> int:
+    if has_service_definition() and not force:
+        print("docs/service-definition.md에 이미 서비스 정의가 있습니다.")
+        print("다시 입력하려면 tars init --force 를 사용하세요.")
+        print_next_commands()
+        return 0
+
+    print("신규 서비스 MVP 시작 정보를 입력합니다.")
+    values = {
+        "definition": ask(
+            "서비스 정의",
+            "예: [서비스명]은 [페르소나]가 [결과]를 [핵심 메커니즘]으로 달성하게 돕는다.",
+        ),
+        "persona": ask("페르소나", "타겟 유저를 한 문단으로 적어주세요."),
+        "pain": ask("핵심 pain", "사용자가 겪는 가장 선명한 문제를 적어주세요."),
+        "before": ask("Before", "제품 사용 전 사용자의 상태를 적어주세요."),
+        "after": ask("After", "제품 사용 후 사용자의 상태를 적어주세요."),
+        "mechanism": ask("핵심 메커니즘", "서비스가 변화를 만드는 핵심 방식을 적어주세요."),
+    }
+
+    write_text(SERVICE_DEFINITION, build_service_definition(values))
+    prompt = build_kickoff_prompt(values)
+    write_text(START_SESSION, "# Start Session Prompt\n\n" + prompt)
+
+    print("\n서비스 정의를 저장했습니다:")
+    print(f"- {SERVICE_DEFINITION.relative_to(ROOT)}")
+    print(f"- {START_SESSION.relative_to(ROOT)}")
+    print("\n다음 단계:")
+    print("- tars start   : Codex kickoff prompt 출력")
+    print("- tars next    : 다음 MVP todo 확인")
+    return 0
+
+
+def get_prompt() -> str | None:
+    values = load_service_definition()
+    if not has_service_definition():
+        return None
+    return build_kickoff_prompt(
+        {
+            "definition": values["definition"],
+            "persona": values["persona"],
+            "pain": values["pain"],
+            "transformation": values["transformation"],
+        }
+    )
+
+
+def command_prompt() -> int:
+    prompt = get_prompt()
+    if not prompt:
+        print("서비스 정의가 아직 비어 있습니다. 먼저 tars init 을 실행하세요.")
+        return 1
+    write_text(START_SESSION, "# Start Session Prompt\n\n" + prompt)
+    print(prompt)
+    return 0
+
+
+def command_start() -> int:
+    if not has_service_definition():
+        print("서비스 정의가 아직 없습니다. 먼저 질문을 시작합니다.")
+        result = command_init()
+        if result != 0:
+            return result
+        print("\n--- Codex Kickoff Prompt ---\n")
+    return command_prompt()
+
+
+def required_files() -> list[str]:
+    return [
+        "new-service-starter-protocol.md",
+        "agent-runbook.md",
+        "service-definition.md",
+        "g-stack.md",
+        "superpowers.md",
+        "mvp-todo.md",
+        "decision-gates.md",
+        "frontend-engineering-standards.md",
+    ]
+
+
+def command_status() -> int:
+    print("Starter status")
+    for filename in required_files():
+        path = DOCS / filename
+        marker = "ok" if path.exists() else "missing"
+        print(f"- {marker}: docs/{filename}")
+    print(f"- service definition: {'ready' if has_service_definition() else 'needs input'}")
+    print_next_commands()
+    return 0
+
+
+def command_doctor() -> int:
+    missing = [filename for filename in required_files() if not (DOCS / filename).exists()]
+    if missing:
+        print("Doctor: missing required starter files")
+        for filename in missing:
+            print(f"- docs/{filename}")
+        return 1
+
+    print("Doctor: ok")
+    print(f"- root: {ROOT}")
+    print(f"- docs: {DOCS}")
+    print(f"- service definition: {'ready' if has_service_definition() else 'needs input'}")
+    return 0
+
+
+def command_next() -> int:
+    text = read_text(MVP_TODO)
+    if not text:
+        print("docs/mvp-todo.md를 찾을 수 없습니다.")
+        return 1
+    for line in text.splitlines():
+        if line.startswith("- [ ]"):
+            print("Next todo:")
+            print(line.replace("- [ ]", "-", 1))
+            print("\nSuggested command:")
+            print("tars start")
+            return 0
+    print("열린 todo가 없습니다. MVP 완료 조건을 확인하세요.")
+    return 0
+
+
+def print_next_commands() -> None:
+    print("\n다음 명령:")
+    print("- tars start   : Codex kickoff prompt 출력")
+    print("- tars status  : 스타터 문서 상태 확인")
+    print("- tars next    : 다음 MVP todo 확인")
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) == 1 or argv[1] in {"--help", "-h", "help"}:
+        print(HELP)
+        return 0
+    if argv[1] == "--version":
+        print(VERSION)
+        return 0
+
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("command")
+    parser.add_argument("--force", action="store_true")
+    args, extra = parser.parse_known_args(argv[1:])
+
+    if extra:
+        print(f"알 수 없는 인자: {' '.join(extra)}")
+        print("도움말은 tars --help")
+        return 2
+
+    if args.command == "init":
+        return command_init(force=args.force)
+    if args.command == "start":
+        return command_start()
+    if args.command == "prompt":
+        return command_prompt()
+    if args.command == "status":
+        return command_status()
+    if args.command == "next":
+        return command_next()
+    if args.command == "doctor":
+        return command_doctor()
+
+    print(f"알 수 없는 명령: {args.command}")
+    print("도움말은 tars --help")
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv))

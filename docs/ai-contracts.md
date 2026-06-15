@@ -1,0 +1,121 @@
+# AI Contracts
+
+## Goal
+AI must produce structured, reviewable plan outputs. It must not behave like an unconstrained chatbot inside core product flows.
+
+## AI Functions
+### generateInitialPlan
+Input:
+- User profile.
+- Goal.
+- Lifestyle answers.
+
+Output:
+- 7-day plan.
+- Meal items.
+- Exercise items.
+- Short rationale.
+- Adjustment notes.
+
+### adjustTodayPlan
+Input:
+- Current plan.
+- Today plan.
+- Completed items.
+- Adjustment request.
+- Optional food text or photo interpretation.
+
+Output:
+- Revision summary.
+- Updated remaining items for today.
+- Optional future plan changes.
+- Encouraging explanation.
+
+### summarizeProgress
+Input:
+- Weekly completion data.
+- Revision history.
+- Recent check-ins.
+
+Output:
+- Short progress summary.
+- One practical suggestion.
+- No shame or diagnosis.
+
+## Output Rules
+- Return JSON only for product flows.
+- Use domain terms from `docs/frontend-engineering-standards.md`.
+- Include user-facing copy separately from structured plan data.
+- Do not include medical diagnosis.
+- Do not overstate calorie precision.
+- Do not shame the user.
+- Do not update persisted plan data until the user approves.
+
+## Initial JSON Shapes
+### Plan
+```ts
+type Plan = {
+  id?: string;
+  goalId: string;
+  startDate: string;
+  endDate: string;
+  summary: string;
+  items: PlanItem[];
+};
+```
+
+### PlanItem
+```ts
+type PlanItem = {
+  id?: string;
+  date: string;
+  type: "meal" | "exercise";
+  slot: "breakfast" | "lunch" | "dinner" | "snack" | "workout";
+  title: string;
+  description: string;
+  intensity?: "light" | "moderate" | "challenging";
+  status?: "pending" | "completed" | "skipped" | "adjusted";
+};
+```
+
+### AdjustmentRequest
+```ts
+type AdjustmentRequest = {
+  reason: "meal_changed" | "missed_exercise" | "schedule_changed" | "want_replan";
+  note?: string;
+  affectedDate: string;
+};
+```
+
+### PlanRevision
+```ts
+type PlanRevision = {
+  planId: string;
+  affectedDate: string;
+  reason: AdjustmentRequest["reason"];
+  summary: string;
+  userMessage: string;
+  updatedTodayItems: PlanItem[];
+  updatedFutureItems?: PlanItem[];
+};
+```
+
+## Fixture Cases
+Create fixtures for:
+- User skips breakfast regularly.
+- User must eat normal lunch.
+- User has no exercise habit.
+- User eats a heavy lunch and wants dinner adjustment.
+- User misses workout and wants tomorrow adjusted.
+- User wants a gentler plan without explaining why.
+
+## Regression Rule
+Every prompt change must run AI fixtures.
+
+The test does not need to judge perfect nutrition. It must verify:
+- JSON parses.
+- Required fields exist.
+- User-facing copy follows tone rules.
+- Plan changes are plausible.
+- The app can render the result.
+
