@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -42,6 +43,7 @@ Usage:
   tars status                          Check starter document readiness
   tars next                            Show the next unchecked MVP todo
   tars doctor                          Verify this project has the required starter files
+  tars handoff                         Show multi-machine handoff checklist
 
 What TARS sets up:
   1. Service definition and persona
@@ -54,6 +56,7 @@ Examples:
   tars init                            Start a new service MVP by answering questions
   tars start                           Continue from the current service definition
   tars next                            See what the agent should do next
+  tars handoff                         Prepare to switch between work and home PCs
 
 Notes:
   TARS is a shell CLI. Your current shell is usually zsh on macOS.
@@ -286,11 +289,64 @@ def command_next() -> int:
     return 0
 
 
+def run_git(args: list[str]) -> str:
+    try:
+        result = subprocess.run(
+            ["git", *args],
+            cwd=ROOT,
+            check=False,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+    except FileNotFoundError:
+        return ""
+    return result.stdout.strip()
+
+
+def next_todo_line() -> str:
+    text = read_text(MVP_TODO)
+    if not text:
+        return "docs/mvp-todo.md not found"
+    for line in text.splitlines():
+        if line.startswith("- [ ]"):
+            return line.replace("- [ ]", "-", 1)
+    return "No open todo found"
+
+
+def command_handoff() -> int:
+    branch = run_git(["branch", "--show-current"]) or "(not a git repo)"
+    status = run_git(["status", "--short"]) or "(clean)"
+    remote = run_git(["remote", "-v"]) or "(no remote configured)"
+
+    print("TARS handoff")
+    print(f"- project: {ROOT}")
+    print(f"- branch: {branch}")
+    print(f"- next todo: {next_todo_line()}")
+    print("\nGit status:")
+    print(status)
+    print("\nGit remote:")
+    print(remote)
+    print("\nBefore leaving this PC:")
+    print("1. Run checks for the slice you touched.")
+    print("2. Update docs/decision-log.md or docs/lessons-and-rules.md if needed.")
+    print("3. Commit your work.")
+    print("4. Push to the remote.")
+    print("\nWhen starting on another PC:")
+    print("1. Pull the latest branch.")
+    print("2. Run `tars doctor`.")
+    print("3. Run `tars status`.")
+    print("4. Run `tars next`.")
+    print("5. Tell Codex: `tars 기준으로 다음 todo 진행해줘.`")
+    return 0
+
+
 def print_next_commands() -> None:
     print("\n다음 명령:")
     print("- tars start   : Codex kickoff prompt 출력")
     print("- tars status  : 스타터 문서 상태 확인")
     print("- tars next    : 다음 MVP todo 확인")
+    print("- tars handoff : 다른 PC로 작업 넘기기 체크리스트")
 
 
 def main(argv: list[str]) -> int:
@@ -323,6 +379,8 @@ def main(argv: list[str]) -> int:
         return command_next()
     if args.command == "doctor":
         return command_doctor()
+    if args.command == "handoff":
+        return command_handoff()
 
     print(f"알 수 없는 명령: {args.command}")
     print("도움말은 tars --help")

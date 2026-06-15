@@ -15,8 +15,9 @@ Copy:
 
 ```txt
 starter-kit/new-service/docs/
+starter-kit/new-service/README.md
+starter-kit/new-service/HOW_IT_WORKS.md
 starter-kit/new-service/tars
-starter-kit/new-service/mvp
 starter-kit/new-service/start
 starter-kit/new-service/activate
 starter-kit/new-service/scripts/install-tars.zsh
@@ -45,6 +46,24 @@ source ~/.zshrc
 tars
 ```
 
+To continue work between office and home PCs:
+
+```bash
+tars handoff
+git add .
+git commit -m "Complete current slice"
+git push
+```
+
+On the other PC:
+
+```bash
+git pull
+tars doctor
+tars status
+tars next
+```
+
 ## Minimum Copy Pack
 Copy these files:
 
@@ -69,7 +88,6 @@ Copy the whole `starter-kit/new-service/docs/` folder into the new project as `d
 ```txt
 docs/new-service-starter-protocol.md
 docs/service-definition.md
-docs/persona.md
 docs/g-stack.md
 docs/superpowers.md
 docs/mvp-execution-harness.md

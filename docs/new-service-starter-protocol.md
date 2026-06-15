@@ -126,7 +126,6 @@ Every new service should start with these files:
 ```txt
 docs/
   service-definition.md
-  persona.md
   g-stack.md
   superpowers.md
   mvp-execution-harness.md

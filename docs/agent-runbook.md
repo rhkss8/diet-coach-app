@@ -14,13 +14,14 @@ Use `docs/new-service-starter-protocol.md` as the reusable kickoff protocol for 
 4. Read `docs/decision-log.md`.
 5. Read `docs/lessons-and-rules.md`.
 6. Read `docs/decision-gates.md`.
-7. If changing kickoff structure, read `docs/new-service-starter-protocol.md` and `docs/new-service-copy-pack.md`.
-8. If changing product definition, read `docs/service-definition.md`, `docs/g-stack.md`, and `docs/superpowers.md`.
-9. If touching UI or copy, read `docs/design-tone-and-manner.md`.
-10. If touching frontend code, read `docs/frontend-engineering-standards.md`.
-11. If touching AI behavior, read `docs/ai-contracts.md`.
-12. If touching metrics, read `docs/analytics-events.md`.
-13. If testing or preparing release, read `docs/qa-checklist.md`.
+7. If resuming from another PC, read `docs/workstation-handoff.md`.
+8. If changing kickoff structure, read `docs/new-service-starter-protocol.md` and `docs/new-service-copy-pack.md`.
+9. If changing product definition, read `docs/service-definition.md`, `docs/g-stack.md`, and `docs/superpowers.md`.
+10. If touching UI or copy, read `docs/design-tone-and-manner.md`.
+11. If touching frontend code, read `docs/frontend-engineering-standards.md`.
+12. If touching AI behavior, read `docs/ai-contracts.md`.
+13. If touching metrics, read `docs/analytics-events.md`.
+14. If testing or preparing release, read `docs/qa-checklist.md`.
 
 ## Work Selection
 Pick the first incomplete todo that unlocks the core loop.
