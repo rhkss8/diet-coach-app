@@ -37,8 +37,9 @@ export function AppRoot() {
   >();
   const [adjustmentNote, setAdjustmentNote] = useState("");
   const [adjustedPlanOutput, setAdjustedPlanOutput] = useState<AdjustTodayPlanOutput | null>(null);
-  const { latestRevisionSnapshot, persistPlanRevision } = usePlanRevisionPersistence();
-  const { approvedPlanSnapshot, approvePlan, isHydratingApprovedPlan } =
+  const [isApprovingAdjustedPlan, setIsApprovingAdjustedPlan] = useState(false);
+  const { persistPlanRevision } = usePlanRevisionPersistence();
+  const { applyApprovedRevision, approvedPlanSnapshot, approvePlan, isHydratingApprovedPlan } =
     useApprovedPlanPersistence();
 
   return (
@@ -47,12 +48,22 @@ export function AppRoot() {
       {isHydratingApprovedPlan ? (
         <LoadingPlan />
       ) : isAdjustingToday ? (
-        latestRevisionSnapshot ? (
-          <RevisionPersisted />
+        isApprovingAdjustedPlan ? (
+          <ApprovingAdjustedPlan />
         ) : adjustedPlanOutput ? (
           <RevisedPlanReviewScreen
             onApprove={() => {
-              void persistPlanRevision(adjustedPlanOutput.revision);
+              void approveAdjustedPlan(adjustedPlanOutput.revision, {
+                applyApprovedRevision,
+                persistPlanRevision,
+                resetAdjustmentFlow: () => {
+                  setAdjustedPlanOutput(null);
+                  setAdjustmentNote("");
+                  setSelectedAdjustmentReason(undefined);
+                  setIsAdjustingToday(false);
+                },
+                setIsApprovingAdjustedPlan,
+              });
             }}
             onDismiss={() => setIsAdjustingToday(false)}
             output={adjustedPlanOutput}
@@ -139,15 +150,6 @@ export function AppRoot() {
   );
 }
 
-function RevisionPersisted() {
-  return (
-    <View style={styles.completedContent}>
-      <Text style={styles.eyebrow}>조정안 저장됨</Text>
-      <Text style={styles.title}>이제 오늘 플랜에 반영할 차례예요</Text>
-    </View>
-  );
-}
-
 function completeOnboarding(
   result: Omit<CompletedOnboarding, "initialPlanOutput">,
 ): CompletedOnboarding {
@@ -168,6 +170,37 @@ function completeOnboarding(
     ...result,
     initialPlanOutput,
   };
+}
+
+type ApproveAdjustedPlanActions = {
+  applyApprovedRevision: (revision: AdjustTodayPlanOutput["revision"]) => Promise<unknown>;
+  persistPlanRevision: (revision: AdjustTodayPlanOutput["revision"]) => Promise<void>;
+  resetAdjustmentFlow: () => void;
+  setIsApprovingAdjustedPlan: (isApproving: boolean) => void;
+};
+
+async function approveAdjustedPlan(
+  revision: AdjustTodayPlanOutput["revision"],
+  actions: ApproveAdjustedPlanActions,
+) {
+  actions.setIsApprovingAdjustedPlan(true);
+
+  try {
+    await actions.persistPlanRevision(revision);
+    await actions.applyApprovedRevision(revision);
+    actions.resetAdjustmentFlow();
+  } finally {
+    actions.setIsApprovingAdjustedPlan(false);
+  }
+}
+
+function ApprovingAdjustedPlan() {
+  return (
+    <View style={styles.completedContent}>
+      <Text style={styles.eyebrow}>조정안 저장됨</Text>
+      <Text style={styles.title}>오늘 플랜에 반영하고 있어요</Text>
+    </View>
+  );
 }
 
 function LoadingPlan() {

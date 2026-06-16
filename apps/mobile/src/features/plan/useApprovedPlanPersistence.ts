@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 
-import type { AiPlan } from "@diet-coach/ai";
+import type { AdjustTodayPlanOutput, AiPlan } from "@diet-coach/ai";
 
 import { trackAnalyticsEvent } from "../../shared/lib/analytics";
+import { applyPlanRevisionToPlan } from "./apply-plan-revision";
 import { type ApprovedPlanSnapshot, createApprovedPlanSnapshot } from "./approved-plan-snapshot";
 import { loadApprovedPlanSnapshot, saveApprovedPlanSnapshot } from "./approvedPlanStorage";
 
@@ -35,16 +36,34 @@ export function useApprovedPlanPersistence() {
   async function approvePlan(plan: AiPlan) {
     const snapshot = createApprovedPlanSnapshot(plan);
 
-    await saveApprovedPlanSnapshot(snapshot);
+    await persistApprovedPlanSnapshot(snapshot);
     trackAnalyticsEvent("PLAN_APPROVED", {
       userId: "local-user",
       goalId: plan.goalId,
       planId: plan.id ?? "local-plan",
     });
+  }
+
+  async function applyApprovedRevision(revision: AdjustTodayPlanOutput["revision"]) {
+    if (!approvedPlanSnapshot) {
+      return null;
+    }
+
+    const revisedPlan = applyPlanRevisionToPlan(approvedPlanSnapshot.plan, revision);
+    const snapshot = createApprovedPlanSnapshot(revisedPlan, approvedPlanSnapshot.approvedAt);
+
+    await persistApprovedPlanSnapshot(snapshot);
+
+    return snapshot;
+  }
+
+  async function persistApprovedPlanSnapshot(snapshot: ApprovedPlanSnapshot) {
+    await saveApprovedPlanSnapshot(snapshot);
     setApprovedPlanSnapshot(snapshot);
   }
 
   return {
+    applyApprovedRevision,
     approvedPlanSnapshot,
     approvePlan,
     isHydratingApprovedPlan,

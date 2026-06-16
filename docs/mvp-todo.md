@@ -94,7 +94,7 @@ Todos:
 - [x] Generate mock revised plan.
 - [x] Build revised plan review screen.
 - [x] Persist PlanRevision.
-- [ ] Apply approved revision to today and future plan items.
+- [x] Apply approved revision to today and future plan items.
 - [ ] Track adjustment events.
 
 Exit criteria:
