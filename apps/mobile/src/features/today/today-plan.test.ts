@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import type { AiPlan } from "@diet-coach/ai";
 
-import { countPendingTodayItems, getTodayPlanDate, getTodayPlanItems } from "./today-plan";
+import {
+  countPendingTodayItems,
+  getTodayPlanDate,
+  getTodayPlanItems,
+  groupTodayPlanItemsByType,
+} from "./today-plan";
 
 const plan = {
   goalId: "goal-1",
@@ -48,5 +53,12 @@ describe("today plan helpers", () => {
 
   it("counts pending today items", () => {
     expect(countPendingTodayItems(getTodayPlanItems(plan))).toBe(1);
+  });
+
+  it("groups today's meals and exercise", () => {
+    expect(groupTodayPlanItemsByType(getTodayPlanItems(plan))).toEqual({
+      exercises: [expect.objectContaining({ type: "exercise" })],
+      meals: [expect.objectContaining({ type: "meal" })],
+    });
   });
 });

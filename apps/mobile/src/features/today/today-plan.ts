@@ -13,3 +13,10 @@ export function getTodayPlanItems(plan: AiPlan) {
 export function countPendingTodayItems(planItems: AiPlanItem[]) {
   return planItems.filter((planItem) => planItem.status !== "completed").length;
 }
+
+export function groupTodayPlanItemsByType(planItems: AiPlanItem[]) {
+  return {
+    exercises: planItems.filter((planItem) => planItem.type === "exercise"),
+    meals: planItems.filter((planItem) => planItem.type === "meal"),
+  };
+}

@@ -73,7 +73,7 @@ Goal: user can act on today's plan.
 Todos:
 
 - [x] Build Today screen.
-- [ ] Show meals and exercise.
+- [x] Show meals and exercise.
 - [ ] Add completion check controls.
 - [ ] Add daily progress summary.
 - [ ] Track plan item completion events.
