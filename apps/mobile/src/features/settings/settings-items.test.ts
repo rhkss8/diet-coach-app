@@ -8,6 +8,7 @@ describe("basic settings items", () => {
       "account",
       "notifications",
       "privacy_policy",
+      "terms",
       "app_info",
     ]);
   });
@@ -31,13 +32,27 @@ describe("basic settings items", () => {
     );
   });
 
+  it("adds a terms URL when release links are configured", () => {
+    expect(
+      getBasicSettingsItems({
+        termsUrl: "https://example.com/terms",
+      }).find((item) => item.id === "terms"),
+    ).toEqual(
+      expect.objectContaining({
+        url: "https://example.com/terms",
+      }),
+    );
+  });
+
   it("reads release links from environment values", () => {
     expect(
       getReleaseLinks({
         EXPO_PUBLIC_PRIVACY_POLICY_URL: "https://example.com/privacy",
+        EXPO_PUBLIC_TERMS_URL: "https://example.com/terms",
       }),
     ).toEqual({
       privacyPolicyUrl: "https://example.com/privacy",
+      termsUrl: "https://example.com/terms",
     });
   });
 });

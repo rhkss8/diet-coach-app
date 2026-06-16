@@ -144,7 +144,7 @@ Todos:
 - [x] Add notification permission recommendation.
 - [x] Add basic settings screen.
 - [x] Add privacy policy link.
-- [ ] Add terms link.
+- [x] Add terms link.
 - [ ] Add feedback channel.
 - [ ] Run full manual QA.
 - [ ] Run test suite.
