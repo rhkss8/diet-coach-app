@@ -40,7 +40,7 @@ Todos:
 - [x] Define AI JSON schemas.
 - [x] Define analytics event names.
 - [x] Define initial fixture users.
-- [ ] Define adjustment fixture cases.
+- [x] Define adjustment fixture cases.
 - [ ] Define core flow acceptance criteria.
 
 Exit criteria:
