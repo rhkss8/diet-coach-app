@@ -141,7 +141,7 @@ Goal: prepare closed MVP test.
 
 Todos:
 
-- [ ] Add notification permission recommendation.
+- [x] Add notification permission recommendation.
 - [ ] Add basic settings screen.
 - [ ] Add privacy policy link.
 - [ ] Add terms link.

@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { AiPlan, AiPlanItem } from "@diet-coach/ai";
 import type { PlanItemStatus } from "@diet-coach/core";
 
+import { NotificationRecommendation } from "../notifications";
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
 import { trackAnalyticsEvent } from "../../shared/lib/analytics";
 import {
@@ -126,6 +127,8 @@ export function TodayScreen({ onAdjustToday, plan, revisionContext }: TodayScree
           항목 {progressSummary.pendingCount}개
         </Text>
       </View>
+
+      <NotificationRecommendation />
 
       <TodayPlanSection items={meals} onStatusChange={updatePlanItemStatus} title="오늘 식사" />
       <TodayPlanSection items={exercises} onStatusChange={updatePlanItemStatus} title="오늘 운동" />
