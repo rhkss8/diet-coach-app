@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 
-import type { GenerateInitialPlanOutput } from "@diet-coach/ai";
+import type { AdjustTodayPlanOutput, GenerateInitialPlanOutput } from "@diet-coach/ai";
 import type {
   AdjustmentReason,
   GoalInput,
@@ -10,11 +10,12 @@ import type {
   UserProfileInput,
 } from "@diet-coach/core";
 
-import { generateMockInitialPlan } from "@diet-coach/ai";
+import { generateMockAdjustedPlan, generateMockInitialPlan } from "@diet-coach/ai";
 import { AdjustmentReasonSelectionScreen } from "../features/adjustment";
 import { OnboardingFlow } from "../features/onboarding";
 import { PlanApprovalScreen, useApprovedPlanPersistence } from "../features/plan";
 import { TodayScreen } from "../features/today";
+import { getTodayPlanItems } from "../features/today";
 import { trackAnalyticsEvent } from "../shared/lib/analytics";
 
 type CompletedOnboarding = {
@@ -31,7 +32,7 @@ export function AppRoot() {
     AdjustmentReason | undefined
   >();
   const [adjustmentNote, setAdjustmentNote] = useState("");
-  const [isAdjustmentNoteSubmitted, setIsAdjustmentNoteSubmitted] = useState(false);
+  const [adjustedPlanOutput, setAdjustedPlanOutput] = useState<AdjustTodayPlanOutput | null>(null);
   const { approvedPlanSnapshot, approvePlan, isHydratingApprovedPlan } =
     useApprovedPlanPersistence();
 
@@ -41,8 +42,8 @@ export function AppRoot() {
       {isHydratingApprovedPlan ? (
         <LoadingPlan />
       ) : isAdjustingToday ? (
-        isAdjustmentNoteSubmitted ? (
-          <AdjustmentNoteSubmitted />
+        adjustedPlanOutput ? (
+          <AdjustmentGenerated output={adjustedPlanOutput} />
         ) : (
           <AdjustmentReasonSelectionScreen
             note={adjustmentNote}
@@ -57,14 +58,47 @@ export function AppRoot() {
               });
             }}
             onSubmitNote={() => {
+              const reason = selectedAdjustmentReason ?? "meal_changed";
               trackAnalyticsEvent("ADJUSTMENT_NOTE_SUBMITTED", {
                 userId: "local-user",
                 planId: approvedPlanSnapshot?.plan.id ?? "local-plan",
                 affectedDate: approvedPlanSnapshot?.plan.startDate ?? "local-date",
                 hasNote: adjustmentNote.trim().length > 0,
-                reason: selectedAdjustmentReason,
+                reason,
               });
-              setIsAdjustmentNoteSubmitted(true);
+              trackAnalyticsEvent("PLAN_ADJUSTMENT_GENERATION_STARTED", {
+                userId: "local-user",
+                planId: approvedPlanSnapshot?.plan.id ?? "local-plan",
+                affectedDate: approvedPlanSnapshot?.plan.startDate ?? "local-date",
+                reason,
+              });
+              const output = generateMockAdjustedPlan({
+                currentPlan: approvedPlanSnapshot?.plan ?? {
+                  goalId: "local-goal",
+                  startDate: "local-date",
+                  endDate: "local-date",
+                  summary: "local plan",
+                  items: [],
+                },
+                todayItems: approvedPlanSnapshot
+                  ? getTodayPlanItems(approvedPlanSnapshot.plan)
+                  : [],
+                completedItemIds: [],
+                request: {
+                  planId: approvedPlanSnapshot?.plan.id ?? "local-plan",
+                  affectedDate: approvedPlanSnapshot?.plan.startDate ?? "local-date",
+                  reason,
+                  note: adjustmentNote.trim() || undefined,
+                },
+              });
+              trackAnalyticsEvent("PLAN_ADJUSTMENT_GENERATION_SUCCEEDED", {
+                userId: "local-user",
+                planId: output.revision.planId,
+                affectedDate: output.revision.affectedDate,
+                revisionId: "mock-revision-1",
+                reason,
+              });
+              setAdjustedPlanOutput(output);
             }}
             selectedReason={selectedAdjustmentReason}
           />
@@ -92,11 +126,11 @@ export function AppRoot() {
   );
 }
 
-function AdjustmentNoteSubmitted() {
+function AdjustmentGenerated({ output }: { output: AdjustTodayPlanOutput }) {
   return (
     <View style={styles.completedContent}>
-      <Text style={styles.eyebrow}>메모 저장됨</Text>
-      <Text style={styles.title}>이제 조정안을 만들 차례예요</Text>
+      <Text style={styles.eyebrow}>조정안 생성됨</Text>
+      <Text style={styles.title}>{output.revision.summary}</Text>
     </View>
   );
 }

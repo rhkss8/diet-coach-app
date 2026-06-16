@@ -91,7 +91,7 @@ Todos:
 - [x] Add "Adjust today" entry point.
 - [x] Build adjustment reason selection.
 - [x] Add optional short text input.
-- [ ] Generate mock revised plan.
+- [x] Generate mock revised plan.
 - [ ] Build revised plan review screen.
 - [ ] Persist PlanRevision.
 - [ ] Apply approved revision to today and future plan items.
