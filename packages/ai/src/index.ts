@@ -1,1 +1,1 @@
-export const aiPackageReady = true;
+export * from "./contracts";

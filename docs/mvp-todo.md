@@ -37,7 +37,7 @@ Goal: define contracts before building UI deeply.
 Todos:
 
 - [x] Define domain types: User, Goal, Plan, PlanItem, PlanRevision, AdjustmentRequest, DailyCheckIn.
-- [ ] Define AI JSON schemas.
+- [x] Define AI JSON schemas.
 - [ ] Define analytics event names.
 - [ ] Define initial fixture users.
 - [ ] Define adjustment fixture cases.

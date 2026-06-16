@@ -10,6 +10,9 @@
     "lint": "eslint .",
     "test": "vitest run --passWithNoTests"
   },
+  "dependencies": {
+    "@diet-coach/core": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "~6.0.3"
   }
