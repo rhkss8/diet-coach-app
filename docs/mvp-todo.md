@@ -88,7 +88,7 @@ Goal: user can request a plan adjustment.
 
 Todos:
 
-- [ ] Add "Adjust today" entry point.
+- [x] Add "Adjust today" entry point.
 - [ ] Build adjustment reason selection.
 - [ ] Add optional short text input.
 - [ ] Generate mock revised plan.

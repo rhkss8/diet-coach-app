@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { AiPlan, AiPlanItem } from "@diet-coach/ai";
 import type { PlanItemStatus } from "@diet-coach/core";
 
+import { PrimaryButton } from "../../shared/ui/PrimaryButton";
 import { trackAnalyticsEvent } from "../../shared/lib/analytics";
 import {
   countPendingTodayItems,
@@ -16,10 +17,11 @@ import {
 } from "./today-plan";
 
 type TodayScreenProps = {
+  onAdjustToday: () => void;
   plan: AiPlan;
 };
 
-export function TodayScreen({ plan }: TodayScreenProps) {
+export function TodayScreen({ onAdjustToday, plan }: TodayScreenProps) {
   const todayPlanDate = getTodayPlanDate(plan);
   const [todayItems, setTodayItems] = useState(() => getTodayPlanItems(plan));
   const pendingItemCount = countPendingTodayItems(todayItems);
@@ -50,6 +52,15 @@ export function TodayScreen({ plan }: TodayScreenProps) {
     }
 
     setTodayItems((currentItems) => updateTodayPlanItemStatus(currentItems, planItemId, status));
+  }
+
+  function startAdjustment() {
+    trackAnalyticsEvent("ADJUST_TODAY_CLICKED", {
+      userId: "local-user",
+      planId: plan.id ?? "local-plan",
+      affectedDate: todayPlanDate,
+    });
+    onAdjustToday();
   }
 
   return (
@@ -93,6 +104,14 @@ export function TodayScreen({ plan }: TodayScreenProps) {
 
       <TodayPlanSection items={meals} onStatusChange={updatePlanItemStatus} title="오늘 식사" />
       <TodayPlanSection items={exercises} onStatusChange={updatePlanItemStatus} title="오늘 운동" />
+
+      <View style={styles.adjustBand}>
+        <Text style={styles.adjustTitle}>오늘 계획이 달라졌나요?</Text>
+        <Text style={styles.summaryText}>
+          회식, 야근, 운동 미실행이 생기면 남은 하루 기준으로 다시 맞출 수 있어요.
+        </Text>
+        <PrimaryButton label="오늘 계획 조정" onPress={startAdjustment} />
+      </View>
     </ScrollView>
   );
 }
@@ -315,5 +334,19 @@ const styles = StyleSheet.create({
   },
   selectedStatusButtonLabel: {
     color: "#245A42",
+  },
+  adjustBand: {
+    backgroundColor: "#F1EEE7",
+    borderColor: "#E1D9CC",
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 12,
+    padding: 16,
+  },
+  adjustTitle: {
+    color: "#26342C",
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 0,
   },
 });

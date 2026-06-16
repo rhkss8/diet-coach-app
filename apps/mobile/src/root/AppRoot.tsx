@@ -20,6 +20,7 @@ type CompletedOnboarding = {
 
 export function AppRoot() {
   const [completedOnboarding, setCompletedOnboarding] = useState<CompletedOnboarding | null>(null);
+  const [isAdjustingToday, setIsAdjustingToday] = useState(false);
   const { approvedPlanSnapshot, approvePlan, isHydratingApprovedPlan } =
     useApprovedPlanPersistence();
 
@@ -28,8 +29,15 @@ export function AppRoot() {
       <StatusBar style="dark" />
       {isHydratingApprovedPlan ? (
         <LoadingPlan />
+      ) : isAdjustingToday ? (
+        <AdjustmentStarted />
       ) : approvedPlanSnapshot ? (
-        <TodayScreen plan={approvedPlanSnapshot.plan} />
+        <TodayScreen
+          onAdjustToday={() => {
+            setIsAdjustingToday(true);
+          }}
+          plan={approvedPlanSnapshot.plan}
+        />
       ) : completedOnboarding ? (
         <PlanApprovalScreen
           onApprove={() => {
@@ -43,6 +51,15 @@ export function AppRoot() {
         />
       )}
     </SafeAreaView>
+  );
+}
+
+function AdjustmentStarted() {
+  return (
+    <View style={styles.completedContent}>
+      <Text style={styles.eyebrow}>조정 시작</Text>
+      <Text style={styles.title}>이제 사유를 고르면 돼요</Text>
+    </View>
   );
 }
 
