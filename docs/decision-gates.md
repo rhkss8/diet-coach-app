@@ -33,6 +33,7 @@ The agent should continue working by default, but must ask the user at important
 - Requiring API keys.
 - Installing paid services.
 - Running external deployment.
+- Sending tester invites or creating external tester distribution through TestFlight, Google Play, Expo EAS, or public community channels.
 
 ### Data and Privacy
 
