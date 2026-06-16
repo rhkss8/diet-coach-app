@@ -145,7 +145,7 @@ Todos:
 - [x] Add basic settings screen.
 - [x] Add privacy policy link.
 - [x] Add terms link.
-- [ ] Add feedback channel.
+- [x] Add feedback channel.
 - [ ] Run full manual QA.
 - [ ] Run test suite.
 - [ ] Create build.

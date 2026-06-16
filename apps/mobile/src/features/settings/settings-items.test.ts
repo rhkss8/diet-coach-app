@@ -9,6 +9,7 @@ describe("basic settings items", () => {
       "notifications",
       "privacy_policy",
       "terms",
+      "feedback",
       "app_info",
     ]);
   });
@@ -44,13 +45,27 @@ describe("basic settings items", () => {
     );
   });
 
+  it("adds a feedback URL when release links are configured", () => {
+    expect(
+      getBasicSettingsItems({
+        feedbackUrl: "mailto:test@example.com",
+      }).find((item) => item.id === "feedback"),
+    ).toEqual(
+      expect.objectContaining({
+        url: "mailto:test@example.com",
+      }),
+    );
+  });
+
   it("reads release links from environment values", () => {
     expect(
       getReleaseLinks({
+        EXPO_PUBLIC_FEEDBACK_URL: "mailto:test@example.com",
         EXPO_PUBLIC_PRIVACY_POLICY_URL: "https://example.com/privacy",
         EXPO_PUBLIC_TERMS_URL: "https://example.com/terms",
       }),
     ).toEqual({
+      feedbackUrl: "mailto:test@example.com",
       privacyPolicyUrl: "https://example.com/privacy",
       termsUrl: "https://example.com/terms",
     });
