@@ -111,7 +111,7 @@ Todos:
 - [x] Implement adjustment prompt.
 - [x] Enforce JSON schema validation.
 - [x] Add fallback for invalid AI output.
-- [ ] Add AI fixture regression tests.
+- [x] Add AI fixture regression tests.
 - [ ] Add cost/logging guardrails.
 
 Exit criteria:
