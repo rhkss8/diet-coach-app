@@ -148,7 +148,7 @@ Todos:
 - [x] Add feedback channel.
 - [x] Run full manual QA.
 - [x] Run test suite.
-- [ ] Create build.
+- [x] Create build.
 - [ ] Recruit first tester cohort.
 
 Exit criteria:

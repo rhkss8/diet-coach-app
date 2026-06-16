@@ -8,6 +8,7 @@
     "mobile:ios": "pnpm --filter @diet-coach/mobile ios",
     "mobile:android": "pnpm --filter @diet-coach/mobile android",
     "mobile:web": "pnpm --filter @diet-coach/mobile web",
+    "mobile:build:web": "pnpm --filter @diet-coach/mobile build:web",
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run",
     "lint": "eslint .",
