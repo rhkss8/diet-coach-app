@@ -146,7 +146,7 @@ Todos:
 - [x] Add privacy policy link.
 - [x] Add terms link.
 - [x] Add feedback channel.
-- [ ] Run full manual QA.
+- [x] Run full manual QA.
 - [ ] Run test suite.
 - [ ] Create build.
 - [ ] Recruit first tester cohort.
