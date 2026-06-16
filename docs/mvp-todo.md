@@ -41,7 +41,7 @@ Todos:
 - [x] Define analytics event names.
 - [x] Define initial fixture users.
 - [x] Define adjustment fixture cases.
-- [ ] Define core flow acceptance criteria.
+- [x] Define core flow acceptance criteria.
 
 Exit criteria:
 
