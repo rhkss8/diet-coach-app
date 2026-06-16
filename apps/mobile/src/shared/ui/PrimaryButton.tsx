@@ -2,13 +2,19 @@ import { Pressable, StyleSheet, Text } from "react-native";
 
 type PrimaryButtonProps = {
   label: string;
+  disabled?: boolean;
   onPress: () => void;
 };
 
-export function PrimaryButton({ label, onPress }: PrimaryButtonProps) {
+export function PrimaryButton({ disabled = false, label, onPress }: PrimaryButtonProps) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={styles.button}>
-      <Text style={styles.label}>{label}</Text>
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={onPress}
+      style={[styles.button, disabled && styles.disabledButton]}
+    >
+      <Text style={[styles.label, disabled && styles.disabledLabel]}>{label}</Text>
     </Pressable>
   );
 }
@@ -28,5 +34,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     letterSpacing: 0,
+  },
+  disabledButton: {
+    backgroundColor: "#D7DDD7",
+  },
+  disabledLabel: {
+    color: "#6E7B72",
   },
 });

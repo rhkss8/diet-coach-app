@@ -1,21 +1,43 @@
 import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 
-import { PrimaryButton } from "../shared/ui/PrimaryButton";
+import type { UserProfileInput } from "@diet-coach/core";
+
+import { createAnalyticsEvent } from "@diet-coach/core";
+
+import { BasicProfileStep } from "../features/onboarding";
 
 export function AppRoot() {
+  const [profile, setProfile] = useState<UserProfileInput | null>(null);
+
+  function completeProfile(profileInput: UserProfileInput) {
+    createAnalyticsEvent("PROFILE_STEP_COMPLETED", {});
+    setProfile(profileInput);
+  }
+
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="dark" />
-      <View style={styles.content}>
-        <Text style={styles.eyebrow}>Diet Planner</Text>
-        <Text style={styles.title}>계획이 바뀌어도 계속 이어갈 수 있게</Text>
-        <Text style={styles.description}>
-          온보딩, 7일 플랜, 오늘 조정하기 흐름을 이 화면에서부터 세로 슬라이스로 연결합니다.
-        </Text>
-        <PrimaryButton label="MVP 시작 준비됨" onPress={() => undefined} />
-      </View>
+      {profile ? (
+        <ProfileStepCompleted profile={profile} />
+      ) : (
+        <BasicProfileStep onComplete={completeProfile} />
+      )}
     </SafeAreaView>
+  );
+}
+
+function ProfileStepCompleted({ profile }: { profile: UserProfileInput }) {
+  return (
+    <View style={styles.completedContent}>
+      <Text style={styles.eyebrow}>기본 정보 저장됨</Text>
+      <Text style={styles.title}>이제 목표를 맞출 차례예요</Text>
+      <Text style={styles.description}>
+        {profile.age}세, {profile.heightCm}cm, 현재 {profile.currentWeightKg}kg 기준으로 다음
+        단계에서 목표를 설정합니다.
+      </Text>
+    </View>
   );
 }
 
@@ -24,7 +46,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8F7F4",
   },
-  content: {
+  completedContent: {
     flex: 1,
     justifyContent: "center",
     gap: 18,
