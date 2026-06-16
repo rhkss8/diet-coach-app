@@ -2,11 +2,12 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 
-import type { GenerateInitialPlanOutput } from "@diet-coach/ai";
+import type { AiPlan, GenerateInitialPlanOutput } from "@diet-coach/ai";
 import type { GoalInput, LifestyleAnswers, UserProfileInput } from "@diet-coach/core";
 
 import { generateMockInitialPlan } from "@diet-coach/ai";
 import { OnboardingFlow } from "../features/onboarding";
+import { PlanApprovalScreen } from "../features/plan";
 
 type CompletedOnboarding = {
   profile: UserProfileInput;
@@ -17,12 +18,18 @@ type CompletedOnboarding = {
 
 export function AppRoot() {
   const [completedOnboarding, setCompletedOnboarding] = useState<CompletedOnboarding | null>(null);
+  const [approvedPlan, setApprovedPlan] = useState<AiPlan | null>(null);
 
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="dark" />
-      {completedOnboarding ? (
-        <OnboardingCompleted result={completedOnboarding} />
+      {approvedPlan ? (
+        <PlanApproved plan={approvedPlan} />
+      ) : completedOnboarding ? (
+        <PlanApprovalScreen
+          onApprove={() => setApprovedPlan(completedOnboarding.initialPlanOutput.plan)}
+          output={completedOnboarding.initialPlanOutput}
+        />
       ) : (
         <OnboardingFlow
           onComplete={(result) => setCompletedOnboarding(completeOnboarding(result))}
@@ -41,18 +48,12 @@ function completeOnboarding(
   };
 }
 
-function OnboardingCompleted({ result }: { result: CompletedOnboarding }) {
+function PlanApproved({ plan }: { plan: AiPlan }) {
   return (
     <View style={styles.completedContent}>
-      <Text style={styles.eyebrow}>목표 저장됨</Text>
-      <Text style={styles.title}>이제 생활 패턴만 맞추면 돼요</Text>
-      <Text style={styles.description}>
-        현재 {result.profile.currentWeightKg}kg에서 {result.goal.targetWeightKg}kg까지,
-        {result.goal.targetDate} 기준으로 {result.lifestyleAnswers.pace} 플랜을 준비합니다.
-      </Text>
-      <Text style={styles.description}>
-        {result.initialPlanOutput.plan.items.length}개의 식사/운동 항목이 준비됐어요.
-      </Text>
+      <Text style={styles.eyebrow}>플랜 승인됨</Text>
+      <Text style={styles.title}>오늘 플랜으로 이어갈게요</Text>
+      <Text style={styles.description}>{plan.items.length}개의 식사/운동 항목이 준비됐어요.</Text>
     </View>
   );
 }
