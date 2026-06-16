@@ -1,16 +1,5 @@
 import type { GenerateInitialPlanInput } from "../contracts";
-
-export type AiPromptMessage = {
-  role: "system" | "user";
-  content: string;
-};
-
-export type AiPrompt = {
-  messages: AiPromptMessage[];
-  responseFormat: {
-    type: "json_object";
-  };
-};
+import type { AiPrompt } from "./prompt-types";
 
 export function buildGenerateInitialPlanPrompt(input: GenerateInitialPlanInput): AiPrompt {
   return {
