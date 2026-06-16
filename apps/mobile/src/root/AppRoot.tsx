@@ -20,6 +20,7 @@ import {
 import { AuthScreen, useAuthSession } from "../features/auth";
 import { OnboardingFlow } from "../features/onboarding";
 import { PlanApprovalScreen, useApprovedPlanPersistence } from "../features/plan";
+import { SettingsScreen } from "../features/settings";
 import { TodayScreen } from "../features/today";
 import { getTodayPlanItems } from "../features/today";
 import { trackAnalyticsEvent } from "../shared/lib/analytics";
@@ -43,6 +44,7 @@ export function AppRoot() {
     requestMagicLink,
   } = useAuthSession();
   const [completedOnboarding, setCompletedOnboarding] = useState<CompletedOnboarding | null>(null);
+  const [isViewingSettings, setIsViewingSettings] = useState(false);
   const [isAdjustingToday, setIsAdjustingToday] = useState(false);
   const [selectedAdjustmentReason, setSelectedAdjustmentReason] = useState<
     AdjustmentReason | undefined
@@ -72,6 +74,11 @@ export function AppRoot() {
         />
       ) : isHydratingApprovedPlan ? (
         <LoadingPlan />
+      ) : isViewingSettings ? (
+        <SettingsScreen
+          authMode={authGateState === "guest" ? "guest" : "authenticated"}
+          onClose={() => setIsViewingSettings(false)}
+        />
       ) : isAdjustingToday ? (
         isApprovingAdjustedPlan ? (
           <ApprovingAdjustedPlan />
@@ -179,6 +186,7 @@ export function AppRoot() {
           onAdjustToday={() => {
             setIsAdjustingToday(true);
           }}
+          onOpenSettings={() => setIsViewingSettings(true)}
           plan={approvedPlanSnapshot.plan}
           revisionContext={
             latestRevisionSnapshot

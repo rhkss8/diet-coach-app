@@ -20,6 +20,7 @@ import {
 
 type TodayScreenProps = {
   onAdjustToday: () => void;
+  onOpenSettings: () => void;
   plan: AiPlan;
   revisionContext?: {
     revisedPlanItemIds: string[];
@@ -27,7 +28,12 @@ type TodayScreenProps = {
   };
 };
 
-export function TodayScreen({ onAdjustToday, plan, revisionContext }: TodayScreenProps) {
+export function TodayScreen({
+  onAdjustToday,
+  onOpenSettings,
+  plan,
+  revisionContext,
+}: TodayScreenProps) {
   const todayPlanDate = getTodayPlanDate(plan);
   const [todayItems, setTodayItems] = useState(() => getTodayPlanItems(plan));
   const pendingItemCount = countPendingTodayItems(todayItems);
@@ -92,7 +98,16 @@ export function TodayScreen({ onAdjustToday, plan, revisionContext }: TodayScree
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
       <View style={styles.header}>
-        <Text style={styles.eyebrow}>{todayPlanDate}</Text>
+        <View style={styles.headerTop}>
+          <Text style={styles.eyebrow}>{todayPlanDate}</Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={onOpenSettings}
+            style={styles.settingsButton}
+          >
+            <Text style={styles.settingsButtonLabel}>설정</Text>
+          </Pressable>
+        </View>
         <Text style={styles.title}>오늘 플랜을 이어갈게요</Text>
         <Text style={styles.description}>
           남은 항목 {pendingItemCount}개만 확인하면 돼요. 계획이 달라지면 오늘 기준으로 다시 맞출 수
@@ -231,6 +246,11 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingTop: 12,
   },
+  headerTop: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
   eyebrow: {
     color: "#5E7664",
     fontSize: 14,
@@ -248,6 +268,20 @@ const styles = StyleSheet.create({
     color: "#53645A",
     fontSize: 16,
     lineHeight: 24,
+  },
+  settingsButton: {
+    borderColor: "#D7DED8",
+    borderRadius: 8,
+    borderWidth: 1,
+    minHeight: 36,
+    justifyContent: "center",
+    paddingHorizontal: 12,
+  },
+  settingsButtonLabel: {
+    color: "#2F6B4F",
+    fontSize: 13,
+    fontWeight: "800",
+    letterSpacing: 0,
   },
   summaryBand: {
     backgroundColor: "#EAF1EC",
