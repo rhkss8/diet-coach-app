@@ -143,7 +143,7 @@ Todos:
 
 - [x] Add notification permission recommendation.
 - [x] Add basic settings screen.
-- [ ] Add privacy policy link.
+- [x] Add privacy policy link.
 - [ ] Add terms link.
 - [ ] Add feedback channel.
 - [ ] Run full manual QA.

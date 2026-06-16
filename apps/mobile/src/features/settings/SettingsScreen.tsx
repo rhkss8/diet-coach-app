@@ -1,6 +1,6 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { basicSettingsItems } from "./settings-items";
+import { getBasicSettingsItems, getReleaseLinks } from "./settings-items";
 
 type SettingsScreenProps = {
   authMode: "authenticated" | "guest";
@@ -8,6 +8,8 @@ type SettingsScreenProps = {
 };
 
 export function SettingsScreen({ authMode, onClose }: SettingsScreenProps) {
+  const settingsItems = getBasicSettingsItems(getReleaseLinks());
+
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
       <View style={styles.topBar}>
@@ -25,11 +27,21 @@ export function SettingsScreen({ authMode, onClose }: SettingsScreenProps) {
       </View>
 
       <View style={styles.list}>
-        {basicSettingsItems.map((item) => (
-          <View key={item.id} style={styles.item}>
+        {settingsItems.map((item) => (
+          <Pressable
+            accessibilityRole={item.url ? "link" : undefined}
+            disabled={!item.url}
+            key={item.id}
+            onPress={() => {
+              if (item.url) {
+                void Linking.openURL(item.url);
+              }
+            }}
+            style={styles.item}
+          >
             <Text style={styles.itemTitle}>{item.title}</Text>
             <Text style={styles.itemDescription}>{item.description}</Text>
-          </View>
+          </Pressable>
         ))}
       </View>
     </ScrollView>
