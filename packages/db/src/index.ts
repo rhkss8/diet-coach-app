@@ -1,3 +1,5 @@
+export * from "./schema";
+
 export type SupabaseProjectConfig = {
   anonKey: string | null;
   isConfigured: boolean;
