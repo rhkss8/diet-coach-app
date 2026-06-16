@@ -8,6 +8,7 @@ import type { GoalInput, LifestyleAnswers, UserProfileInput } from "@diet-coach/
 import { generateMockInitialPlan } from "@diet-coach/ai";
 import { OnboardingFlow } from "../features/onboarding";
 import { PlanApprovalScreen, useApprovedPlanPersistence } from "../features/plan";
+import { TodayScreen } from "../features/today";
 import { trackAnalyticsEvent } from "../shared/lib/analytics";
 
 type CompletedOnboarding = {
@@ -28,7 +29,7 @@ export function AppRoot() {
       {isHydratingApprovedPlan ? (
         <LoadingPlan />
       ) : approvedPlanSnapshot ? (
-        <PlanApproved snapshot={approvedPlanSnapshot} />
+        <TodayScreen plan={approvedPlanSnapshot.plan} />
       ) : completedOnboarding ? (
         <PlanApprovalScreen
           onApprove={() => {
@@ -76,23 +77,6 @@ function LoadingPlan() {
   );
 }
 
-function PlanApproved({
-  snapshot,
-}: {
-  snapshot: NonNullable<ReturnType<typeof useApprovedPlanPersistence>["approvedPlanSnapshot"]>;
-}) {
-  return (
-    <View style={styles.completedContent}>
-      <Text style={styles.eyebrow}>플랜 승인됨</Text>
-      <Text style={styles.title}>오늘 플랜으로 이어갈게요</Text>
-      <Text style={styles.description}>
-        {snapshot.plan.items.length}개의 식사/운동 항목이 저장됐어요.
-      </Text>
-      <Text style={styles.description}>승인 시간: {snapshot.approvedAt}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -116,10 +100,5 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 0,
     lineHeight: 38,
-  },
-  description: {
-    color: "#53645A",
-    fontSize: 16,
-    lineHeight: 24,
   },
 });
