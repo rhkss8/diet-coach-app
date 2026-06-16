@@ -2,7 +2,7 @@ import { StyleSheet, Text, TextInput, View } from "react-native";
 
 type FormTextFieldProps = {
   error?: string;
-  inputMode?: "text" | "numeric";
+  inputMode?: "email" | "text" | "numeric";
   label: string;
   multiline?: boolean;
   onChangeText: (value: string) => void;

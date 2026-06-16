@@ -17,6 +17,7 @@ import {
   RevisedPlanReviewScreen,
   usePlanRevisionPersistence,
 } from "../features/adjustment";
+import { AuthScreen, useAuthSession } from "../features/auth";
 import { OnboardingFlow } from "../features/onboarding";
 import { PlanApprovalScreen, useApprovedPlanPersistence } from "../features/plan";
 import { TodayScreen } from "../features/today";
@@ -31,6 +32,16 @@ type CompletedOnboarding = {
 };
 
 export function AppRoot() {
+  const {
+    authError,
+    authGateState,
+    authMessage,
+    continueAsGuest,
+    isAuthConfigured,
+    isHydratingAuth,
+    isSubmittingAuth,
+    requestMagicLink,
+  } = useAuthSession();
   const [completedOnboarding, setCompletedOnboarding] = useState<CompletedOnboarding | null>(null);
   const [isAdjustingToday, setIsAdjustingToday] = useState(false);
   const [selectedAdjustmentReason, setSelectedAdjustmentReason] = useState<
@@ -46,7 +57,20 @@ export function AppRoot() {
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="dark" />
-      {isHydratingApprovedPlan ? (
+      {isHydratingAuth ? (
+        <LoadingAuth />
+      ) : authGateState === "requires_auth" ? (
+        <AuthScreen
+          error={authError}
+          isConfigured={isAuthConfigured}
+          isSubmitting={isSubmittingAuth}
+          message={authMessage}
+          onContinueAsGuest={continueAsGuest}
+          onRequestMagicLink={(email) => {
+            void requestMagicLink(email);
+          }}
+        />
+      ) : isHydratingApprovedPlan ? (
         <LoadingPlan />
       ) : isAdjustingToday ? (
         isApprovingAdjustedPlan ? (
@@ -241,6 +265,15 @@ function LoadingPlan() {
     <View style={styles.completedContent}>
       <Text style={styles.eyebrow}>불러오는 중</Text>
       <Text style={styles.title}>저장된 플랜을 확인하고 있어요</Text>
+    </View>
+  );
+}
+
+function LoadingAuth() {
+  return (
+    <View style={styles.completedContent}>
+      <Text style={styles.eyebrow}>로그인 확인 중</Text>
+      <Text style={styles.title}>저장된 세션을 확인하고 있어요</Text>
     </View>
   );
 }
