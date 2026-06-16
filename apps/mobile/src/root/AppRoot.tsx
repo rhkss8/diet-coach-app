@@ -11,7 +11,11 @@ import type {
 } from "@diet-coach/core";
 
 import { generateMockAdjustedPlan, generateMockInitialPlan } from "@diet-coach/ai";
-import { AdjustmentReasonSelectionScreen, RevisedPlanReviewScreen } from "../features/adjustment";
+import {
+  AdjustmentReasonSelectionScreen,
+  RevisedPlanReviewScreen,
+  usePlanRevisionPersistence,
+} from "../features/adjustment";
 import { OnboardingFlow } from "../features/onboarding";
 import { PlanApprovalScreen, useApprovedPlanPersistence } from "../features/plan";
 import { TodayScreen } from "../features/today";
@@ -33,6 +37,7 @@ export function AppRoot() {
   >();
   const [adjustmentNote, setAdjustmentNote] = useState("");
   const [adjustedPlanOutput, setAdjustedPlanOutput] = useState<AdjustTodayPlanOutput | null>(null);
+  const { latestRevisionSnapshot, persistPlanRevision } = usePlanRevisionPersistence();
   const { approvedPlanSnapshot, approvePlan, isHydratingApprovedPlan } =
     useApprovedPlanPersistence();
 
@@ -42,9 +47,13 @@ export function AppRoot() {
       {isHydratingApprovedPlan ? (
         <LoadingPlan />
       ) : isAdjustingToday ? (
-        adjustedPlanOutput ? (
+        latestRevisionSnapshot ? (
+          <RevisionPersisted />
+        ) : adjustedPlanOutput ? (
           <RevisedPlanReviewScreen
-            onApprove={() => undefined}
+            onApprove={() => {
+              void persistPlanRevision(adjustedPlanOutput.revision);
+            }}
             onDismiss={() => setIsAdjustingToday(false)}
             output={adjustedPlanOutput}
           />
@@ -127,6 +136,15 @@ export function AppRoot() {
         />
       )}
     </SafeAreaView>
+  );
+}
+
+function RevisionPersisted() {
+  return (
+    <View style={styles.completedContent}>
+      <Text style={styles.eyebrow}>조정안 저장됨</Text>
+      <Text style={styles.title}>이제 오늘 플랜에 반영할 차례예요</Text>
+    </View>
   );
 }
 
