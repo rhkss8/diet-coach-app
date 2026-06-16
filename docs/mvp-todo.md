@@ -128,7 +128,7 @@ Todos:
 - [x] Add DB schema migrations.
 - [x] Add auth.
 - [x] Persist users, goals, plans, items, revisions, and check-ins.
-- [ ] Add analytics provider.
+- [x] Add analytics provider.
 - [ ] Verify full event coverage.
 
 Exit criteria:
