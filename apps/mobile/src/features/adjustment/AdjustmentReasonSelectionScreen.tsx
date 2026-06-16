@@ -1,16 +1,24 @@
 import type { AdjustmentReason } from "@diet-coach/core";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { FormTextField } from "../../shared/ui/FormTextField";
+import { PrimaryButton } from "../../shared/ui/PrimaryButton";
 import { SegmentedChoice } from "../../shared/ui/SegmentedChoice";
 import { getAdjustmentReasonOptions } from "./adjustment-reason";
 
 type AdjustmentReasonSelectionScreenProps = {
+  note: string;
+  onChangeNote: (note: string) => void;
   onSelectReason: (reason: AdjustmentReason) => void;
+  onSubmitNote: () => void;
   selectedReason?: AdjustmentReason;
 };
 
 export function AdjustmentReasonSelectionScreen({
+  note,
+  onChangeNote,
   onSelectReason,
+  onSubmitNote,
   selectedReason = "meal_changed",
 }: AdjustmentReasonSelectionScreenProps) {
   return (
@@ -30,6 +38,20 @@ export function AdjustmentReasonSelectionScreen({
           options={getAdjustmentReasonOptions()}
           value={selectedReason}
         />
+      </View>
+
+      <View style={styles.noteBand}>
+        <FormTextField
+          label="짧은 메모"
+          multiline
+          onChangeText={onChangeNote}
+          placeholder="예: 점심을 많이 먹었어요. 오늘 운동은 어려울 것 같아요."
+          value={note}
+        />
+        <Text style={styles.helperText}>
+          메모는 선택 입력이에요. 비워도 다음 단계로 갈 수 있어요.
+        </Text>
+        <PrimaryButton label="조정안 만들기" onPress={onSubmitNote} />
       </View>
     </ScrollView>
   );
@@ -73,5 +95,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     padding: 16,
+  },
+  noteBand: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#DFE5E0",
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 12,
+    padding: 16,
+  },
+  helperText: {
+    color: "#657269",
+    fontSize: 14,
+    lineHeight: 20,
   },
 });

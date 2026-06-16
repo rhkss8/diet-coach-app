@@ -30,6 +30,8 @@ export function AppRoot() {
   const [selectedAdjustmentReason, setSelectedAdjustmentReason] = useState<
     AdjustmentReason | undefined
   >();
+  const [adjustmentNote, setAdjustmentNote] = useState("");
+  const [isAdjustmentNoteSubmitted, setIsAdjustmentNoteSubmitted] = useState(false);
   const { approvedPlanSnapshot, approvePlan, isHydratingApprovedPlan } =
     useApprovedPlanPersistence();
 
@@ -39,18 +41,34 @@ export function AppRoot() {
       {isHydratingApprovedPlan ? (
         <LoadingPlan />
       ) : isAdjustingToday ? (
-        <AdjustmentReasonSelectionScreen
-          onSelectReason={(reason) => {
-            setSelectedAdjustmentReason(reason);
-            trackAnalyticsEvent("ADJUSTMENT_REASON_SELECTED", {
-              userId: "local-user",
-              planId: approvedPlanSnapshot?.plan.id ?? "local-plan",
-              affectedDate: approvedPlanSnapshot?.plan.startDate ?? "local-date",
-              reason,
-            });
-          }}
-          selectedReason={selectedAdjustmentReason}
-        />
+        isAdjustmentNoteSubmitted ? (
+          <AdjustmentNoteSubmitted />
+        ) : (
+          <AdjustmentReasonSelectionScreen
+            note={adjustmentNote}
+            onChangeNote={setAdjustmentNote}
+            onSelectReason={(reason) => {
+              setSelectedAdjustmentReason(reason);
+              trackAnalyticsEvent("ADJUSTMENT_REASON_SELECTED", {
+                userId: "local-user",
+                planId: approvedPlanSnapshot?.plan.id ?? "local-plan",
+                affectedDate: approvedPlanSnapshot?.plan.startDate ?? "local-date",
+                reason,
+              });
+            }}
+            onSubmitNote={() => {
+              trackAnalyticsEvent("ADJUSTMENT_NOTE_SUBMITTED", {
+                userId: "local-user",
+                planId: approvedPlanSnapshot?.plan.id ?? "local-plan",
+                affectedDate: approvedPlanSnapshot?.plan.startDate ?? "local-date",
+                hasNote: adjustmentNote.trim().length > 0,
+                reason: selectedAdjustmentReason,
+              });
+              setIsAdjustmentNoteSubmitted(true);
+            }}
+            selectedReason={selectedAdjustmentReason}
+          />
+        )
       ) : approvedPlanSnapshot ? (
         <TodayScreen
           onAdjustToday={() => {
@@ -71,6 +89,15 @@ export function AppRoot() {
         />
       )}
     </SafeAreaView>
+  );
+}
+
+function AdjustmentNoteSubmitted() {
+  return (
+    <View style={styles.completedContent}>
+      <Text style={styles.eyebrow}>메모 저장됨</Text>
+      <Text style={styles.title}>이제 조정안을 만들 차례예요</Text>
+    </View>
   );
 }
 

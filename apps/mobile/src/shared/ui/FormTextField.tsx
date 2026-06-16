@@ -4,6 +4,7 @@ type FormTextFieldProps = {
   error?: string;
   inputMode?: "text" | "numeric";
   label: string;
+  multiline?: boolean;
   onChangeText: (value: string) => void;
   placeholder: string;
   value: string;
@@ -13,6 +14,7 @@ export function FormTextField({
   error,
   inputMode = "text",
   label,
+  multiline = false,
   onChangeText,
   placeholder,
   value,
@@ -22,10 +24,11 @@ export function FormTextField({
       <Text style={styles.label}>{label}</Text>
       <TextInput
         inputMode={inputMode}
+        multiline={multiline}
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor="#9AA49D"
-        style={[styles.input, error && styles.inputError]}
+        style={[styles.input, multiline && styles.multilineInput, error && styles.inputError]}
         value={value}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -55,6 +58,11 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: "#B95E4E",
+  },
+  multilineInput: {
+    minHeight: 92,
+    paddingTop: 12,
+    textAlignVertical: "top",
   },
   error: {
     color: "#9A4B40",
