@@ -124,7 +124,7 @@ Goal: make MVP measurable.
 
 Todos:
 
-- [ ] Set up Supabase project.
+- [x] Set up Supabase project.
 - [ ] Add DB schema migrations.
 - [ ] Add auth.
 - [ ] Persist users, goals, plans, items, revisions, and check-ins.

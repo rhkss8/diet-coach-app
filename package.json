@@ -13,7 +13,10 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "hooks:install": "zsh scripts/install-git-hooks.zsh"
+    "hooks:install": "zsh scripts/install-git-hooks.zsh",
+    "supabase:start": "supabase start",
+    "supabase:status": "supabase status",
+    "supabase:stop": "supabase stop"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
