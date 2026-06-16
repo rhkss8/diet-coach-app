@@ -2,13 +2,14 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 
-import type { GoalInput, UserProfileInput } from "@diet-coach/core";
+import type { GoalInput, LifestyleAnswers, UserProfileInput } from "@diet-coach/core";
 
 import { OnboardingFlow } from "../features/onboarding";
 
 type CompletedOnboarding = {
   profile: UserProfileInput;
   goal: GoalInput;
+  lifestyleAnswers: LifestyleAnswers;
 };
 
 export function AppRoot() {
@@ -33,7 +34,7 @@ function OnboardingCompleted({ result }: { result: CompletedOnboarding }) {
       <Text style={styles.title}>이제 생활 패턴만 맞추면 돼요</Text>
       <Text style={styles.description}>
         현재 {result.profile.currentWeightKg}kg에서 {result.goal.targetWeightKg}kg까지,
-        {result.goal.targetDate} 기준으로 첫 플랜을 준비합니다.
+        {result.goal.targetDate} 기준으로 {result.lifestyleAnswers.pace} 플랜을 준비합니다.
       </Text>
     </View>
   );

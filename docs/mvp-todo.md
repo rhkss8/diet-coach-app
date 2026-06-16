@@ -56,7 +56,7 @@ Todos:
 
 - [x] Build onboarding basic profile step.
 - [x] Build goal setup step.
-- [ ] Build 3-question lifestyle step.
+- [x] Build 3-question lifestyle step.
 - [ ] Generate mock 7-day plan.
 - [ ] Build plan approval screen.
 - [ ] Persist approved plan locally or in DB.

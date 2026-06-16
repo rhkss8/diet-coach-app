@@ -1,15 +1,17 @@
 import { useState } from "react";
 
-import type { GoalInput, UserProfileInput } from "@diet-coach/core";
+import type { GoalInput, LifestyleAnswers, UserProfileInput } from "@diet-coach/core";
 
 import { createAnalyticsEvent } from "@diet-coach/core";
 
 import { BasicProfileStep } from "./BasicProfileStep";
 import { GoalSetupStep } from "./GoalSetupStep";
+import { LifestyleStep } from "./LifestyleStep";
 
 export type OnboardingResult = {
   profile: UserProfileInput;
   goal: GoalInput;
+  lifestyleAnswers: LifestyleAnswers;
 };
 
 type OnboardingFlowProps = {
@@ -18,6 +20,7 @@ type OnboardingFlowProps = {
 
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [profile, setProfile] = useState<UserProfileInput | null>(null);
+  const [goal, setGoal] = useState<GoalInput | null>(null);
 
   function completeProfile(profileInput: UserProfileInput) {
     createAnalyticsEvent("PROFILE_STEP_COMPLETED", {});
@@ -26,14 +29,21 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   function completeGoal(goalInput: GoalInput) {
     createAnalyticsEvent("GOAL_STEP_COMPLETED", {});
+    setGoal(goalInput);
+  }
 
-    if (!profile) {
+  function completeLifestyle(lifestyleAnswers: LifestyleAnswers) {
+    createAnalyticsEvent("LIFESTYLE_STEP_COMPLETED", {});
+    createAnalyticsEvent("ONBOARDING_COMPLETED", { userId: "local-user" });
+
+    if (!profile || !goal) {
       return;
     }
 
     onComplete({
       profile,
-      goal: goalInput,
+      goal,
+      lifestyleAnswers,
     });
   }
 
@@ -41,5 +51,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     return <BasicProfileStep onComplete={completeProfile} />;
   }
 
-  return <GoalSetupStep onComplete={completeGoal} profile={profile} />;
+  if (!goal) {
+    return <GoalSetupStep onComplete={completeGoal} profile={profile} />;
+  }
+
+  return <LifestyleStep onComplete={completeLifestyle} />;
 }

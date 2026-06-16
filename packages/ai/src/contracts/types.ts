@@ -4,6 +4,7 @@ import type {
   EntityId,
   GoalInput,
   ISODate,
+  LifestyleAnswers,
   PlanItemIntensity,
   PlanItemSlot,
   PlanItemStatus,
@@ -11,15 +12,7 @@ import type {
   UserProfileInput,
 } from "@diet-coach/core";
 
-export type LifestylePace = "fast_3_months" | "steady_6_months" | "consistency_first";
-export type LifestyleHardestPart = "meal" | "exercise" | "both";
-export type LifestyleExerciseExperience = "none" | "some" | "consistent";
-
-export type LifestyleAnswers = {
-  pace: LifestylePace;
-  hardestPart: LifestyleHardestPart;
-  exerciseExperience: LifestyleExerciseExperience;
-};
+export type { LifestyleAnswers } from "@diet-coach/core";
 
 export type AiPlanItem = {
   id?: EntityId;
