@@ -11,7 +11,7 @@ import type {
 } from "@diet-coach/core";
 
 import { generateMockAdjustedPlan, generateMockInitialPlan } from "@diet-coach/ai";
-import { AdjustmentReasonSelectionScreen } from "../features/adjustment";
+import { AdjustmentReasonSelectionScreen, RevisedPlanReviewScreen } from "../features/adjustment";
 import { OnboardingFlow } from "../features/onboarding";
 import { PlanApprovalScreen, useApprovedPlanPersistence } from "../features/plan";
 import { TodayScreen } from "../features/today";
@@ -43,7 +43,11 @@ export function AppRoot() {
         <LoadingPlan />
       ) : isAdjustingToday ? (
         adjustedPlanOutput ? (
-          <AdjustmentGenerated output={adjustedPlanOutput} />
+          <RevisedPlanReviewScreen
+            onApprove={() => undefined}
+            onDismiss={() => setIsAdjustingToday(false)}
+            output={adjustedPlanOutput}
+          />
         ) : (
           <AdjustmentReasonSelectionScreen
             note={adjustmentNote}
@@ -123,15 +127,6 @@ export function AppRoot() {
         />
       )}
     </SafeAreaView>
-  );
-}
-
-function AdjustmentGenerated({ output }: { output: AdjustTodayPlanOutput }) {
-  return (
-    <View style={styles.completedContent}>
-      <Text style={styles.eyebrow}>조정안 생성됨</Text>
-      <Text style={styles.title}>{output.revision.summary}</Text>
-    </View>
   );
 }
 

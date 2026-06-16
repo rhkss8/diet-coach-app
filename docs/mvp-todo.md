@@ -92,7 +92,7 @@ Todos:
 - [x] Build adjustment reason selection.
 - [x] Add optional short text input.
 - [x] Generate mock revised plan.
-- [ ] Build revised plan review screen.
+- [x] Build revised plan review screen.
 - [ ] Persist PlanRevision.
 - [ ] Apply approved revision to today and future plan items.
 - [ ] Track adjustment events.
