@@ -39,7 +39,7 @@ Todos:
 - [x] Define domain types: User, Goal, Plan, PlanItem, PlanRevision, AdjustmentRequest, DailyCheckIn.
 - [x] Define AI JSON schemas.
 - [x] Define analytics event names.
-- [ ] Define initial fixture users.
+- [x] Define initial fixture users.
 - [ ] Define adjustment fixture cases.
 - [ ] Define core flow acceptance criteria.
 
