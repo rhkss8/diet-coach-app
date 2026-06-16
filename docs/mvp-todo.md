@@ -147,7 +147,7 @@ Todos:
 - [x] Add terms link.
 - [x] Add feedback channel.
 - [x] Run full manual QA.
-- [ ] Run test suite.
+- [x] Run test suite.
 - [ ] Create build.
 - [ ] Recruit first tester cohort.
 
