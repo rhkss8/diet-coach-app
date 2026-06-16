@@ -109,7 +109,7 @@ Todos:
 
 - [x] Implement initial plan generation prompt.
 - [x] Implement adjustment prompt.
-- [ ] Enforce JSON schema validation.
+- [x] Enforce JSON schema validation.
 - [ ] Add fallback for invalid AI output.
 - [ ] Add AI fixture regression tests.
 - [ ] Add cost/logging guardrails.
