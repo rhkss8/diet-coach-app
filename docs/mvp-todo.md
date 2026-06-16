@@ -112,7 +112,7 @@ Todos:
 - [x] Enforce JSON schema validation.
 - [x] Add fallback for invalid AI output.
 - [x] Add AI fixture regression tests.
-- [ ] Add cost/logging guardrails.
+- [x] Add cost/logging guardrails.
 
 Exit criteria:
 
