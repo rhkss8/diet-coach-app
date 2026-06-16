@@ -63,3 +63,11 @@ export function getPlanItemStatusEventName(status: PlanItemStatus): AnalyticsEve
 
   return null;
 }
+
+export function shouldTrackPlanItemCompletedAfterRevision(
+  planItemId: string,
+  status: PlanItemStatus,
+  revisedPlanItemIds: string[] | undefined,
+) {
+  return status === "completed" && Boolean(revisedPlanItemIds?.includes(planItemId));
+}

@@ -9,6 +9,7 @@ import {
   getDailyProgressSummary,
   getPlanItemStatusEventName,
   groupTodayPlanItemsByType,
+  shouldTrackPlanItemCompletedAfterRevision,
   updateTodayPlanItemStatus,
 } from "./today-plan";
 
@@ -93,5 +94,15 @@ describe("today plan helpers", () => {
     expect(getPlanItemStatusEventName("completed")).toBe("PLAN_ITEM_COMPLETED");
     expect(getPlanItemStatusEventName("skipped")).toBe("PLAN_ITEM_SKIPPED");
     expect(getPlanItemStatusEventName("pending")).toBeNull();
+  });
+
+  it("tracks after-revision completion only for revised completed items", () => {
+    expect(shouldTrackPlanItemCompletedAfterRevision("workout-1", "completed", ["workout-1"])).toBe(
+      true,
+    );
+    expect(shouldTrackPlanItemCompletedAfterRevision("workout-1", "skipped", ["workout-1"])).toBe(
+      false,
+    );
+    expect(shouldTrackPlanItemCompletedAfterRevision("breakfast-1", "completed", [])).toBe(false);
   });
 });

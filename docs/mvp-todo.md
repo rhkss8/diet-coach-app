@@ -95,7 +95,7 @@ Todos:
 - [x] Build revised plan review screen.
 - [x] Persist PlanRevision.
 - [x] Apply approved revision to today and future plan items.
-- [ ] Track adjustment events.
+- [x] Track adjustment events.
 
 Exit criteria:
 

@@ -13,6 +13,7 @@ import type {
 import { generateMockAdjustedPlan, generateMockInitialPlan } from "@diet-coach/ai";
 import {
   AdjustmentReasonSelectionScreen,
+  createPlanRevisionId,
   RevisedPlanReviewScreen,
   usePlanRevisionPersistence,
 } from "../features/adjustment";
@@ -38,7 +39,7 @@ export function AppRoot() {
   const [adjustmentNote, setAdjustmentNote] = useState("");
   const [adjustedPlanOutput, setAdjustedPlanOutput] = useState<AdjustTodayPlanOutput | null>(null);
   const [isApprovingAdjustedPlan, setIsApprovingAdjustedPlan] = useState(false);
-  const { persistPlanRevision } = usePlanRevisionPersistence();
+  const { latestRevisionSnapshot, persistPlanRevision } = usePlanRevisionPersistence();
   const { applyApprovedRevision, approvedPlanSnapshot, approvePlan, isHydratingApprovedPlan } =
     useApprovedPlanPersistence();
 
@@ -56,6 +57,17 @@ export function AppRoot() {
               void approveAdjustedPlan(adjustedPlanOutput.revision, {
                 applyApprovedRevision,
                 persistPlanRevision,
+                trackRevisionApproved: (revisionId) => {
+                  const revision = adjustedPlanOutput.revision;
+
+                  trackAnalyticsEvent("PLAN_REVISION_APPROVED", {
+                    userId: "local-user",
+                    planId: revision.planId,
+                    affectedDate: revision.affectedDate,
+                    revisionId,
+                    reason: revision.reason,
+                  });
+                },
                 resetAdjustmentFlow: () => {
                   setAdjustedPlanOutput(null);
                   setAdjustmentNote("");
@@ -65,7 +77,18 @@ export function AppRoot() {
                 setIsApprovingAdjustedPlan,
               });
             }}
-            onDismiss={() => setIsAdjustingToday(false)}
+            onDismiss={() => {
+              const revision = adjustedPlanOutput.revision;
+
+              trackAnalyticsEvent("PLAN_REVISION_DISMISSED", {
+                userId: "local-user",
+                planId: revision.planId,
+                affectedDate: revision.affectedDate,
+                revisionId: createPlanRevisionId(revision),
+                reason: revision.reason,
+              });
+              setIsAdjustingToday(false);
+            }}
             output={adjustedPlanOutput}
           />
         ) : (
@@ -133,6 +156,14 @@ export function AppRoot() {
             setIsAdjustingToday(true);
           }}
           plan={approvedPlanSnapshot.plan}
+          revisionContext={
+            latestRevisionSnapshot
+              ? {
+                  revisedPlanItemIds: latestRevisionSnapshot.revision.changedItemIds,
+                  revisionId: latestRevisionSnapshot.revisionId,
+                }
+              : undefined
+          }
         />
       ) : completedOnboarding ? (
         <PlanApprovalScreen
@@ -177,6 +208,7 @@ type ApproveAdjustedPlanActions = {
   persistPlanRevision: (revision: AdjustTodayPlanOutput["revision"]) => Promise<void>;
   resetAdjustmentFlow: () => void;
   setIsApprovingAdjustedPlan: (isApproving: boolean) => void;
+  trackRevisionApproved: (revisionId: string) => void;
 };
 
 async function approveAdjustedPlan(
@@ -188,6 +220,7 @@ async function approveAdjustedPlan(
   try {
     await actions.persistPlanRevision(revision);
     await actions.applyApprovedRevision(revision);
+    actions.trackRevisionApproved(createPlanRevisionId(revision));
     actions.resetAdjustmentFlow();
   } finally {
     actions.setIsApprovingAdjustedPlan(false);

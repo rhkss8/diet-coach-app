@@ -20,6 +20,7 @@ const revision = {
 describe("plan revision snapshot", () => {
   it("creates a persisted revision snapshot", () => {
     expect(createPlanRevisionSnapshot(revision, "2026-06-16T00:00:00.000Z")).toEqual({
+      revisionId: "plan-1:2026-06-16:meal_changed",
       revision,
       persistedAt: "2026-06-16T00:00:00.000Z",
     });

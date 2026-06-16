@@ -1,6 +1,7 @@
 import type { AdjustTodayPlanOutput } from "@diet-coach/ai";
 
 export type PlanRevisionSnapshot = {
+  revisionId: string;
   revision: AdjustTodayPlanOutput["revision"];
   persistedAt: string;
 };
@@ -10,9 +11,14 @@ export function createPlanRevisionSnapshot(
   persistedAt: string = new Date().toISOString(),
 ): PlanRevisionSnapshot {
   return {
+    revisionId: createPlanRevisionId(revision),
     revision,
     persistedAt,
   };
+}
+
+export function createPlanRevisionId(revision: AdjustTodayPlanOutput["revision"]) {
+  return `${revision.planId}:${revision.affectedDate}:${revision.reason}`;
 }
 
 export function serializePlanRevisionSnapshots(snapshots: PlanRevisionSnapshot[]) {
@@ -27,7 +33,9 @@ export function parsePlanRevisionSnapshots(value: string): PlanRevisionSnapshot[
       return [];
     }
 
-    return parsed.filter((snapshot) => snapshot.revision && snapshot.persistedAt);
+    return parsed.filter(
+      (snapshot) => snapshot.revisionId && snapshot.revision && snapshot.persistedAt,
+    );
   } catch {
     return [];
   }

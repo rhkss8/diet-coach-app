@@ -13,15 +13,20 @@ import {
   getDailyProgressSummary,
   getPlanItemStatusEventName,
   groupTodayPlanItemsByType,
+  shouldTrackPlanItemCompletedAfterRevision,
   updateTodayPlanItemStatus,
 } from "./today-plan";
 
 type TodayScreenProps = {
   onAdjustToday: () => void;
   plan: AiPlan;
+  revisionContext?: {
+    revisedPlanItemIds: string[];
+    revisionId: string;
+  };
 };
 
-export function TodayScreen({ onAdjustToday, plan }: TodayScreenProps) {
+export function TodayScreen({ onAdjustToday, plan, revisionContext }: TodayScreenProps) {
   const todayPlanDate = getTodayPlanDate(plan);
   const [todayItems, setTodayItems] = useState(() => getTodayPlanItems(plan));
   const pendingItemCount = countPendingTodayItems(todayItems);
@@ -49,6 +54,26 @@ export function TodayScreen({ onAdjustToday, plan }: TodayScreenProps) {
         type: planItem.type,
         date: planItem.date,
       });
+
+      const completedAfterRevisionId = shouldTrackPlanItemCompletedAfterRevision(
+        planItemId,
+        status,
+        revisionContext?.revisedPlanItemIds,
+      )
+        ? revisionContext?.revisionId
+        : undefined;
+
+      if (completedAfterRevisionId) {
+        trackAnalyticsEvent("PLAN_ITEM_COMPLETED_AFTER_REVISION", {
+          userId: "local-user",
+          goalId: plan.goalId,
+          planId: plan.id ?? "local-plan",
+          planItemId,
+          type: planItem.type,
+          date: planItem.date,
+          revisionId: completedAfterRevisionId,
+        });
+      }
     }
 
     setTodayItems((currentItems) => updateTodayPlanItemStatus(currentItems, planItemId, status));
