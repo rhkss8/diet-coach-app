@@ -129,7 +129,7 @@ Todos:
 - [x] Add auth.
 - [x] Persist users, goals, plans, items, revisions, and check-ins.
 - [x] Add analytics provider.
-- [ ] Verify full event coverage.
+- [x] Verify full event coverage.
 
 Exit criteria:
 
