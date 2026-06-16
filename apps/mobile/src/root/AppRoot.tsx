@@ -8,6 +8,7 @@ import type { GoalInput, LifestyleAnswers, UserProfileInput } from "@diet-coach/
 import { generateMockInitialPlan } from "@diet-coach/ai";
 import { OnboardingFlow } from "../features/onboarding";
 import { PlanApprovalScreen, useApprovedPlanPersistence } from "../features/plan";
+import { trackAnalyticsEvent } from "../shared/lib/analytics";
 
 type CompletedOnboarding = {
   profile: UserProfileInput;
@@ -47,9 +48,22 @@ export function AppRoot() {
 function completeOnboarding(
   result: Omit<CompletedOnboarding, "initialPlanOutput">,
 ): CompletedOnboarding {
+  trackAnalyticsEvent("INITIAL_PLAN_GENERATION_STARTED", {
+    userId: "local-user",
+    goalId: "local-goal",
+  });
+  const initialPlanOutput = generateMockInitialPlan(result);
+
+  trackAnalyticsEvent("INITIAL_PLAN_GENERATION_SUCCEEDED", {
+    userId: "local-user",
+    goalId: initialPlanOutput.plan.goalId,
+    planId: initialPlanOutput.plan.id ?? "local-plan",
+    itemCount: initialPlanOutput.plan.items.length,
+  });
+
   return {
     ...result,
-    initialPlanOutput: generateMockInitialPlan(result),
+    initialPlanOutput,
   };
 }
 

@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { GoalInput, LifestyleAnswers, UserProfileInput } from "@diet-coach/core";
 
-import { createAnalyticsEvent } from "@diet-coach/core";
-
+import { trackAnalyticsEvent } from "../../shared/lib/analytics";
 import { BasicProfileStep } from "./BasicProfileStep";
 import { GoalSetupStep } from "./GoalSetupStep";
 import { LifestyleStep } from "./LifestyleStep";
@@ -22,19 +21,23 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [profile, setProfile] = useState<UserProfileInput | null>(null);
   const [goal, setGoal] = useState<GoalInput | null>(null);
 
+  useEffect(() => {
+    trackAnalyticsEvent("ONBOARDING_STARTED", {});
+  }, []);
+
   function completeProfile(profileInput: UserProfileInput) {
-    createAnalyticsEvent("PROFILE_STEP_COMPLETED", {});
+    trackAnalyticsEvent("PROFILE_STEP_COMPLETED", {});
     setProfile(profileInput);
   }
 
   function completeGoal(goalInput: GoalInput) {
-    createAnalyticsEvent("GOAL_STEP_COMPLETED", {});
+    trackAnalyticsEvent("GOAL_STEP_COMPLETED", {});
     setGoal(goalInput);
   }
 
   function completeLifestyle(lifestyleAnswers: LifestyleAnswers) {
-    createAnalyticsEvent("LIFESTYLE_STEP_COMPLETED", {});
-    createAnalyticsEvent("ONBOARDING_COMPLETED", { userId: "local-user" });
+    trackAnalyticsEvent("LIFESTYLE_STEP_COMPLETED", {});
+    trackAnalyticsEvent("ONBOARDING_COMPLETED", { userId: "local-user" });
 
     if (!profile || !goal) {
       return;

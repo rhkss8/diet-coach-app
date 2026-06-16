@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
 import type { AiPlan } from "@diet-coach/ai";
-import { createAnalyticsEvent } from "@diet-coach/core";
 
+import { trackAnalyticsEvent } from "../../shared/lib/analytics";
 import { type ApprovedPlanSnapshot, createApprovedPlanSnapshot } from "./approved-plan-snapshot";
 import { loadApprovedPlanSnapshot, saveApprovedPlanSnapshot } from "./approvedPlanStorage";
 
@@ -36,7 +36,7 @@ export function useApprovedPlanPersistence() {
     const snapshot = createApprovedPlanSnapshot(plan);
 
     await saveApprovedPlanSnapshot(snapshot);
-    createAnalyticsEvent("PLAN_APPROVED", {
+    trackAnalyticsEvent("PLAN_APPROVED", {
       userId: "local-user",
       goalId: plan.goalId,
       planId: plan.id ?? "local-plan",

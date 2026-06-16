@@ -60,7 +60,7 @@ Todos:
 - [x] Generate mock 7-day plan.
 - [x] Build plan approval screen.
 - [x] Persist approved plan locally or in DB.
-- [ ] Track onboarding and plan approval events.
+- [x] Track onboarding and plan approval events.
 
 Exit criteria:
 
