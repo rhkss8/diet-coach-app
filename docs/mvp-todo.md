@@ -55,7 +55,7 @@ Goal: user can create and approve the first plan.
 Todos:
 
 - [x] Build onboarding basic profile step.
-- [ ] Build goal setup step.
+- [x] Build goal setup step.
 - [ ] Build 3-question lifestyle step.
 - [ ] Generate mock 7-day plan.
 - [ ] Build plan approval screen.

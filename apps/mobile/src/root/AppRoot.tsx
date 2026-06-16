@@ -2,40 +2,38 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 
-import type { UserProfileInput } from "@diet-coach/core";
+import type { GoalInput, UserProfileInput } from "@diet-coach/core";
 
-import { createAnalyticsEvent } from "@diet-coach/core";
+import { OnboardingFlow } from "../features/onboarding";
 
-import { BasicProfileStep } from "../features/onboarding";
+type CompletedOnboarding = {
+  profile: UserProfileInput;
+  goal: GoalInput;
+};
 
 export function AppRoot() {
-  const [profile, setProfile] = useState<UserProfileInput | null>(null);
-
-  function completeProfile(profileInput: UserProfileInput) {
-    createAnalyticsEvent("PROFILE_STEP_COMPLETED", {});
-    setProfile(profileInput);
-  }
+  const [completedOnboarding, setCompletedOnboarding] = useState<CompletedOnboarding | null>(null);
 
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="dark" />
-      {profile ? (
-        <ProfileStepCompleted profile={profile} />
+      {completedOnboarding ? (
+        <OnboardingCompleted result={completedOnboarding} />
       ) : (
-        <BasicProfileStep onComplete={completeProfile} />
+        <OnboardingFlow onComplete={setCompletedOnboarding} />
       )}
     </SafeAreaView>
   );
 }
 
-function ProfileStepCompleted({ profile }: { profile: UserProfileInput }) {
+function OnboardingCompleted({ result }: { result: CompletedOnboarding }) {
   return (
     <View style={styles.completedContent}>
-      <Text style={styles.eyebrow}>기본 정보 저장됨</Text>
-      <Text style={styles.title}>이제 목표를 맞출 차례예요</Text>
+      <Text style={styles.eyebrow}>목표 저장됨</Text>
+      <Text style={styles.title}>이제 생활 패턴만 맞추면 돼요</Text>
       <Text style={styles.description}>
-        {profile.age}세, {profile.heightCm}cm, 현재 {profile.currentWeightKg}kg 기준으로 다음
-        단계에서 목표를 설정합니다.
+        현재 {result.profile.currentWeightKg}kg에서 {result.goal.targetWeightKg}kg까지,
+        {result.goal.targetDate} 기준으로 첫 플랜을 준비합니다.
       </Text>
     </View>
   );
