@@ -5,6 +5,7 @@
   "dependencies": {
     "@diet-coach/ai": "workspace:*",
     "@diet-coach/core": "workspace:*",
+    "@react-native-async-storage/async-storage": "^3.1.1",
     "expo": "~56.0.11",
     "expo-status-bar": "~56.0.4",
     "react": "19.2.3",
