@@ -1,5 +1,5 @@
 import type { AiPlan, AiPlanItem } from "@diet-coach/ai";
-import type { PlanItemStatus } from "@diet-coach/core";
+import type { AnalyticsEventName, PlanItemStatus } from "@diet-coach/core";
 
 export function getTodayPlanDate(plan: AiPlan) {
   return plan.items[0]?.date ?? plan.startDate;
@@ -50,4 +50,16 @@ export function getDailyProgressSummary(planItems: AiPlanItem[]) {
     skippedCount,
     totalCount,
   };
+}
+
+export function getPlanItemStatusEventName(status: PlanItemStatus): AnalyticsEventName | null {
+  if (status === "completed") {
+    return "PLAN_ITEM_COMPLETED";
+  }
+
+  if (status === "skipped") {
+    return "PLAN_ITEM_SKIPPED";
+  }
+
+  return null;
 }

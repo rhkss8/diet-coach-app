@@ -76,7 +76,7 @@ Todos:
 - [x] Show meals and exercise.
 - [x] Add completion check controls.
 - [x] Add daily progress summary.
-- [ ] Track plan item completion events.
+- [x] Track plan item completion events.
 
 Exit criteria:
 

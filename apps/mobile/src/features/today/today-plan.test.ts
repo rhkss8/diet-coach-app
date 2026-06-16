@@ -7,6 +7,7 @@ import {
   getTodayPlanDate,
   getTodayPlanItems,
   getDailyProgressSummary,
+  getPlanItemStatusEventName,
   groupTodayPlanItemsByType,
   updateTodayPlanItemStatus,
 } from "./today-plan";
@@ -86,5 +87,11 @@ describe("today plan helpers", () => {
       skippedCount: 0,
       totalCount: 2,
     });
+  });
+
+  it("maps status changes to analytics events", () => {
+    expect(getPlanItemStatusEventName("completed")).toBe("PLAN_ITEM_COMPLETED");
+    expect(getPlanItemStatusEventName("skipped")).toBe("PLAN_ITEM_SKIPPED");
+    expect(getPlanItemStatusEventName("pending")).toBeNull();
   });
 });

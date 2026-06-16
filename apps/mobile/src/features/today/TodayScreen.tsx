@@ -10,6 +10,7 @@ import {
   getTodayPlanDate,
   getTodayPlanItems,
   getDailyProgressSummary,
+  getPlanItemStatusEventName,
   groupTodayPlanItemsByType,
   updateTodayPlanItemStatus,
 } from "./today-plan";
@@ -34,6 +35,20 @@ export function TodayScreen({ plan }: TodayScreenProps) {
   }, [plan.goalId, plan.id]);
 
   function updatePlanItemStatus(planItemId: string, status: PlanItemStatus) {
+    const planItem = todayItems.find((currentItem) => currentItem.id === planItemId);
+    const eventName = getPlanItemStatusEventName(status);
+
+    if (planItem && eventName) {
+      trackAnalyticsEvent(eventName, {
+        userId: "local-user",
+        goalId: plan.goalId,
+        planId: plan.id ?? "local-plan",
+        planItemId,
+        type: planItem.type,
+        date: planItem.date,
+      });
+    }
+
     setTodayItems((currentItems) => updateTodayPlanItemStatus(currentItems, planItemId, status));
   }
 
