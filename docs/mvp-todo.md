@@ -127,7 +127,7 @@ Todos:
 - [x] Set up Supabase project.
 - [x] Add DB schema migrations.
 - [x] Add auth.
-- [ ] Persist users, goals, plans, items, revisions, and check-ins.
+- [x] Persist users, goals, plans, items, revisions, and check-ins.
 - [ ] Add analytics provider.
 - [ ] Verify full event coverage.
 

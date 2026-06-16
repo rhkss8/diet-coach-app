@@ -87,6 +87,10 @@ importers:
         version: 6.0.3
 
   packages/db:
+    dependencies:
+      '@diet-coach/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       typescript:
         specifier: ~6.0.3

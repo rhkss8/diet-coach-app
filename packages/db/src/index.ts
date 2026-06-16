@@ -1,3 +1,4 @@
+export * from "./persistence";
 export * from "./schema";
 
 export type SupabaseProjectConfig = {
