@@ -107,7 +107,7 @@ Goal: replace mocks with structured AI calls.
 
 Todos:
 
-- [ ] Implement initial plan generation prompt.
+- [x] Implement initial plan generation prompt.
 - [ ] Implement adjustment prompt.
 - [ ] Enforce JSON schema validation.
 - [ ] Add fallback for invalid AI output.
