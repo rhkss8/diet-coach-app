@@ -7,6 +7,7 @@ import {
   getTodayPlanDate,
   getTodayPlanItems,
   groupTodayPlanItemsByType,
+  updateTodayPlanItemStatus,
 } from "./today-plan";
 
 const plan = {
@@ -16,6 +17,7 @@ const plan = {
   summary: "7일 플랜",
   items: [
     {
+      id: "breakfast-1",
       date: "2026-06-16",
       type: "meal",
       slot: "breakfast",
@@ -24,6 +26,7 @@ const plan = {
       status: "completed",
     },
     {
+      id: "workout-1",
       date: "2026-06-16",
       type: "exercise",
       slot: "workout",
@@ -32,6 +35,7 @@ const plan = {
       status: "pending",
     },
     {
+      id: "breakfast-2",
       date: "2026-06-17",
       type: "meal",
       slot: "breakfast",
@@ -60,5 +64,16 @@ describe("today plan helpers", () => {
       exercises: [expect.objectContaining({ type: "exercise" })],
       meals: [expect.objectContaining({ type: "meal" })],
     });
+  });
+
+  it("updates a plan item status by id", () => {
+    expect(updateTodayPlanItemStatus(getTodayPlanItems(plan), "workout-1", "skipped")).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "workout-1",
+          status: "skipped",
+        }),
+      ]),
+    );
   });
 });

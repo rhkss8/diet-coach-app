@@ -74,7 +74,7 @@ Todos:
 
 - [x] Build Today screen.
 - [x] Show meals and exercise.
-- [ ] Add completion check controls.
+- [x] Add completion check controls.
 - [ ] Add daily progress summary.
 - [ ] Track plan item completion events.
 

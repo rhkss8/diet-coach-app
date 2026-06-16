@@ -1,7 +1,8 @@
-import { useEffect } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import type { AiPlan } from "@diet-coach/ai";
+import type { AiPlan, AiPlanItem } from "@diet-coach/ai";
+import type { PlanItemStatus } from "@diet-coach/core";
 
 import { trackAnalyticsEvent } from "../../shared/lib/analytics";
 import {
@@ -9,6 +10,7 @@ import {
   getTodayPlanDate,
   getTodayPlanItems,
   groupTodayPlanItemsByType,
+  updateTodayPlanItemStatus,
 } from "./today-plan";
 
 type TodayScreenProps = {
@@ -17,7 +19,7 @@ type TodayScreenProps = {
 
 export function TodayScreen({ plan }: TodayScreenProps) {
   const todayPlanDate = getTodayPlanDate(plan);
-  const todayItems = getTodayPlanItems(plan);
+  const [todayItems, setTodayItems] = useState(() => getTodayPlanItems(plan));
   const pendingItemCount = countPendingTodayItems(todayItems);
   const { exercises, meals } = groupTodayPlanItemsByType(todayItems);
 
@@ -28,6 +30,10 @@ export function TodayScreen({ plan }: TodayScreenProps) {
       planId: plan.id ?? "local-plan",
     });
   }, [plan.goalId, plan.id]);
+
+  function updatePlanItemStatus(planItemId: string, status: PlanItemStatus) {
+    setTodayItems((currentItems) => updateTodayPlanItemStatus(currentItems, planItemId, status));
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
@@ -47,30 +53,70 @@ export function TodayScreen({ plan }: TodayScreenProps) {
         </Text>
       </View>
 
-      <TodayPlanSection items={meals} title="오늘 식사" />
-      <TodayPlanSection items={exercises} title="오늘 운동" />
+      <TodayPlanSection items={meals} onStatusChange={updatePlanItemStatus} title="오늘 식사" />
+      <TodayPlanSection items={exercises} onStatusChange={updatePlanItemStatus} title="오늘 운동" />
     </ScrollView>
   );
 }
 
 function TodayPlanSection({
   items,
+  onStatusChange,
   title,
 }: {
-  items: ReturnType<typeof groupTodayPlanItemsByType>["meals"];
+  items: AiPlanItem[];
+  onStatusChange: (planItemId: string, status: PlanItemStatus) => void;
   title: string;
 }) {
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
-      {items.map((planItem) => (
-        <View key={planItem.id ?? `${planItem.date}-${planItem.slot}`} style={styles.planItem}>
-          <Text style={styles.planItemSlot}>{getSlotLabel(planItem.slot)}</Text>
-          <Text style={styles.planItemTitle}>{planItem.title}</Text>
-          <Text style={styles.planItemDescription}>{planItem.description}</Text>
-        </View>
-      ))}
+      {items.map((planItem) => {
+        const planItemId = planItem.id ?? `${planItem.date}-${planItem.slot}`;
+
+        return (
+          <View key={planItemId} style={styles.planItem}>
+            <Text style={styles.planItemSlot}>{getSlotLabel(planItem.slot)}</Text>
+            <Text style={styles.planItemTitle}>{planItem.title}</Text>
+            <Text style={styles.planItemDescription}>{planItem.description}</Text>
+            <View style={styles.controls}>
+              <StatusButton
+                isSelected={planItem.status === "completed"}
+                label="완료"
+                onPress={() => onStatusChange(planItemId, "completed")}
+              />
+              <StatusButton
+                isSelected={planItem.status === "skipped"}
+                label="건너뜀"
+                onPress={() => onStatusChange(planItemId, "skipped")}
+              />
+            </View>
+          </View>
+        );
+      })}
     </View>
+  );
+}
+
+function StatusButton({
+  isSelected,
+  label,
+  onPress,
+}: {
+  isSelected: boolean;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={[styles.statusButton, isSelected && styles.selectedStatusButton]}
+    >
+      <Text style={[styles.statusButtonLabel, isSelected && styles.selectedStatusButtonLabel]}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -169,5 +215,32 @@ const styles = StyleSheet.create({
     color: "#53645A",
     fontSize: 14,
     lineHeight: 20,
+  },
+  controls: {
+    flexDirection: "row",
+    gap: 8,
+    paddingTop: 6,
+  },
+  statusButton: {
+    alignItems: "center",
+    borderColor: "#D9E0DA",
+    borderRadius: 8,
+    borderWidth: 1,
+    minHeight: 38,
+    justifyContent: "center",
+    paddingHorizontal: 12,
+  },
+  statusButtonLabel: {
+    color: "#526057",
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 0,
+  },
+  selectedStatusButton: {
+    backgroundColor: "#E6F0EA",
+    borderColor: "#2F6B4F",
+  },
+  selectedStatusButtonLabel: {
+    color: "#245A42",
   },
 });
