@@ -1,11 +1,13 @@
 # How TARS Works
 
 ## Purpose
+
 This file explains the operating model behind the starter kit.
 
 For the actual first-use guide, read [README.md](README.md).
 
 ## Operating Model
+
 TARS separates three concerns:
 
 - CLI: gives commands, gathers kickoff inputs, prints prompts, and points to the next todo.
@@ -13,6 +15,7 @@ TARS separates three concerns:
 - Codex: discusses, implements, tests, and updates the docs as the project evolves.
 
 ## What To Copy
+
 Copy this folder's `docs/` directory, `tars` launcher, `start` wrapper, `activate`, and `scripts/install-tars.zsh` into a new project.
 
 Run the CLI with no arguments to see available commands:
@@ -78,6 +81,7 @@ G-Stack, Superpowers, MVP todo, 디자인 톤앤매너, 개발 하네스, AI/QA/
 ```
 
 ## What This Kit Provides
+
 - Product brainstorming structure.
 - G-Stack.
 - Superpowers.
@@ -91,11 +95,13 @@ G-Stack, Superpowers, MVP todo, 디자인 톤앤매너, 개발 하네스, AI/QA/
 - Local agent operating model.
 
 ## Local Only
+
 This is not a global Codex skill.
 
 Keep it as a project-local copy pack. Update it when repeated lessons prove useful across projects.
 
 ## Folder Structure
+
 ```txt
 starter-kit/new-service/
   README.md
@@ -125,12 +131,14 @@ starter-kit/new-service/
 ```
 
 ## Day-To-Day Relationship
+
 Use TARS for orientation:
 
 ```bash
 tars status
 tars next
 tars start
+tars done
 tars handoff
 ```
 
@@ -142,7 +150,16 @@ tars 기준으로 다음 todo 진행해줘.
 
 Codex should then read `docs/agent-runbook.md`, pick the next todo, implement it, run checks, and update decisions or lessons.
 
+At the end of each slice, run:
+
+```bash
+tars done
+git add .
+git commit -m "Complete current TARS slice"
+```
+
 ## Multi-PC Continuity
+
 When switching between PCs, TARS does not sync files by itself. Git does that.
 
 TARS provides the handoff checklist:
@@ -152,6 +169,7 @@ tars handoff
 ```
 
 The rule is simple:
+
 - Push before leaving one PC.
 - Pull before starting on another PC.
 - Run `tars doctor`, `tars status`, and `tars next`.

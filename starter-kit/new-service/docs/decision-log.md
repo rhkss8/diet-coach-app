@@ -1,11 +1,13 @@
 # Decision Log
 
 ## Purpose
+
 Capture product, design, engineering, and process decisions so the project does not rely on chat memory.
 
 Every meaningful decision should be recorded here when it changes how the MVP is built.
 
 ## Decision Format
+
 ```txt
 ## YYYY-MM-DD - Short Decision Title
 Status: proposed | accepted | replaced
@@ -24,4 +26,3 @@ Tradeoff:
 Review Trigger:
 - When to revisit this decision.
 ```
-

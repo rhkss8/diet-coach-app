@@ -1,6 +1,7 @@
 # New Service Copy Pack
 
 ## Purpose
+
 These are the files to copy into a new project before asking Codex to brainstorm and build a new service.
 
 The reusable local starter kit lives at:
@@ -65,6 +66,7 @@ tars next
 ```
 
 ## Minimum Copy Pack
+
 Copy these files:
 
 ```txt
@@ -77,12 +79,14 @@ docs/decision-gates.md
 ```
 
 Then provide:
+
 - Service definition.
 - Persona.
 - Core pain.
 - Desired transformation.
 
 ## Full Copy Pack
+
 Copy the whole `starter-kit/new-service/docs/` folder into the new project as `docs/` when the project should begin with product, design, AI, analytics, QA, and todo structure already present.
 
 ```txt
@@ -105,6 +109,7 @@ docs/decision-gates.md
 ```
 
 ## Kickoff Prompt
+
 Use this prompt in a new project:
 
 ```txt

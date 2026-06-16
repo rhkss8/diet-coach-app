@@ -1,0 +1,27 @@
+{
+  "name": "diet-coach-app",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.15.1",
+  "scripts": {
+    "mobile:start": "pnpm --filter @diet-coach/mobile start",
+    "mobile:ios": "pnpm --filter @diet-coach/mobile ios",
+    "mobile:android": "pnpm --filter @diet-coach/mobile android",
+    "mobile:web": "pnpm --filter @diet-coach/mobile web",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "hooks:install": "zsh scripts/install-git-hooks.zsh"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.5.0",
+    "globals": "^17.6.0",
+    "prettier": "^3.7.4",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.61.0",
+    "vitest": "^3.2.4"
+  }
+}

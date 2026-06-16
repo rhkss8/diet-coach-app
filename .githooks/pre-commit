@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+if [[ -s "$HOME/.zshrc" ]]; then
+  source "$HOME/.zshrc" >/dev/null 2>&1 || true
+fi
+
+if command -v nvm >/dev/null 2>&1; then
+  nvm use 20.19.4 >/dev/null 2>&1 || true
+fi
+
+echo "Running TARS pre-commit checks..."
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm format:check

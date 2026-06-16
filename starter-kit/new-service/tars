@@ -43,6 +43,7 @@ Usage:
   tars status                          Check starter document readiness
   tars next                            Show the next unchecked MVP todo
   tars doctor                          Verify this project has the required starter files
+  tars done                            Show end-of-slice checks and commit guide
   tars handoff                         Show multi-machine handoff checklist
 
 What TARS sets up:
@@ -56,6 +57,7 @@ Examples:
   tars init                            Start a new service MVP by answering questions
   tars start                           Continue from the current service definition
   tars next                            See what the agent should do next
+  tars done                            Finish a slice before moving to the next todo
   tars handoff                         Prepare to switch between work and home PCs
 
 Notes:
@@ -341,11 +343,33 @@ def command_handoff() -> int:
     return 0
 
 
+def command_done() -> int:
+    status = run_git(["status", "--short"]) or "(clean)"
+
+    print("TARS done")
+    print(f"- project: {ROOT}")
+    print(f"- next todo after commit: {next_todo_line()}")
+    print("\nRun checks:")
+    print("1. pnpm typecheck")
+    print("2. pnpm lint")
+    print("3. pnpm test")
+    print("4. pnpm format:check")
+    print("\nCurrent git status:")
+    print(status)
+    print("\nCommit this slice:")
+    print("git add .")
+    print('git commit -m "Complete current TARS slice"')
+    print("\nThen continue:")
+    print("tars next")
+    return 0
+
+
 def print_next_commands() -> None:
     print("\n다음 명령:")
     print("- tars start   : Codex kickoff prompt 출력")
     print("- tars status  : 스타터 문서 상태 확인")
     print("- tars next    : 다음 MVP todo 확인")
+    print("- tars done    : 작업 완료 체크/커밋 가이드")
     print("- tars handoff : 다른 PC로 작업 넘기기 체크리스트")
 
 
@@ -379,6 +403,8 @@ def main(argv: list[str]) -> int:
         return command_next()
     if args.command == "doctor":
         return command_doctor()
+    if args.command == "done":
+        return command_done()
     if args.command == "handoff":
         return command_handoff()
 

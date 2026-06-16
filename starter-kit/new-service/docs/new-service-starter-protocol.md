@@ -1,9 +1,11 @@
 # New Service Starter Protocol
 
 ## Purpose
+
 For every new service, start from the same operating structure.
 
 The only required custom inputs are:
+
 - Service definition.
 - Target persona.
 - Core user pain.
@@ -12,13 +14,17 @@ The only required custom inputs are:
 Everything else should be generated from the shared starter protocol.
 
 ## Required Inputs
+
 ### 1. Service Definition
+
 Answer in one sentence:
 
 This service helps `[persona]` achieve `[outcome]` by `[core mechanism]`.
 
 ### 2. Persona
+
 Define:
+
 - Who they are.
 - What situation they are in.
 - What they already tried.
@@ -26,30 +32,39 @@ Define:
 - What moment makes them search for a new product.
 
 ### 3. Core Pain
+
 Use plain language.
 
 Bad:
+
 - "Need better AI personalization."
 
 Good:
+
 - "When [specific situation] happens, the user feels [specific pain]."
 
 ### 4. Desired Transformation
+
 Define the before and after.
 
 Before:
+
 - What the user feels or does today.
 
 After:
+
 - What the user can do after the product works.
 
 ## G-Stack
+
 G-Stack is the default project operating stack for new services.
 
 ### G1. Goal Stack
+
 Defines what the product must prove.
 
 Required outputs:
+
 - One-line MVP goal.
 - Core loop.
 - Primary success metric.
@@ -57,9 +72,11 @@ Required outputs:
 - Non-goals.
 
 ### G2. Growth Stack
+
 Defines how the first users are acquired and learned from.
 
 Required outputs:
+
 - First 10 users.
 - First 50 users.
 - Acquisition channel.
@@ -67,9 +84,11 @@ Required outputs:
 - Retention hypothesis.
 
 ### G3. Governance Stack
+
 Defines rules that keep development from drifting.
 
 Required outputs:
+
 - Scope guardrails.
 - Decision log.
 - Definition of done.
@@ -77,9 +96,11 @@ Required outputs:
 - Release gates.
 
 ### G4. Ground Truth Stack
+
 Defines what data tells the team whether the product works.
 
 Required outputs:
+
 - Analytics events.
 - User state model.
 - Experiment dashboard questions.
@@ -87,9 +108,11 @@ Required outputs:
 - Manual observation plan.
 
 ### G5. Generation Stack
+
 Defines how AI participates in the product.
 
 Required outputs:
+
 - AI functions.
 - JSON contracts.
 - Prompt fixtures.
@@ -97,20 +120,24 @@ Required outputs:
 - Fallback behavior.
 
 ## Superpowers
+
 Superpowers are the few abilities the service gives the user that existing products do not.
 
 Rules:
+
 - 1 to 3 superpowers only.
 - Each superpower must map to a core product flow.
 - Each superpower must be testable in the MVP.
 - Avoid generic claims like "AI personalized experience."
 
 Template:
+
 ```txt
 As a [persona], I can [new ability], so that [meaningful outcome].
 ```
 
 ## New Project Kickoff Flow
+
 1. Define service in one sentence.
 2. Define primary persona.
 3. Define the user's before/after transformation.
@@ -124,15 +151,16 @@ As a [persona], I can [new ability], so that [meaningful outcome].
 11. Start Phase 0 foundation.
 
 ## Lesson-And-Run Memory
+
 Every new service should maintain:
 
 - `docs/decision-log.md`
 - `docs/lessons-and-rules.md`
 
 Promotion path:
+
 1. Chat insight.
 2. Project decision or lesson.
 3. Harness rule.
 4. Checklist item.
 5. Reusable starter update.
-

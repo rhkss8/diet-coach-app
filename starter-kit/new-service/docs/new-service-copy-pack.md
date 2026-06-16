@@ -1,9 +1,11 @@
 # New Service Copy Pack
 
 ## Purpose
+
 Copy this folder into a new project before asking Codex to brainstorm and build a new service.
 
 ## Minimum Copy Pack
+
 Copy:
 
 ```txt
@@ -16,15 +18,18 @@ docs/decision-gates.md
 ```
 
 Then provide:
+
 - Service definition.
 - Persona.
 - Core pain.
 - Desired transformation.
 
 ## Full Copy Pack
+
 Copy the full `starter-kit/new-service/docs/` folder into the new project as `docs/`.
 
 ## Kickoff Prompt
+
 Use this prompt in a new project:
 
 ```txt
@@ -48,4 +53,3 @@ G-Stack, Superpowers, MVP todo, 디자인 톤앤매너, 개발 하네스, AI/QA/
 중요 의사결정 지점은 물어보고,
 그 외에는 MVP core loop가 끝날 때까지 계속 진행해줘.
 ```
-

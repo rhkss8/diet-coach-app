@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# native builds
+ios/
+android/
+
+# env
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.*
+yarn-debug.*
+pnpm-debug.*
+
+# TypeScript
+*.tsbuildinfo
+
+# macOS
+.DS_Store
+
