@@ -3,9 +3,15 @@ import { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 
 import type { GenerateInitialPlanOutput } from "@diet-coach/ai";
-import type { GoalInput, LifestyleAnswers, UserProfileInput } from "@diet-coach/core";
+import type {
+  AdjustmentReason,
+  GoalInput,
+  LifestyleAnswers,
+  UserProfileInput,
+} from "@diet-coach/core";
 
 import { generateMockInitialPlan } from "@diet-coach/ai";
+import { AdjustmentReasonSelectionScreen } from "../features/adjustment";
 import { OnboardingFlow } from "../features/onboarding";
 import { PlanApprovalScreen, useApprovedPlanPersistence } from "../features/plan";
 import { TodayScreen } from "../features/today";
@@ -21,6 +27,9 @@ type CompletedOnboarding = {
 export function AppRoot() {
   const [completedOnboarding, setCompletedOnboarding] = useState<CompletedOnboarding | null>(null);
   const [isAdjustingToday, setIsAdjustingToday] = useState(false);
+  const [selectedAdjustmentReason, setSelectedAdjustmentReason] = useState<
+    AdjustmentReason | undefined
+  >();
   const { approvedPlanSnapshot, approvePlan, isHydratingApprovedPlan } =
     useApprovedPlanPersistence();
 
@@ -30,7 +39,18 @@ export function AppRoot() {
       {isHydratingApprovedPlan ? (
         <LoadingPlan />
       ) : isAdjustingToday ? (
-        <AdjustmentStarted />
+        <AdjustmentReasonSelectionScreen
+          onSelectReason={(reason) => {
+            setSelectedAdjustmentReason(reason);
+            trackAnalyticsEvent("ADJUSTMENT_REASON_SELECTED", {
+              userId: "local-user",
+              planId: approvedPlanSnapshot?.plan.id ?? "local-plan",
+              affectedDate: approvedPlanSnapshot?.plan.startDate ?? "local-date",
+              reason,
+            });
+          }}
+          selectedReason={selectedAdjustmentReason}
+        />
       ) : approvedPlanSnapshot ? (
         <TodayScreen
           onAdjustToday={() => {
@@ -51,15 +71,6 @@ export function AppRoot() {
         />
       )}
     </SafeAreaView>
-  );
-}
-
-function AdjustmentStarted() {
-  return (
-    <View style={styles.completedContent}>
-      <Text style={styles.eyebrow}>조정 시작</Text>
-      <Text style={styles.title}>이제 사유를 고르면 돼요</Text>
-    </View>
   );
 }
 
