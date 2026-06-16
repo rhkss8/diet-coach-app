@@ -36,3 +36,18 @@ export function updateTodayPlanItemStatus(
       : planItem,
   );
 }
+
+export function getDailyProgressSummary(planItems: AiPlanItem[]) {
+  const totalCount = planItems.length;
+  const completedCount = planItems.filter((planItem) => planItem.status === "completed").length;
+  const skippedCount = planItems.filter((planItem) => planItem.status === "skipped").length;
+  const pendingCount = totalCount - completedCount - skippedCount;
+
+  return {
+    completedCount,
+    completionRate: totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100),
+    pendingCount,
+    skippedCount,
+    totalCount,
+  };
+}

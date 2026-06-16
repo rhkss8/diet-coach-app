@@ -75,7 +75,7 @@ Todos:
 - [x] Build Today screen.
 - [x] Show meals and exercise.
 - [x] Add completion check controls.
-- [ ] Add daily progress summary.
+- [x] Add daily progress summary.
 - [ ] Track plan item completion events.
 
 Exit criteria:

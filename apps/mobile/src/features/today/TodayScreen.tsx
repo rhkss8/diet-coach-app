@@ -9,6 +9,7 @@ import {
   countPendingTodayItems,
   getTodayPlanDate,
   getTodayPlanItems,
+  getDailyProgressSummary,
   groupTodayPlanItemsByType,
   updateTodayPlanItemStatus,
 } from "./today-plan";
@@ -21,6 +22,7 @@ export function TodayScreen({ plan }: TodayScreenProps) {
   const todayPlanDate = getTodayPlanDate(plan);
   const [todayItems, setTodayItems] = useState(() => getTodayPlanItems(plan));
   const pendingItemCount = countPendingTodayItems(todayItems);
+  const progressSummary = getDailyProgressSummary(todayItems);
   const { exercises, meals } = groupTodayPlanItemsByType(todayItems);
 
   useEffect(() => {
@@ -50,6 +52,27 @@ export function TodayScreen({ plan }: TodayScreenProps) {
         <Text style={styles.summaryTitle}>{plan.summary}</Text>
         <Text style={styles.summaryText}>
           오늘은 식사와 운동을 합쳐 {todayItems.length}개 항목으로 시작합니다.
+        </Text>
+      </View>
+
+      <View style={styles.progressBand}>
+        <View style={styles.progressHeader}>
+          <Text style={styles.progressTitle}>오늘 진행률</Text>
+          <Text style={styles.progressRate}>{progressSummary.completionRate}%</Text>
+        </View>
+        <View style={styles.progressTrack}>
+          <View
+            style={[
+              styles.progressFill,
+              {
+                width: `${progressSummary.completionRate}%`,
+              },
+            ]}
+          />
+        </View>
+        <Text style={styles.summaryText}>
+          완료 {progressSummary.completedCount}개, 건너뜀 {progressSummary.skippedCount}개, 남은
+          항목 {progressSummary.pendingCount}개
         </Text>
       </View>
 
@@ -181,6 +204,41 @@ const styles = StyleSheet.create({
     color: "#526057",
     fontSize: 14,
     lineHeight: 20,
+  },
+  progressBand: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#DFE5E0",
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 10,
+    padding: 16,
+  },
+  progressHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  progressTitle: {
+    color: "#26342C",
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 0,
+  },
+  progressRate: {
+    color: "#2F6B4F",
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: 0,
+  },
+  progressTrack: {
+    backgroundColor: "#E4EAE5",
+    borderRadius: 8,
+    height: 8,
+    overflow: "hidden",
+  },
+  progressFill: {
+    backgroundColor: "#2F6B4F",
+    height: 8,
   },
   section: {
     gap: 10,

@@ -6,6 +6,7 @@ import {
   countPendingTodayItems,
   getTodayPlanDate,
   getTodayPlanItems,
+  getDailyProgressSummary,
   groupTodayPlanItemsByType,
   updateTodayPlanItemStatus,
 } from "./today-plan";
@@ -75,5 +76,15 @@ describe("today plan helpers", () => {
         }),
       ]),
     );
+  });
+
+  it("summarizes daily progress", () => {
+    expect(getDailyProgressSummary(getTodayPlanItems(plan))).toEqual({
+      completedCount: 1,
+      completionRate: 50,
+      pendingCount: 1,
+      skippedCount: 0,
+      totalCount: 2,
+    });
   });
 });
