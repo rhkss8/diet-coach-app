@@ -32,6 +32,9 @@ importers:
 
   apps/mobile:
     dependencies:
+      '@diet-coach/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@diet-coach/core':
         specifier: workspace:*
         version: link:../../packages/core

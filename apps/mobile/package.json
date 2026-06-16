@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
+    "@diet-coach/ai": "workspace:*",
     "@diet-coach/core": "workspace:*",
     "expo": "~56.0.11",
     "expo-status-bar": "~56.0.4",

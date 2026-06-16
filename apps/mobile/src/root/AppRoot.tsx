@@ -2,14 +2,17 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 
+import type { GenerateInitialPlanOutput } from "@diet-coach/ai";
 import type { GoalInput, LifestyleAnswers, UserProfileInput } from "@diet-coach/core";
 
+import { generateMockInitialPlan } from "@diet-coach/ai";
 import { OnboardingFlow } from "../features/onboarding";
 
 type CompletedOnboarding = {
   profile: UserProfileInput;
   goal: GoalInput;
   lifestyleAnswers: LifestyleAnswers;
+  initialPlanOutput: GenerateInitialPlanOutput;
 };
 
 export function AppRoot() {
@@ -21,10 +24,21 @@ export function AppRoot() {
       {completedOnboarding ? (
         <OnboardingCompleted result={completedOnboarding} />
       ) : (
-        <OnboardingFlow onComplete={setCompletedOnboarding} />
+        <OnboardingFlow
+          onComplete={(result) => setCompletedOnboarding(completeOnboarding(result))}
+        />
       )}
     </SafeAreaView>
   );
+}
+
+function completeOnboarding(
+  result: Omit<CompletedOnboarding, "initialPlanOutput">,
+): CompletedOnboarding {
+  return {
+    ...result,
+    initialPlanOutput: generateMockInitialPlan(result),
+  };
 }
 
 function OnboardingCompleted({ result }: { result: CompletedOnboarding }) {
@@ -35,6 +49,9 @@ function OnboardingCompleted({ result }: { result: CompletedOnboarding }) {
       <Text style={styles.description}>
         현재 {result.profile.currentWeightKg}kg에서 {result.goal.targetWeightKg}kg까지,
         {result.goal.targetDate} 기준으로 {result.lifestyleAnswers.pace} 플랜을 준비합니다.
+      </Text>
+      <Text style={styles.description}>
+        {result.initialPlanOutput.plan.items.length}개의 식사/운동 항목이 준비됐어요.
       </Text>
     </View>
   );
