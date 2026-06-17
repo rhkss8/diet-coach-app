@@ -48,6 +48,57 @@ export type GenerateInitialPlanOutput = {
   adjustmentNotes: string[];
 };
 
+export type ChatPlannerMessage = {
+  id: EntityId;
+  role: "assistant" | "user";
+  content: string;
+};
+
+export type ChatPlannerConfirmation =
+  | {
+      action: "add_to_meal_plan";
+      label: "식단에 추가하시겠습니까?";
+    }
+  | {
+      action: "add_to_exercise_plan";
+      label: "운동에 추가하시겠습니까?";
+    }
+  | {
+      action: "revise_plan";
+      label: "플랜을 수정하시겠습니까?";
+    };
+
+export type ChatPlannerResponse =
+  | {
+      type: "meal_plan_suggestion";
+      message: string;
+      suggestedItems: AiPlanItem[];
+      confirmation: Extract<ChatPlannerConfirmation, { action: "add_to_meal_plan" }>;
+    }
+  | {
+      type: "exercise_plan_suggestion";
+      message: string;
+      suggestedItems: AiPlanItem[];
+      confirmation: Extract<ChatPlannerConfirmation, { action: "add_to_exercise_plan" }>;
+    }
+  | {
+      type: "plan_revision_suggestion";
+      message: string;
+      revision: AdjustTodayPlanOutput["revision"];
+      confirmation: Extract<ChatPlannerConfirmation, { action: "revise_plan" }>;
+    }
+  | {
+      type: "clarification_question";
+      message: string;
+      question: string;
+    };
+
+export type GenerateChatPlannerResponseInput = {
+  currentPlan?: AiPlan;
+  messages: ChatPlannerMessage[];
+  todayDate: ISODate;
+};
+
 export type AdjustTodayPlanInput = {
   currentPlan: AiPlan;
   todayItems: AiPlanItem[];

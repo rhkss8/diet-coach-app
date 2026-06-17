@@ -2,14 +2,14 @@
 
 ## Goal
 
-The 50-user MVP test must answer whether manual plan adjustment improves continuation.
+The 50-user MVP test must answer whether chat-generated plan actions help users continue after reality breaks the original plan.
 
 ## Primary Metrics
 
-- Onboarding completion rate.
-- Plan approval rate.
-- Adjustment entry rate.
-- Adjustment approval rate.
+- Consultation start rate.
+- Chat planner response generation rate.
+- Chat action approval rate.
+- Chat revision approval rate.
 - Return within 24 hours after approved adjustment.
 - Next plan item completion after approved adjustment.
 - 7-day retention.
@@ -21,6 +21,12 @@ The 50-user MVP test must answer whether manual plan adjustment improves continu
 - Keep payloads small and structured.
 
 ## Required Events
+
+### Consultation
+
+- `CHAT_CONSULTATION_STARTED`
+- `CHAT_PLANNER_RESPONSE_GENERATED`
+- `CHAT_PLANNER_ACTION_APPROVED`
 
 ### Onboarding
 
@@ -80,6 +86,21 @@ The 50-user MVP test must answer whether manual plan adjustment improves continu
 }
 ```
 
+### Chat Planner Events
+
+```ts
+{
+  userId: string;
+  responseType:
+    | "meal_plan_suggestion"
+    | "exercise_plan_suggestion"
+    | "plan_revision_suggestion"
+    | "clarification_question";
+  action?: "add_meal_to_plan" | "add_exercise_to_plan" | "apply_plan_revision";
+  planId?: string;
+}
+```
+
 ### Plan Item Events
 
 ```ts
@@ -96,7 +117,9 @@ The 50-user MVP test must answer whether manual plan adjustment improves continu
 
 At the end of the MVP test, answer:
 
-- How many users reached an approved plan?
+- How many users started chat consultation?
+- How many users received a structured meal, exercise, or revision suggestion?
+- How many users approved a chat-generated action?
 - How many users clicked "Adjust today"?
 - Which adjustment reason was most common?
 - How many approved a revision?

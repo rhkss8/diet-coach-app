@@ -6,6 +6,25 @@ AI must produce structured, reviewable plan outputs. It must not behave like an 
 
 ## AI Functions
 
+### generateChatPlannerResponse
+
+Input:
+
+- Current chat messages.
+- Optional current plan.
+- Optional inferred profile context.
+
+Output:
+
+- User-facing assistant message.
+- Structured action type.
+- Optional meal item suggestion.
+- Optional exercise item suggestion.
+- Optional plan revision suggestion.
+- Confirmation label and action.
+
+The app must render the message as chat and the structured action as a confirmation card. The plan is not changed until the user confirms.
+
 ### generateInitialPlan
 
 Input:
@@ -118,6 +137,44 @@ type PlanRevision = {
   updatedFutureItems?: PlanItem[];
   changedItemIds: string[];
 };
+```
+
+### ChatPlannerResponse
+
+```ts
+type ChatPlannerResponse =
+  | {
+      type: "meal_plan_suggestion";
+      message: string;
+      suggestedItems: PlanItem[];
+      confirmation: {
+        label: "식단에 추가하시겠습니까?";
+        action: "add_to_meal_plan";
+      };
+    }
+  | {
+      type: "exercise_plan_suggestion";
+      message: string;
+      suggestedItems: PlanItem[];
+      confirmation: {
+        label: "운동에 추가하시겠습니까?";
+        action: "add_to_exercise_plan";
+      };
+    }
+  | {
+      type: "plan_revision_suggestion";
+      message: string;
+      revision: PlanRevision;
+      confirmation: {
+        label: "플랜을 수정하시겠습니까?";
+        action: "revise_plan";
+      };
+    }
+  | {
+      type: "clarification_question";
+      message: string;
+      question: string;
+    };
 ```
 
 ## Fixture Cases

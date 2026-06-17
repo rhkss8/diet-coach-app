@@ -155,6 +155,26 @@ Exit criteria:
 
 - Closed MVP can be distributed to testers.
 
+## Phase 8: Chat-First Pivot
+
+Goal: make AI consultation the primary way to create and revise plans.
+
+Todos:
+
+- [x] Define chat planner JSON action contract.
+- [x] Add mock chat planner response generation.
+- [x] Build consultation chat screen.
+- [x] Render confirmation cards for meal, exercise, and revision actions.
+- [x] Apply approved chat actions to plan state.
+- [x] Add route history for chat, today, adjustment, and settings.
+- [x] Update Expo run script for port and tunnel reliability.
+
+Exit criteria:
+
+- User can chat, approve a suggested meal or exercise, and see it in the plan.
+- User can chat a revision and approve a plan change.
+- Web route history and native back behavior are not just local boolean state.
+
 ## Non-Stop Loop
 
 For every scheduled work cycle:

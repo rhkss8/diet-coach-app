@@ -9,20 +9,17 @@ import {
 
 describe("core flow acceptance criteria", () => {
   it("matches the MVP release core flow length", () => {
-    expect(coreFlowAcceptanceSteps).toHaveLength(13);
+    expect(coreFlowAcceptanceSteps).toHaveLength(10);
   });
 
   it("requires the core analytics events needed to prove recovery", () => {
     expect(getRequiredCoreFlowEventNames()).toEqual(
       expect.arrayContaining([
-        "ONBOARDING_COMPLETED",
-        "INITIAL_PLAN_GENERATION_SUCCEEDED",
-        "PLAN_APPROVED",
+        "CHAT_CONSULTATION_STARTED",
+        "CHAT_PLANNER_RESPONSE_GENERATED",
+        "CHAT_PLANNER_ACTION_APPROVED",
         "TODAY_SCREEN_VIEWED",
         "PLAN_ITEM_COMPLETED",
-        "ADJUST_TODAY_CLICKED",
-        "ADJUSTMENT_REASON_SELECTED",
-        "PLAN_ADJUSTMENT_GENERATION_SUCCEEDED",
         "PLAN_REVISION_APPROVED",
         "PLAN_ITEM_COMPLETED_AFTER_REVISION",
       ]),
@@ -30,7 +27,7 @@ describe("core flow acceptance criteria", () => {
   });
 
   it("reports missing event coverage", () => {
-    expect(findMissingCoreFlowEventNames(["ONBOARDING_STARTED"])).toContain(
+    expect(findMissingCoreFlowEventNames(["CHAT_CONSULTATION_STARTED"])).toContain(
       "PLAN_REVISION_APPROVED",
     );
   });

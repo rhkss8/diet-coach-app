@@ -4,22 +4,23 @@
 
 ### MVP Goal
 
-Prove that users continue after manually adjusting a diet plan.
+Prove that users can turn chat consultation into approved meal, exercise, and plan revision actions.
 
 ### Core Loop
 
-Onboarding -> initial plan -> approval -> today plan -> manual adjustment -> revision approval -> continued plan.
+Chat consultation -> structured AI action -> user confirmation -> plan mutation -> today plan -> chat or plan-based revision.
 
 ### Primary Metric
 
-Return within 24 hours after approved plan revision.
+Approval rate of AI chat suggestions and return within 24 hours after an approved revision.
 
 ### Secondary Metrics
 
-- Onboarding completion rate.
+- Consultation start rate.
+- Chat suggestion generation rate.
+- Chat suggestion approval rate.
 - Plan approval rate.
-- Adjustment entry rate.
-- Adjustment approval rate.
+- Chat-based revision approval rate.
 - Next plan item completion after approved revision.
 - 7-day retention.
 
@@ -28,7 +29,7 @@ Return within 24 hours after approved plan revision.
 - Calorie precision as the main value.
 - Automatic failure detection.
 - Food recognition as the main value.
-- Infinite AI chat.
+- Unstructured infinite AI chat with no reviewable plan action.
 - Community.
 - Wearable integration.
 - Paid subscription in MVP.
@@ -53,7 +54,7 @@ In-app feedback link plus direct interview for early testers.
 
 ### Retention Hypothesis
 
-Users who approve at least one plan revision are more likely to return because the app reframes a changed day as continuation.
+Users who approve at least one chat-generated plan action are more likely to return because the app turns vague intent into a concrete next plan change.
 
 ## G3. Governance Stack
 
@@ -85,13 +86,13 @@ Use `docs/analytics-events.md`.
 
 ### User State Model
 
-New -> onboarded -> plan generated -> plan approved -> active today -> adjustment requested -> revision approved -> returned.
+New -> consultation started -> profile inferred -> action suggested -> action approved -> active today -> revision approved -> returned.
 
 ### Dashboard Questions
 
-- Did users reach an approved plan?
-- Did users find "Adjust today"?
-- Did users approve revisions?
+- Did users start consultation?
+- Did chat produce a useful action?
+- Did users approve meal, exercise, or revision actions?
 - Did users return after revisions?
 - Did users complete the next plan item after revision?
 
@@ -101,13 +102,14 @@ Use `docs/qa-checklist.md`.
 
 ### Manual Observation Plan
 
-Watch at least 5 testers complete onboarding, approve a plan, and find the adjustment entry point.
+Watch at least 5 testers start chat consultation, approve an AI suggestion, and find the plan screen after approval.
 
 ## G5. Generation Stack
 
 ### AI Functions
 
 - `generateInitialPlan`
+- `generateChatPlannerResponse`
 - `adjustTodayPlan`
 - `summarizeProgress`
 

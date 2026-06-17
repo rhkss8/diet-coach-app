@@ -19,11 +19,21 @@ Modes:
   --web, web        Start Expo for web
   --dev-client, dev-client
                    Start Expo in development-client mode
+  --lan, lan        Start Expo using LAN transport
   --tunnel, tunnel Start Expo using tunnel transport
   --export-web, export-web
                    Export the web build locally
   --doctor, doctor Run Expo diagnostics
   --help, help     Show this help
+
+Environment:
+  PORT=8082         Start Metro on a specific port when 8081 is occupied
+  EXPO_CLI='...'    Override the Expo command, for example: EXPO_CLI='pnpm exec expo'
+
+Examples:
+  ./script/build_and_run.sh
+  PORT=8082 ./script/build_and_run.sh
+  PORT=8082 ./script/build_and_run.sh --tunnel
 USAGE
 }
 
@@ -59,24 +69,32 @@ run_doctor() {
 
 resolve_expo_cmd
 
+EXPO_START_ARGS=()
+if [[ -n "${PORT:-}" ]]; then
+  EXPO_START_ARGS+=(--port "$PORT")
+fi
+
 case "$MODE" in
   start | run)
-    exec "${EXPO_CMD[@]}" start
+    exec "${EXPO_CMD[@]}" start "${EXPO_START_ARGS[@]}"
     ;;
   --ios | ios)
-    exec "${EXPO_CMD[@]}" start --ios
+    exec "${EXPO_CMD[@]}" start --ios "${EXPO_START_ARGS[@]}"
     ;;
   --android | android)
-    exec "${EXPO_CMD[@]}" start --android
+    exec "${EXPO_CMD[@]}" start --android "${EXPO_START_ARGS[@]}"
     ;;
   --web | web)
-    exec "${EXPO_CMD[@]}" start --web
+    exec "${EXPO_CMD[@]}" start --web "${EXPO_START_ARGS[@]}"
     ;;
   --dev-client | dev-client)
-    exec "${EXPO_CMD[@]}" start --dev-client
+    exec "${EXPO_CMD[@]}" start --dev-client "${EXPO_START_ARGS[@]}"
+    ;;
+  --lan | lan)
+    exec "${EXPO_CMD[@]}" start --lan "${EXPO_START_ARGS[@]}"
     ;;
   --tunnel | tunnel)
-    exec "${EXPO_CMD[@]}" start --tunnel
+    exec "${EXPO_CMD[@]}" start --tunnel "${EXPO_START_ARGS[@]}"
     ;;
   --export-web | export-web)
     cd "$ROOT_DIR"

@@ -4,27 +4,17 @@ export const coreFlowAcceptanceSteps = [
   {
     id: "fresh_user_opens_app",
     label: "Fresh user opens app",
-    requiredEvents: ["ONBOARDING_STARTED"],
+    requiredEvents: ["CHAT_CONSULTATION_STARTED"],
   },
   {
-    id: "user_completes_onboarding",
-    label: "User completes onboarding",
-    requiredEvents: [
-      "PROFILE_STEP_COMPLETED",
-      "GOAL_STEP_COMPLETED",
-      "LIFESTYLE_STEP_COMPLETED",
-      "ONBOARDING_COMPLETED",
-    ],
+    id: "user_requests_plan_from_chat",
+    label: "User requests a plan from chat consultation",
+    requiredEvents: ["CHAT_PLANNER_RESPONSE_GENERATED"],
   },
   {
-    id: "app_generates_initial_plan",
-    label: "App generates a 7-day plan",
-    requiredEvents: ["INITIAL_PLAN_GENERATION_STARTED", "INITIAL_PLAN_GENERATION_SUCCEEDED"],
-  },
-  {
-    id: "user_approves_plan",
-    label: "User approves the generated plan",
-    requiredEvents: ["PLAN_APPROVED"],
+    id: "user_approves_chat_plan_action",
+    label: "User approves a suggested meal or exercise action",
+    requiredEvents: ["CHAT_PLANNER_ACTION_APPROVED"],
   },
   {
     id: "user_opens_today",
@@ -37,34 +27,24 @@ export const coreFlowAcceptanceSteps = [
     requiredEvents: ["PLAN_ITEM_COMPLETED"],
   },
   {
-    id: "user_starts_adjustment",
-    label: "User taps Adjust today",
-    requiredEvents: ["ADJUST_TODAY_CLICKED"],
+    id: "user_requests_revision_from_chat",
+    label: "User asks chat to revise the plan",
+    requiredEvents: ["CHAT_PLANNER_RESPONSE_GENERATED"],
   },
   {
-    id: "user_selects_adjustment_reason",
-    label: "User selects an adjustment reason",
-    requiredEvents: ["ADJUSTMENT_REASON_SELECTED"],
+    id: "user_approves_chat_revision",
+    label: "User approves a chat-generated revision",
+    requiredEvents: ["CHAT_PLANNER_ACTION_APPROVED"],
   },
   {
-    id: "app_generates_revision",
-    label: "App generates a revised plan",
-    requiredEvents: ["PLAN_ADJUSTMENT_GENERATION_STARTED", "PLAN_ADJUSTMENT_GENERATION_SUCCEEDED"],
-  },
-  {
-    id: "user_approves_revision",
-    label: "User approves the revised plan",
+    id: "revision_history_is_stored",
+    label: "Plan revision history is stored",
     requiredEvents: ["PLAN_REVISION_APPROVED"],
   },
   {
     id: "today_plan_updates",
     label: "Today plan updates after approval",
     requiredEvents: ["PLAN_ITEM_COMPLETED_AFTER_REVISION"],
-  },
-  {
-    id: "revision_history_is_stored",
-    label: "Plan revision history is stored",
-    requiredEvents: ["PLAN_REVISION_APPROVED"],
   },
   {
     id: "analytics_events_are_emitted",

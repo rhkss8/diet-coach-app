@@ -34,14 +34,19 @@ export function useApprovedPlanPersistence() {
   }, []);
 
   async function approvePlan(plan: AiPlan) {
-    const snapshot = createApprovedPlanSnapshot(plan);
+    await saveApprovedPlan(plan);
 
-    await persistApprovedPlanSnapshot(snapshot);
     trackAnalyticsEvent("PLAN_APPROVED", {
       userId: "local-user",
       goalId: plan.goalId,
       planId: plan.id ?? "local-plan",
     });
+  }
+
+  async function saveApprovedPlan(plan: AiPlan) {
+    const snapshot = createApprovedPlanSnapshot(plan);
+
+    await persistApprovedPlanSnapshot(snapshot);
   }
 
   async function applyApprovedRevision(revision: AdjustTodayPlanOutput["revision"]) {
@@ -66,6 +71,7 @@ export function useApprovedPlanPersistence() {
     applyApprovedRevision,
     approvedPlanSnapshot,
     approvePlan,
+    saveApprovedPlan,
     isHydratingApprovedPlan,
   };
 }

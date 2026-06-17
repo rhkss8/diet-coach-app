@@ -8,6 +8,9 @@ export const analyticsEventNames = [
   "GOAL_STEP_COMPLETED",
   "LIFESTYLE_STEP_COMPLETED",
   "ONBOARDING_COMPLETED",
+  "CHAT_CONSULTATION_STARTED",
+  "CHAT_PLANNER_RESPONSE_GENERATED",
+  "CHAT_PLANNER_ACTION_APPROVED",
   "INITIAL_PLAN_GENERATION_STARTED",
   "INITIAL_PLAN_GENERATION_SUCCEEDED",
   "INITIAL_PLAN_GENERATION_FAILED",
@@ -50,6 +53,15 @@ export type AnalyticsEventPayloadByName = {
   GOAL_STEP_COMPLETED: OptionalUserPayload;
   LIFESTYLE_STEP_COMPLETED: OptionalUserPayload;
   ONBOARDING_COMPLETED: RequiredUserPayload;
+  CHAT_CONSULTATION_STARTED: RequiredUserPayload;
+  CHAT_PLANNER_RESPONSE_GENERATED: RequiredUserPayload & {
+    responseType: string;
+  };
+  CHAT_PLANNER_ACTION_APPROVED: RequiredUserPayload & {
+    action: string;
+    responseType: string;
+    planId: EntityId;
+  };
   INITIAL_PLAN_GENERATION_STARTED: GoalPayload;
   INITIAL_PLAN_GENERATION_SUCCEEDED: PlanGenerationPayload;
   INITIAL_PLAN_GENERATION_FAILED: GoalPayload & FailurePayload;

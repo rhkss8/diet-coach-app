@@ -1,16 +1,16 @@
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 
-import type { AdjustTodayPlanOutput, GenerateInitialPlanOutput } from "@diet-coach/ai";
 import type {
-  AdjustmentReason,
-  GoalInput,
-  LifestyleAnswers,
-  UserProfileInput,
-} from "@diet-coach/core";
+  AdjustTodayPlanOutput,
+  AiPlan,
+  ChatPlannerMessage,
+  ChatPlannerResponse,
+} from "@diet-coach/ai";
+import type { AdjustmentReason } from "@diet-coach/core";
 
-import { generateMockAdjustedPlan, generateMockInitialPlan } from "@diet-coach/ai";
+import { generateMockAdjustedPlan, generateMockChatPlannerResponse } from "@diet-coach/ai";
 import {
   AdjustmentReasonSelectionScreen,
   createPlanRevisionId,
@@ -18,19 +18,23 @@ import {
   usePlanRevisionPersistence,
 } from "../features/adjustment";
 import { AuthScreen, useAuthSession } from "../features/auth";
-import { OnboardingFlow } from "../features/onboarding";
-import { PlanApprovalScreen, useApprovedPlanPersistence } from "../features/plan";
+import { applyChatPlannerResponseToPlan, ConsultationChatScreen } from "../features/consultation";
+import { useApprovedPlanPersistence } from "../features/plan";
 import { SettingsScreen } from "../features/settings";
 import { TodayScreen } from "../features/today";
-import { getTodayPlanItems } from "../features/today";
+import { getTodayPlanDate, getTodayPlanItems } from "../features/today";
 import { trackAnalyticsEvent } from "../shared/lib/analytics";
 
-type CompletedOnboarding = {
-  profile: UserProfileInput;
-  goal: GoalInput;
-  lifestyleAnswers: LifestyleAnswers;
-  initialPlanOutput: GenerateInitialPlanOutput;
-};
+type AppRoute = "adjustment" | "consultation" | "settings" | "today";
+
+const initialConsultationMessages: ChatPlannerMessage[] = [
+  {
+    id: "assistant-welcome",
+    role: "assistant",
+    content:
+      "안녕하세요. 식단, 운동, 오늘 플랜 수정 중 필요한 걸 편하게 말해주세요. 제가 제안으로 정리하고, 승인하면 플랜에 반영할게요.",
+  },
+];
 
 export function AppRoot() {
   const {
@@ -43,9 +47,12 @@ export function AppRoot() {
     isSubmittingAuth,
     requestMagicLink,
   } = useAuthSession();
-  const [completedOnboarding, setCompletedOnboarding] = useState<CompletedOnboarding | null>(null);
-  const [isViewingSettings, setIsViewingSettings] = useState(false);
-  const [isAdjustingToday, setIsAdjustingToday] = useState(false);
+  const [routeHistory, setRouteHistory] = useState<AppRoute[]>(["consultation"]);
+  const currentRoute = routeHistory.at(-1) ?? "consultation";
+  const [consultationMessages, setConsultationMessages] = useState<ChatPlannerMessage[]>(
+    initialConsultationMessages,
+  );
+  const [pendingChatResponse, setPendingChatResponse] = useState<ChatPlannerResponse | null>(null);
   const [selectedAdjustmentReason, setSelectedAdjustmentReason] = useState<
     AdjustmentReason | undefined
   >();
@@ -53,8 +60,18 @@ export function AppRoot() {
   const [adjustedPlanOutput, setAdjustedPlanOutput] = useState<AdjustTodayPlanOutput | null>(null);
   const [isApprovingAdjustedPlan, setIsApprovingAdjustedPlan] = useState(false);
   const { latestRevisionSnapshot, persistPlanRevision } = usePlanRevisionPersistence();
-  const { applyApprovedRevision, approvedPlanSnapshot, approvePlan, isHydratingApprovedPlan } =
+  const { applyApprovedRevision, approvedPlanSnapshot, isHydratingApprovedPlan, saveApprovedPlan } =
     useApprovedPlanPersistence();
+
+  useEffect(() => {
+    trackAnalyticsEvent("CHAT_CONSULTATION_STARTED", {
+      userId: "local-user",
+    });
+  }, []);
+
+  function navigateTo(route: AppRoute) {
+    setRouteHistory((history) => [...history, route]);
+  }
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -74,12 +91,12 @@ export function AppRoot() {
         />
       ) : isHydratingApprovedPlan ? (
         <LoadingPlan />
-      ) : isViewingSettings ? (
+      ) : currentRoute === "settings" ? (
         <SettingsScreen
           authMode={authGateState === "guest" ? "guest" : "authenticated"}
-          onClose={() => setIsViewingSettings(false)}
+          onClose={() => navigateBack(setRouteHistory)}
         />
-      ) : isAdjustingToday ? (
+      ) : currentRoute === "adjustment" ? (
         isApprovingAdjustedPlan ? (
           <ApprovingAdjustedPlan />
         ) : adjustedPlanOutput ? (
@@ -103,7 +120,7 @@ export function AppRoot() {
                   setAdjustedPlanOutput(null);
                   setAdjustmentNote("");
                   setSelectedAdjustmentReason(undefined);
-                  setIsAdjustingToday(false);
+                  navigateTo("today");
                 },
                 setIsApprovingAdjustedPlan,
               });
@@ -118,7 +135,7 @@ export function AppRoot() {
                 revisionId: createPlanRevisionId(revision),
                 reason: revision.reason,
               });
-              setIsAdjustingToday(false);
+              navigateBack(setRouteHistory);
             }}
             output={adjustedPlanOutput}
           />
@@ -181,12 +198,13 @@ export function AppRoot() {
             selectedReason={selectedAdjustmentReason}
           />
         )
-      ) : approvedPlanSnapshot ? (
+      ) : currentRoute === "today" && approvedPlanSnapshot ? (
         <TodayScreen
           onAdjustToday={() => {
-            setIsAdjustingToday(true);
+            navigateTo("adjustment");
           }}
-          onOpenSettings={() => setIsViewingSettings(true)}
+          onOpenConsultation={() => navigateTo("consultation")}
+          onOpenSettings={() => navigateTo("settings")}
           plan={approvedPlanSnapshot.plan}
           revisionContext={
             latestRevisionSnapshot
@@ -197,42 +215,49 @@ export function AppRoot() {
               : undefined
           }
         />
-      ) : completedOnboarding ? (
-        <PlanApprovalScreen
-          onApprove={() => {
-            void approvePlan(completedOnboarding.initialPlanOutput.plan);
-          }}
-          output={completedOnboarding.initialPlanOutput}
-        />
       ) : (
-        <OnboardingFlow
-          onComplete={(result) => setCompletedOnboarding(completeOnboarding(result))}
+        <ConsultationChatScreen
+          messages={consultationMessages}
+          onApproveResponse={(response) => {
+            void approveChatPlannerResponse(response, {
+              currentPlan: approvedPlanSnapshot?.plan ?? null,
+              persistPlanRevision,
+              saveApprovedPlan,
+              setConsultationMessages,
+              setPendingChatResponse,
+              todayDate: getActivePlanDate(approvedPlanSnapshot?.plan),
+              navigateToToday: () => navigateTo("today"),
+            });
+          }}
+          onOpenPlan={() => {
+            if (approvedPlanSnapshot) {
+              navigateTo("today");
+            }
+          }}
+          onSendMessage={(message) => {
+            const userMessage = createChatMessage("user", message);
+            const nextMessages = [...consultationMessages, userMessage];
+            const response = generateMockChatPlannerResponse({
+              currentPlan: approvedPlanSnapshot?.plan,
+              messages: nextMessages,
+              todayDate: getActivePlanDate(approvedPlanSnapshot?.plan),
+            });
+
+            setConsultationMessages([
+              ...nextMessages,
+              createChatMessage("assistant", response.message),
+            ]);
+            setPendingChatResponse(response);
+            trackAnalyticsEvent("CHAT_PLANNER_RESPONSE_GENERATED", {
+              userId: "local-user",
+              responseType: response.type,
+            });
+          }}
+          pendingResponse={pendingChatResponse}
         />
       )}
     </SafeAreaView>
   );
-}
-
-function completeOnboarding(
-  result: Omit<CompletedOnboarding, "initialPlanOutput">,
-): CompletedOnboarding {
-  trackAnalyticsEvent("INITIAL_PLAN_GENERATION_STARTED", {
-    userId: "local-user",
-    goalId: "local-goal",
-  });
-  const initialPlanOutput = generateMockInitialPlan(result);
-
-  trackAnalyticsEvent("INITIAL_PLAN_GENERATION_SUCCEEDED", {
-    userId: "local-user",
-    goalId: initialPlanOutput.plan.goalId,
-    planId: initialPlanOutput.plan.id ?? "local-plan",
-    itemCount: initialPlanOutput.plan.items.length,
-  });
-
-  return {
-    ...result,
-    initialPlanOutput,
-  };
 }
 
 type ApproveAdjustedPlanActions = {
@@ -257,6 +282,72 @@ async function approveAdjustedPlan(
   } finally {
     actions.setIsApprovingAdjustedPlan(false);
   }
+}
+
+type ApproveChatPlannerResponseActions = {
+  currentPlan: AiPlan | null;
+  navigateToToday: () => void;
+  persistPlanRevision: (revision: AdjustTodayPlanOutput["revision"]) => Promise<void>;
+  saveApprovedPlan: (plan: AiPlan) => Promise<void>;
+  setConsultationMessages: Dispatch<SetStateAction<ChatPlannerMessage[]>>;
+  setPendingChatResponse: (response: ChatPlannerResponse | null) => void;
+  todayDate: string;
+};
+
+async function approveChatPlannerResponse(
+  response: ChatPlannerResponse,
+  actions: ApproveChatPlannerResponseActions,
+) {
+  const nextPlan = applyChatPlannerResponseToPlan(response, actions.currentPlan, actions.todayDate);
+
+  if (!nextPlan || response.type === "clarification_question") {
+    return;
+  }
+
+  if (response.type === "plan_revision_suggestion") {
+    await actions.persistPlanRevision(response.revision);
+    trackAnalyticsEvent("PLAN_REVISION_APPROVED", {
+      userId: "local-user",
+      planId: response.revision.planId,
+      affectedDate: response.revision.affectedDate,
+      revisionId: createPlanRevisionId(response.revision),
+      reason: response.revision.reason,
+    });
+  }
+
+  await actions.saveApprovedPlan(nextPlan);
+  actions.setPendingChatResponse(null);
+  actions.setConsultationMessages((messages) => [
+    ...messages,
+    createChatMessage("assistant", "좋아요. 승인한 내용을 플랜에 반영했어요."),
+  ]);
+  trackAnalyticsEvent("CHAT_PLANNER_ACTION_APPROVED", {
+    userId: "local-user",
+    action: response.confirmation.action,
+    responseType: response.type,
+    planId: nextPlan.id ?? "chat-plan",
+  });
+  actions.navigateToToday();
+}
+
+function createChatMessage(role: ChatPlannerMessage["role"], content: string): ChatPlannerMessage {
+  return {
+    id: `${role}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    role,
+    content,
+  };
+}
+
+function navigateBack(setRouteHistory: Dispatch<SetStateAction<AppRoute[]>>) {
+  setRouteHistory((history) => (history.length > 1 ? history.slice(0, -1) : history));
+}
+
+function getTodayDate() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getActivePlanDate(plan: AiPlan | undefined) {
+  return plan ? getTodayPlanDate(plan) : getTodayDate();
 }
 
 function ApprovingAdjustedPlan() {

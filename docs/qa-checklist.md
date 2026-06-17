@@ -5,14 +5,14 @@
 The release cannot ship unless this flow passes:
 
 1. Fresh user opens app.
-2. User completes onboarding.
-3. App generates a plan.
-4. User approves the plan.
-5. User opens Today.
-6. User completes one plan item.
-7. User taps "Adjust today".
-8. User selects an adjustment reason.
-9. App generates revised plan.
+2. User starts AI consultation from the main screen.
+3. User sends a meal or exercise request.
+4. App returns a structured suggestion with an approval card.
+5. User approves the suggestion.
+6. Today plan opens with the approved item.
+7. User completes one plan item.
+8. User sends a revision request from chat.
+9. App returns a structured revision suggestion with an approval card.
 10. User approves revision.
 11. Today plan updates.
 12. Revision history is stored.
@@ -20,18 +20,21 @@ The release cannot ship unless this flow passes:
 
 ## Manual QA Cases
 
-### Onboarding
+### Consultation
 
-- Empty required fields show clear errors.
-- Goal step can be completed without confusion.
-- Lifestyle questions are limited and fast.
+- First screen is chat consultation, not a form wizard.
+- User can send text without losing previous messages.
+- Meal suggestion shows "식단에 추가하시겠습니까?" before mutating the plan.
+- Exercise suggestion shows "운동에 추가하시겠습니까?" before mutating the plan.
+- Revision suggestion shows "플랜을 수정하시겠습니까?" before mutating the plan.
+- Clarification questions do not mutate the plan.
 
-### Plan Approval
+### Plan Approval From Chat
 
-- Generated plan is readable.
-- User can approve.
-- User can request regeneration if supported.
-- User is not forced into a free-form chat.
+- Approved meal and exercise suggestions appear in Today.
+- Approved revision creates PlanRevision history.
+- User can open the current plan from chat.
+- User is never forced to accept an AI suggestion automatically.
 
 ### Today
 
@@ -49,6 +52,7 @@ The release cannot ship unless this flow passes:
 - Approved revision changes today or future items.
 - Approved revision creates PlanRevision history.
 - Copy says the user can continue, not that they failed.
+- Manual adjustment remains available from Today as a secondary path.
 
 ### Analytics
 

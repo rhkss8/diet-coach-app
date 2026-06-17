@@ -20,6 +20,7 @@ import {
 
 type TodayScreenProps = {
   onAdjustToday: () => void;
+  onOpenConsultation: () => void;
   onOpenSettings: () => void;
   plan: AiPlan;
   revisionContext?: {
@@ -30,6 +31,7 @@ type TodayScreenProps = {
 
 export function TodayScreen({
   onAdjustToday,
+  onOpenConsultation,
   onOpenSettings,
   plan,
   revisionContext,
@@ -100,13 +102,22 @@ export function TodayScreen({
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={styles.eyebrow}>{todayPlanDate}</Text>
-          <Pressable
-            accessibilityRole="button"
-            onPress={onOpenSettings}
-            style={styles.settingsButton}
-          >
-            <Text style={styles.settingsButtonLabel}>설정</Text>
-          </Pressable>
+          <View style={styles.headerActions}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onOpenConsultation}
+              style={styles.settingsButton}
+            >
+              <Text style={styles.settingsButtonLabel}>AI 상담</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onOpenSettings}
+              style={styles.settingsButton}
+            >
+              <Text style={styles.settingsButtonLabel}>설정</Text>
+            </Pressable>
+          </View>
         </View>
         <Text style={styles.title}>오늘 플랜을 이어갈게요</Text>
         <Text style={styles.description}>
@@ -250,6 +261,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: 8,
   },
   eyebrow: {
     color: "#5E7664",
