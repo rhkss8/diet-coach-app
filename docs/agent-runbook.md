@@ -24,6 +24,7 @@ Use `docs/new-service-starter-protocol.md` as the reusable kickoff protocol for 
 12. If touching AI behavior, read `docs/ai-contracts.md`.
 13. If touching metrics, read `docs/analytics-events.md`.
 14. If testing or preparing release, read `docs/qa-checklist.md`.
+15. If touching Expo run loops, builds, EAS/TestFlight, native device QA, SDK upgrades, or mobile networking, read `.codex/skills/expo-mvp-delivery/SKILL.md`.
 
 ## Work Selection
 

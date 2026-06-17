@@ -87,6 +87,21 @@ Primary future references:
 - `docs/analytics-events.md`
 - `docs/qa-checklist.md`
 
+### 6. expo-mvp-delivery
+
+Trigger when running Expo, creating builds, preparing EAS/TestFlight or Play Store distribution, debugging Expo dependency/version issues, setting up Codex Run actions, or touching mobile networking.
+
+Responsibilities:
+
+- Route Expo work through the official Expo Skills before improvising.
+- Keep this repo on pnpm and Node 20.19.4 or newer.
+- Use the project-local run script for repeatable Expo commands.
+- Treat EAS, TestFlight, Play Store, and external tester distribution as decision gates.
+
+Primary reference:
+
+- `.codex/skills/expo-mvp-delivery/SKILL.md`
+
 ## Agent Operating Model
 
 Use one lead agent and focused subagents only when the work can be split safely.
@@ -168,5 +183,6 @@ Start with project docs. After the first vertical slice works, promote the stabl
 - `diet-mvp-product`
 - `diet-frontend-senior`
 - `diet-ai-planner`
+- `expo-mvp-delivery`
 
 This avoids freezing bad rules too early.
