@@ -52,6 +52,7 @@ export function buildGenerateInitialPlanPrompt(input: GenerateInitialPlanInput):
               "Return at least 7 dates of plan items.",
               "Include meal items and exercise items.",
               "Use the user's goal and lifestyle answers, but avoid medical claims.",
+              "If targetDate is absent, create a first-week plan without implying a fixed deadline.",
               "Avoid exact calorie precision unless the user provided exact data.",
               "Every item must be renderable by the mobile app.",
             ],

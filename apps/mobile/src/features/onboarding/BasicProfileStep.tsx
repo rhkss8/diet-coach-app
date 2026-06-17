@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { FormTextField } from "../../shared/ui/FormTextField";
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
 import { SegmentedChoice } from "../../shared/ui/SegmentedChoice";
+import { normalizeDecimalInput, normalizeIntegerInput } from "./profile-step";
 import { useBasicProfileStep } from "./useBasicProfileStep";
 
 type BasicProfileStepProps = {
@@ -41,8 +42,10 @@ export function BasicProfileStep({ onComplete }: BasicProfileStepProps) {
         <FormTextField
           error={errors.age}
           inputMode="numeric"
+          keyboardType="number-pad"
           label="나이"
-          onChangeText={(value) => updateDraft("age", value)}
+          maxLength={2}
+          onChangeText={(value) => updateDraft("age", normalizeIntegerInput(value))}
           placeholder="예: 34"
           value={draft.age}
         />
@@ -55,16 +58,20 @@ export function BasicProfileStep({ onComplete }: BasicProfileStepProps) {
         <FormTextField
           error={errors.heightCm}
           inputMode="numeric"
+          keyboardType="number-pad"
           label="키"
-          onChangeText={(value) => updateDraft("heightCm", value)}
+          maxLength={3}
+          onChangeText={(value) => updateDraft("heightCm", normalizeIntegerInput(value))}
           placeholder="cm"
           value={draft.heightCm}
         />
         <FormTextField
           error={errors.currentWeightKg}
           inputMode="numeric"
+          keyboardType="decimal-pad"
           label="현재 체중"
-          onChangeText={(value) => updateDraft("currentWeightKg", value)}
+          maxLength={5}
+          onChangeText={(value) => updateDraft("currentWeightKg", normalizeDecimalInput(value))}
           placeholder="kg"
           value={draft.currentWeightKg}
         />

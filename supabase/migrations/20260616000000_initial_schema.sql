@@ -38,7 +38,7 @@ create table public.goals (
   user_id uuid not null references public.users (id) on delete cascade,
   title text not null,
   start_date date not null,
-  target_date date not null,
+  target_date date,
   target_weight_kg numeric(5, 2) not null,
   status public.goal_status not null default 'draft',
   created_at timestamptz not null default now(),

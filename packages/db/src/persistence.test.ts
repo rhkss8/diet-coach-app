@@ -114,6 +114,25 @@ describe("persistCoreFlowSnapshot", () => {
       "plans upsert failed: no write",
     );
   });
+
+  it("writes nullable target dates for open-ended goals", async () => {
+    const writes: Array<{ operation: string; row: unknown; tableName: string }> = [];
+    const client = createRecordingClient(writes);
+
+    await persistCoreFlowSnapshot(client, {
+      ...input,
+      goal: {
+        ...input.goal,
+        targetDate: undefined,
+      },
+    });
+
+    expect(writes[1]?.row).toEqual(
+      expect.objectContaining({
+        target_date: null,
+      }),
+    );
+  });
 });
 
 function createRecordingClient(

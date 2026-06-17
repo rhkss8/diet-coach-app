@@ -75,7 +75,7 @@ function toGoalRow(goal: Goal) {
     user_id: goal.userId,
     title: goal.title,
     start_date: goal.startDate,
-    target_date: goal.targetDate,
+    target_date: goal.targetDate ?? null,
     target_weight_kg: goal.targetWeightKg,
     status: goal.status,
     created_at: goal.createdAt,

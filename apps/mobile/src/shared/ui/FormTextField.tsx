@@ -1,9 +1,12 @@
+import type { KeyboardTypeOptions } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 type FormTextFieldProps = {
   error?: string;
   inputMode?: "email" | "text" | "numeric";
+  keyboardType?: KeyboardTypeOptions;
   label: string;
+  maxLength?: number;
   multiline?: boolean;
   onChangeText: (value: string) => void;
   placeholder: string;
@@ -13,7 +16,9 @@ type FormTextFieldProps = {
 export function FormTextField({
   error,
   inputMode = "text",
+  keyboardType,
   label,
+  maxLength,
   multiline = false,
   onChangeText,
   placeholder,
@@ -24,6 +29,8 @@ export function FormTextField({
       <Text style={styles.label}>{label}</Text>
       <TextInput
         inputMode={inputMode}
+        keyboardType={keyboardType}
+        maxLength={maxLength}
         multiline={multiline}
         onChangeText={onChangeText}
         placeholder={placeholder}

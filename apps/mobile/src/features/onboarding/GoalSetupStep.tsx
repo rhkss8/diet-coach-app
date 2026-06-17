@@ -3,6 +3,8 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { FormTextField } from "../../shared/ui/FormTextField";
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
+import { CalendarDatePicker } from "./CalendarDatePicker";
+import { getTargetDateRange, normalizeGoalWeightInput } from "./goal-step";
 import { useGoalSetupStep } from "./useGoalSetupStep";
 
 type GoalSetupStepProps = {
@@ -15,6 +17,7 @@ export function GoalSetupStep({ onComplete, profile }: GoalSetupStepProps) {
     profile,
     onComplete,
   );
+  const targetDateRange = getTargetDateRange();
 
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
@@ -30,16 +33,19 @@ export function GoalSetupStep({ onComplete, profile }: GoalSetupStepProps) {
         <FormTextField
           error={errors.targetWeightKg}
           inputMode="numeric"
+          keyboardType="decimal-pad"
           label="목표 체중"
-          onChangeText={(value) => updateDraft("targetWeightKg", value)}
+          maxLength={5}
+          onChangeText={(value) => updateDraft("targetWeightKg", normalizeGoalWeightInput(value))}
           placeholder="예: 66"
           value={draft.targetWeightKg}
         />
-        <FormTextField
+        <CalendarDatePicker
           error={errors.targetDate}
           label="목표 날짜"
-          onChangeText={(value) => updateDraft("targetDate", value)}
-          placeholder="YYYY-MM-DD"
+          maxDate={targetDateRange.maxDate}
+          minDate={targetDateRange.minDate}
+          onChange={(value) => updateDraft("targetDate", value)}
           value={draft.targetDate}
         />
       </View>

@@ -7,7 +7,7 @@ export type Goal = {
   userId: EntityId;
   title: string;
   startDate: ISODate;
-  targetDate: ISODate;
+  targetDate?: ISODate;
   targetWeightKg: number;
   status: GoalStatus;
   createdAt: ISODateTime;
