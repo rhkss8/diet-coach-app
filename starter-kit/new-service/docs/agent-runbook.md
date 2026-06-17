@@ -67,6 +67,8 @@ Frontend code must follow `docs/frontend-engineering-standards.md`.
 
 Any code that mixes UI, policy, API, navigation, and analytics in one component should be refactored before moving on.
 
+Every exported function, hook, domain helper, AI/API boundary, persistence helper, and flow-coordinating component should include useful TSDoc. Comments should explain ownership, intent, product rule, or flow guarantees, not repeat syntax.
+
 ## Stop Conditions
 
 Only stop when:

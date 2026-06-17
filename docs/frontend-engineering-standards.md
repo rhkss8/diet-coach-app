@@ -244,6 +244,71 @@ const adjustment = usePlanAdjustment();
 const analytics = useAnalytics();
 ```
 
+### 12. TSDoc and Flow Comments
+
+Code should explain the product flow well enough that a future developer can understand why the function exists before reading every line.
+
+Use TSDoc for exported functions, exported types, hooks, domain helpers, AI contract helpers, persistence helpers, analytics helpers, and non-trivial UI components.
+
+Required:
+
+- Every exported function, hook, class, type, and component should have a TSDoc block.
+- Every domain or policy function should explain the product rule it protects.
+- Every hook should explain what state it owns, what side effects it performs, and what it intentionally does not own.
+- Every AI or API boundary should document input assumptions, output guarantees, and fallback behavior.
+- Every persistence helper should document storage key ownership and serialization expectations.
+- Every component that coordinates a flow should document the user journey it represents.
+
+Avoid:
+
+- Comments that repeat implementation.
+- Comments that explain obvious syntax.
+- Stale comments that describe an old flow.
+- Long essays inside functions.
+
+Bad:
+
+```ts
+// Sets the status.
+export function updateStatus(status: PlanItemStatus) {
+  return status;
+}
+```
+
+Good:
+
+```ts
+/**
+ * Applies a user's visible Today-plan status change to the current item list.
+ *
+ * This helper keeps status transitions local to the Today flow; persistence and
+ * analytics stay with the caller so the UI can decide when the change becomes durable.
+ */
+export function updateTodayPlanItemStatus(
+  planItems: AiPlanItem[],
+  planItemId: string,
+  status: PlanItemStatus,
+) {
+  // ...
+}
+```
+
+For complex functions, use one short flow comment before the branch that would otherwise be hard to scan:
+
+```ts
+// Keep AI-generated revisions reviewable: they are persisted only after user approval.
+if (response.type === "plan_revision_suggestion") {
+  await persistPlanRevision(response.revision);
+}
+```
+
+Review questions:
+
+- Can a new contributor understand the flow from exported TSDoc alone?
+- Does the comment explain intent, ownership, or product rule?
+- Would the comment still be true after a likely product change?
+- Is a complex branch missing a short flow comment?
+
 ## Project File Rules
 
 Use this default structure:
@@ -279,5 +344,7 @@ Before a change is accepted:
 - Is derived state avoided?
 - Are hooks focused?
 - Are components small enough to change safely?
+- Do exported functions, hooks, components, and domain types have useful TSDoc?
+- Do complex branches include short flow comments where they clarify intent?
 - Are analytics events emitted near user actions, not scattered randomly?
 - Can a future product change be made in one obvious place?
