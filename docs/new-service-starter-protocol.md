@@ -128,11 +128,14 @@ Defines the product's design philosophy and experience system.
 
 Required outputs:
 
+- Design production pipeline.
+- Reference brief.
 - Design philosophy.
 - UX strategy.
 - Interaction principles.
 - Visual system rules.
 - Service design blueprint.
+- Design review rubric.
 - Design QA checklist.
 
 ## Superpowers
@@ -170,11 +173,14 @@ docs/
   g-stack.md
   superpowers.md
   mvp-execution-harness.md
+  design-production-pipeline.md
+  design-reference-brief.md
   design-philosophy.md
   design-tone-and-manner.md
   design-system-spec.md
   interaction-principles.md
   service-design-blueprint.md
+  design-review-rubric.md
   design-qa-checklist.md
   frontend-engineering-standards.md
   ai-contracts.md
@@ -220,16 +226,19 @@ Use these roles for every new service:
 4. Write 1 to 3 superpowers.
 5. Generate G-Stack.
 6. Generate MVP todo.
-7. Generate design philosophy.
-8. Generate interaction principles.
-9. Generate design system spec.
-10. Generate service design blueprint.
-11. Generate design tone and copy rules.
-12. Generate design QA checklist.
-13. Generate frontend standards.
-14. Generate AI contracts if AI is part of the product.
-15. Generate analytics and QA gates.
-16. Start Phase 0 foundation.
+7. Generate design production pipeline.
+8. Generate reference scan and 2 to 3 visual territories.
+9. Choose a visual direction and record the decision.
+10. Generate design philosophy.
+11. Generate interaction principles.
+12. Generate design system spec.
+13. Generate service design blueprint.
+14. Generate design tone and copy rules.
+15. Generate design review rubric and QA checklist.
+16. Generate frontend standards.
+17. Generate AI contracts if AI is part of the product.
+18. Generate analytics and QA gates.
+19. Start Phase 0 foundation.
 
 For the copy/paste starter pack, use `docs/new-service-copy-pack.md`.
 

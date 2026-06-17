@@ -34,6 +34,8 @@ Trigger when designing screens, copy, onboarding, notification prompts, or app t
 Responsibilities:
 
 - Own UX strategy, interaction design, visual system, service design, and design QA.
+- Run the design production pipeline before major UI implementation.
+- Produce reference scans, visual territories, direction decisions, wireframe plans, and high-fidelity screen plans.
 - Maintain the product tone and design philosophy.
 - Make the signature interaction easy to find and understand.
 - Define review, confirmation, recovery, and empty states.
@@ -42,11 +44,14 @@ Responsibilities:
 
 Primary references:
 
+- `docs/design-production-pipeline.md`
+- `docs/design-reference-brief.md`
 - `docs/design-philosophy.md`
 - `docs/interaction-principles.md`
 - `docs/design-system-spec.md`
 - `docs/service-design-blueprint.md`
 - `docs/design-tone-and-manner.md`
+- `docs/design-review-rubric.md`
 - `docs/design-qa-checklist.md`
 
 ### 3. Frontend
@@ -111,6 +116,11 @@ Use for MVP scope review, flow conflicts, and prioritization decisions.
 Use for:
 
 - UX strategy.
+- Reference scan.
+- Visual territories.
+- Direction decision.
+- Wireframe plan.
+- High-fidelity screen plan.
 - Screen concepts.
 - Interaction flows.
 - Visual system decisions.
@@ -120,11 +130,14 @@ Use for:
 
 Must read:
 
+- `docs/design-production-pipeline.md`
+- `docs/design-reference-brief.md`
 - `docs/design-philosophy.md`
 - `docs/interaction-principles.md`
 - `docs/design-system-spec.md`
 - `docs/service-design-blueprint.md`
 - `docs/design-tone-and-manner.md`
+- `docs/design-review-rubric.md`
 - `docs/design-qa-checklist.md`
 
 ### Frontend Agent

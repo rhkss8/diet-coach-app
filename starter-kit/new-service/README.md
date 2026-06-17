@@ -17,11 +17,16 @@ TARS가 준비하는 것:
 - G-Stack
 - Superpowers
 - MVP todo
+- 디자인 제작 파이프라인
+- 디자인 레퍼런스 보드
+- 시각 방향 2-3안
+- 방향 선택 기록
 - 디자인 철학
 - 인터랙션 원칙
 - 디자인 시스템 기준
 - 디자인 톤앤매너
 - 서비스 디자인 블루프린트
+- 디자인 리뷰 루브릭
 - 디자인 QA 체크리스트
 - 시니어 프론트엔드 개발 기준
 - AI 계약
@@ -100,7 +105,7 @@ tars start
 tars 기준으로 시작해줘.
 ```
 
-Codex는 `docs/agent-runbook.md`를 기준으로 기획 정리, G-Stack, Superpowers, MVP todo, 디자인 철학, 인터랙션 원칙, 디자인 시스템, 서비스 디자인, 디자인 QA, 개발 하네스, AI/QA/analytics 기준을 잡고 다음 작업으로 넘어갑니다.
+Codex는 `docs/agent-runbook.md`를 기준으로 기획 정리, G-Stack, Superpowers, MVP todo, 디자인 레퍼런스, 시각 방향 2-3안, 방향 선택, 와이어프레임 계획, 디자인 시스템, 서비스 디자인, 디자인 리뷰/QA, 개발 하네스, AI/QA/analytics 기준을 잡고 다음 작업으로 넘어갑니다.
 
 ## 평소 작업할 때
 

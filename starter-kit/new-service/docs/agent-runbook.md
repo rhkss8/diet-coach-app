@@ -19,7 +19,7 @@ Use `docs/new-service-starter-protocol.md` as the reusable kickoff protocol.
 7. If resuming from another PC, read `docs/workstation-handoff.md`.
 8. If changing kickoff structure, read `docs/new-service-starter-protocol.md` and `docs/new-service-copy-pack.md`.
 9. If changing product definition, read `docs/service-definition.md`, `docs/g-stack.md`, and `docs/superpowers.md`.
-10. If touching UI, UX, visual design, or copy, read `docs/design-philosophy.md`, `docs/interaction-principles.md`, `docs/design-system-spec.md`, `docs/service-design-blueprint.md`, `docs/design-tone-and-manner.md`, and `docs/design-qa-checklist.md`.
+10. If touching UI, UX, visual design, or copy, read `docs/design-production-pipeline.md`, `docs/design-reference-brief.md`, `docs/design-philosophy.md`, `docs/interaction-principles.md`, `docs/design-system-spec.md`, `docs/service-design-blueprint.md`, `docs/design-tone-and-manner.md`, `docs/design-review-rubric.md`, and `docs/design-qa-checklist.md`.
 11. If touching frontend code, read `docs/frontend-engineering-standards.md`.
 12. If touching AI behavior, read `docs/ai-contracts.md`.
 13. If touching metrics, read `docs/analytics-events.md`.
@@ -57,9 +57,11 @@ Bad:
 
 Design rule:
 
+- Do not jump from abstract design philosophy directly into code.
+- Before major UI work, produce a reference scan, 2 to 3 visual territories, a direction decision, a wireframe plan, and a high-fidelity screen plan.
 - Define design philosophy, interaction principles, and the MVP design system before building repeated UI.
 - Keep the design system small enough to serve the first vertical slice.
-- Run design QA before marking a UI slice complete.
+- Run design review and design QA before marking a UI slice complete.
 
 ## Quality Rule
 
