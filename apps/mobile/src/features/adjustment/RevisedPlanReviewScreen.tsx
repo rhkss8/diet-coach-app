@@ -2,6 +2,7 @@ import type { AdjustTodayPlanOutput } from "@diet-coach/ai";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
+import { commonStyles, theme } from "../../shared/ui/design-system";
 import { countChangedTodayItems, getChangedTodayItems } from "./revised-plan-review";
 
 type RevisedPlanReviewScreenProps = {
@@ -44,7 +45,7 @@ export function RevisedPlanReviewScreen({
 
       <View style={styles.actions}>
         <PrimaryButton label="조정안 승인" onPress={onApprove} />
-        <PrimaryButton label="나중에 볼게요" onPress={onDismiss} />
+        <PrimaryButton label="나중에 볼게요" onPress={onDismiss} variant="ghost" />
       </View>
     </ScrollView>
   );
@@ -52,83 +53,69 @@ export function RevisedPlanReviewScreen({
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: "#F8F7F4",
+    backgroundColor: theme.colors.background,
     flex: 1,
   },
   content: {
-    gap: 22,
-    padding: 24,
+    gap: theme.space.lg,
+    padding: theme.space.xl,
     paddingBottom: 36,
   },
   header: {
-    gap: 10,
-    paddingTop: 12,
+    backgroundColor: theme.colors.ink,
+    borderRadius: theme.radius.large,
+    gap: theme.space.sm,
+    padding: theme.space.lg,
   },
   eyebrow: {
-    color: "#5E7664",
-    fontSize: 14,
-    fontWeight: "800",
-    letterSpacing: 0,
+    ...theme.type.eyebrow,
+    color: "#B8CFC2",
   },
   title: {
-    color: "#1F2A24",
-    fontSize: 28,
-    fontWeight: "800",
-    letterSpacing: 0,
-    lineHeight: 36,
+    ...theme.type.title,
+    color: theme.colors.white,
   },
   description: {
-    color: "#53645A",
-    fontSize: 16,
-    lineHeight: 24,
+    ...theme.type.body,
+    color: "#D8E0DA",
   },
   summaryBand: {
-    backgroundColor: "#EAF1EC",
-    borderRadius: 8,
-    gap: 8,
-    padding: 16,
+    ...commonStyles.insetCard,
+    gap: theme.space.xs,
+    padding: theme.space.md,
   },
   summaryTitle: {
-    color: "#24342B",
-    fontSize: 17,
-    fontWeight: "800",
-    letterSpacing: 0,
-    lineHeight: 24,
+    ...theme.type.sectionTitle,
+    color: theme.colors.ink,
   },
   summaryText: {
-    color: "#526057",
-    fontSize: 14,
-    lineHeight: 20,
+    ...theme.type.supporting,
+    color: theme.colors.muted,
   },
   section: {
-    gap: 10,
+    gap: theme.space.sm,
   },
   planItem: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#DFE5E0",
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: 5,
-    padding: 14,
+    ...commonStyles.card,
+    gap: theme.space.xs,
+    padding: theme.space.md,
   },
   planItemSlot: {
-    color: "#5E7664",
-    fontSize: 13,
-    fontWeight: "800",
-    letterSpacing: 0,
+    ...theme.type.caption,
+    color: theme.colors.primary,
+    fontWeight: "900",
   },
   planItemTitle: {
-    color: "#1F2A24",
-    fontSize: 16,
-    fontWeight: "800",
-    letterSpacing: 0,
+    ...theme.type.body,
+    color: theme.colors.ink,
+    fontWeight: "900",
   },
   planItemDescription: {
-    color: "#53645A",
-    fontSize: 14,
-    lineHeight: 20,
+    ...theme.type.supporting,
+    color: theme.colors.muted,
   },
   actions: {
-    gap: 10,
+    alignItems: "flex-start",
+    gap: theme.space.sm,
   },
 });

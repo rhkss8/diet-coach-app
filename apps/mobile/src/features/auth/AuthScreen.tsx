@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { FormTextField } from "../../shared/ui/FormTextField";
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
+import { commonStyles, theme } from "../../shared/ui/design-system";
 
 type AuthScreenProps = {
   error: string | null;
@@ -67,60 +68,54 @@ export function AuthScreen({
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: "#F8F7F4",
+    backgroundColor: theme.colors.background,
   },
   content: {
-    gap: 28,
-    padding: 24,
+    gap: theme.space.xl,
+    padding: theme.space.xl,
   },
   header: {
-    gap: 12,
-    paddingTop: 24,
+    backgroundColor: theme.colors.ink,
+    borderRadius: theme.radius.large,
+    gap: theme.space.sm,
+    padding: theme.space.lg,
   },
   eyebrow: {
-    color: "#5E7664",
-    fontSize: 14,
-    fontWeight: "700",
-    letterSpacing: 0,
+    ...theme.type.eyebrow,
+    color: "#B8CFC2",
   },
   title: {
-    color: "#1F2A24",
-    fontSize: 30,
-    fontWeight: "800",
-    letterSpacing: 0,
-    lineHeight: 38,
+    ...theme.type.title,
+    color: theme.colors.white,
   },
   description: {
-    color: "#526056",
-    fontSize: 16,
-    lineHeight: 23,
+    ...theme.type.body,
+    color: "#D8E0DA",
   },
   form: {
-    gap: 12,
+    ...commonStyles.card,
+    gap: theme.space.sm,
+    padding: theme.space.md,
   },
   helperText: {
-    color: "#6E7B72",
-    fontSize: 13,
-    lineHeight: 19,
+    ...theme.type.caption,
+    color: theme.colors.muted,
   },
   message: {
-    color: "#2F6B4F",
-    fontSize: 13,
-    fontWeight: "700",
-    lineHeight: 19,
+    ...theme.type.caption,
+    color: theme.colors.primary,
+    fontWeight: "800",
   },
   footer: {
     alignItems: "flex-start",
-    gap: 14,
+    gap: theme.space.sm,
   },
   secondary: {
     minHeight: 44,
     justifyContent: "center",
   },
   secondaryLabel: {
-    color: "#2F6B4F",
-    fontSize: 15,
-    fontWeight: "700",
-    letterSpacing: 0,
+    ...theme.type.button,
+    color: theme.colors.primary,
   },
 });

@@ -1,5 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { theme } from "./design-system";
+
 export type SegmentedChoiceOption<TValue extends string> = {
   label: string;
   value: TValue;
@@ -45,39 +47,39 @@ export function SegmentedChoice<TValue extends string>({
 
 const styles = StyleSheet.create({
   field: {
-    gap: 8,
+    gap: theme.space.xs,
   },
   label: {
-    color: "#26342C",
+    color: theme.colors.ink,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "800",
     letterSpacing: 0,
   },
   options: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: theme.space.xs,
   },
   option: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#D9E0DA",
-    borderRadius: 8,
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.small,
     borderWidth: 1,
     minHeight: 42,
     justifyContent: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: theme.space.sm,
   },
   optionLabel: {
-    color: "#526057",
+    color: theme.colors.muted,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "800",
     letterSpacing: 0,
   },
   selectedOption: {
-    backgroundColor: "#E6F0EA",
-    borderColor: "#2F6B4F",
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.primary,
   },
   selectedOptionLabel: {
-    color: "#245A42",
+    color: theme.colors.primaryPressed,
   },
 });

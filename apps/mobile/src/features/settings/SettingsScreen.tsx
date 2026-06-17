@@ -1,5 +1,6 @@
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { commonStyles, theme } from "../../shared/ui/design-system";
 import { getBasicSettingsItems, getReleaseLinks } from "./settings-items";
 
 type SettingsScreenProps = {
@@ -50,75 +51,65 @@ export function SettingsScreen({ authMode, onClose }: SettingsScreenProps) {
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: "#F8F7F4",
+    backgroundColor: theme.colors.background,
     flex: 1,
   },
   content: {
-    gap: 24,
-    padding: 24,
+    gap: theme.space.xl,
+    padding: theme.space.xl,
     paddingBottom: 36,
   },
   topBar: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingTop: 12,
   },
   eyebrow: {
-    color: "#5E7664",
-    fontSize: 14,
-    fontWeight: "800",
-    letterSpacing: 0,
+    ...theme.type.eyebrow,
+    color: theme.colors.primary,
   },
   closeButton: {
-    borderColor: "#D7DED8",
-    borderRadius: 8,
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.small,
     borderWidth: 1,
-    minHeight: 38,
     justifyContent: "center",
-    paddingHorizontal: 12,
+    minHeight: 38,
+    paddingHorizontal: theme.space.sm,
   },
   closeButtonLabel: {
-    color: "#2F6B4F",
-    fontSize: 14,
-    fontWeight: "800",
-    letterSpacing: 0,
+    ...theme.type.button,
+    color: theme.colors.primary,
   },
   header: {
-    gap: 10,
+    backgroundColor: theme.colors.ink,
+    borderRadius: theme.radius.large,
+    gap: theme.space.sm,
+    padding: theme.space.lg,
   },
   title: {
-    color: "#1F2A24",
-    fontSize: 28,
-    fontWeight: "800",
-    letterSpacing: 0,
-    lineHeight: 36,
+    ...theme.type.title,
+    color: theme.colors.white,
   },
   description: {
-    color: "#53645A",
-    fontSize: 16,
-    lineHeight: 24,
+    ...theme.type.body,
+    color: "#D8E0DA",
   },
   list: {
-    gap: 12,
+    gap: theme.space.sm,
   },
   item: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#DFE5E0",
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: 6,
-    padding: 16,
+    ...commonStyles.card,
+    gap: theme.space.xs,
+    padding: theme.space.md,
   },
   itemTitle: {
-    color: "#1F2A24",
-    fontSize: 16,
-    fontWeight: "800",
-    letterSpacing: 0,
+    ...theme.type.body,
+    color: theme.colors.ink,
+    fontWeight: "900",
   },
   itemDescription: {
-    color: "#53645A",
-    fontSize: 14,
-    lineHeight: 20,
+    ...theme.type.supporting,
+    color: theme.colors.muted,
   },
 });

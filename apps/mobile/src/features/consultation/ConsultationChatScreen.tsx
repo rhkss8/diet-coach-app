@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
+import { commonStyles, theme } from "../../shared/ui/design-system";
 
 type ConsultationChatScreenProps = {
   messages: ChatPlannerMessage[];
@@ -35,14 +36,23 @@ export function ConsultationChatScreen({
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.eyebrow}>AI 상담</Text>
-          <Text style={styles.title}>대화로 플랜을 만들어요</Text>
+      <View style={styles.headerShell}>
+        <View style={styles.headerTop}>
+          <View style={styles.brandMark}>
+            <Text style={styles.brandMarkText}>T</Text>
+          </View>
+          <Pressable accessibilityRole="button" onPress={onOpenPlan} style={styles.planButton}>
+            <Text style={styles.planButtonText}>오늘 플랜</Text>
+          </Pressable>
         </View>
-        <Pressable accessibilityRole="button" onPress={onOpenPlan} style={styles.planButton}>
-          <Text style={styles.planButtonText}>플랜</Text>
-        </Pressable>
+        <View style={styles.headerCopy}>
+          <Text style={styles.eyebrow}>ADAPTIVE PLANNER</Text>
+          <Text style={styles.title}>상담하고, 제안만 골라 담아요</Text>
+          <Text style={styles.description}>
+            AI가 플랜을 바로 바꾸지 않아요. 식단, 운동, 수정안은 먼저 카드로 보여드리고 승인한 것만
+            반영합니다.
+          </Text>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.messages} style={styles.messageList}>
@@ -59,16 +69,21 @@ export function ConsultationChatScreen({
 
         {pendingResponse ? (
           <View style={styles.confirmationCard}>
-            <Text style={styles.confirmationTitle}>{pendingResponse.message}</Text>
+            <View style={styles.confirmationHeader}>
+              <Text style={styles.confirmationKicker}>{getResponseTypeLabel(pendingResponse)}</Text>
+              <Text style={styles.confirmationTitle}>{pendingResponse.message}</Text>
+            </View>
             {"confirmation" in pendingResponse ? (
               <>
                 <Text style={styles.confirmationDescription}>
                   {getResponsePreviewText(pendingResponse)}
                 </Text>
-                <PrimaryButton
-                  label={pendingResponse.confirmation.label}
-                  onPress={() => onApproveResponse(pendingResponse)}
-                />
+                <View style={styles.confirmationActions}>
+                  <PrimaryButton
+                    label={pendingResponse.confirmation.label}
+                    onPress={() => onApproveResponse(pendingResponse)}
+                  />
+                </View>
               </>
             ) : (
               <Text style={styles.confirmationDescription}>{pendingResponse.question}</Text>
@@ -86,7 +101,7 @@ export function ConsultationChatScreen({
           style={styles.input}
           value={draftMessage}
         />
-        <PrimaryButton disabled={!canSendMessage} label="전송" onPress={submitMessage} />
+        <PrimaryButton disabled={!canSendMessage} label="제안 받기" onPress={submitMessage} />
       </View>
     </View>
   );
@@ -102,104 +117,159 @@ function getResponsePreviewText(
   return response.suggestedItems.map((item) => item.title).join(", ");
 }
 
+function getResponseTypeLabel(response: ChatPlannerResponse) {
+  if (response.type === "meal_plan_suggestion") {
+    return "식단 제안";
+  }
+
+  if (response.type === "exercise_plan_suggestion") {
+    return "운동 제안";
+  }
+
+  if (response.type === "plan_revision_suggestion") {
+    return "수정 제안";
+  }
+
+  return "추가 질문";
+}
+
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: "#F8F7F4",
+    backgroundColor: theme.colors.background,
     flex: 1,
   },
-  header: {
+  headerShell: {
+    backgroundColor: theme.colors.ink,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    gap: theme.space.xl,
+    padding: theme.space.xl,
+    paddingBottom: theme.space.xxl,
+  },
+  headerTop: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 24,
-    paddingBottom: 12,
+  },
+  brandMark: {
+    alignItems: "center",
+    backgroundColor: theme.colors.warmSoft,
+    borderRadius: theme.radius.medium,
+    height: 42,
+    justifyContent: "center",
+    width: 42,
+  },
+  brandMarkText: {
+    color: theme.colors.warm,
+    fontSize: 18,
+    fontWeight: "900",
+    letterSpacing: 0,
+  },
+  headerCopy: {
+    gap: theme.space.sm,
   },
   eyebrow: {
-    color: "#5E7664",
-    fontSize: 14,
-    fontWeight: "800",
-    letterSpacing: 0,
+    ...theme.type.eyebrow,
+    color: "#B8CFC2",
   },
   title: {
-    color: "#1F2A24",
-    fontSize: 26,
-    fontWeight: "800",
-    letterSpacing: 0,
-    lineHeight: 34,
+    ...theme.type.title,
+    color: theme.colors.white,
+    maxWidth: 360,
+  },
+  description: {
+    ...theme.type.body,
+    color: "#D8E0DA",
+    maxWidth: 440,
   },
   planButton: {
-    backgroundColor: "#E7EFE8",
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.22)",
+    borderRadius: theme.radius.small,
+    borderWidth: 1,
+    minHeight: 40,
+    justifyContent: "center",
+    paddingHorizontal: theme.space.md,
   },
   planButtonText: {
-    color: "#2F5D46",
-    fontSize: 14,
-    fontWeight: "800",
+    ...theme.type.button,
+    color: theme.colors.white,
   },
   messageList: {
     flex: 1,
   },
   messages: {
-    gap: 12,
-    padding: 24,
-    paddingTop: 12,
+    gap: theme.space.md,
+    padding: theme.space.xl,
   },
   messageBubble: {
     alignSelf: "flex-start",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 8,
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.large,
+    borderTopLeftRadius: theme.radius.small,
+    borderWidth: 1,
     maxWidth: "86%",
-    padding: 14,
+    padding: theme.space.md,
   },
   userMessageBubble: {
     alignSelf: "flex-end",
-    backgroundColor: "#2F5D46",
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+    borderTopLeftRadius: theme.radius.large,
+    borderTopRightRadius: theme.radius.small,
   },
   messageText: {
-    color: "#26342C",
-    fontSize: 15,
-    lineHeight: 22,
+    ...theme.type.supporting,
+    color: theme.colors.inkSoft,
   },
   userMessageText: {
-    color: "#FFFFFF",
+    color: theme.colors.white,
   },
   confirmationCard: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#C9D7CC",
-    borderRadius: 8,
+    ...commonStyles.card,
+    borderColor: theme.colors.primary,
     borderWidth: 1,
-    gap: 12,
-    padding: 16,
+    gap: theme.space.md,
+    padding: theme.space.lg,
+  },
+  confirmationHeader: {
+    borderLeftColor: theme.colors.warm,
+    borderLeftWidth: 4,
+    gap: theme.space.xs,
+    paddingLeft: theme.space.md,
+  },
+  confirmationKicker: {
+    ...theme.type.eyebrow,
+    color: theme.colors.warm,
   },
   confirmationTitle: {
-    color: "#1F2A24",
-    fontSize: 17,
-    fontWeight: "800",
-    lineHeight: 24,
+    ...theme.type.sectionTitle,
+    color: theme.colors.ink,
   },
   confirmationDescription: {
-    color: "#53645A",
-    fontSize: 14,
-    lineHeight: 20,
+    ...theme.type.supporting,
+    color: theme.colors.muted,
+  },
+  confirmationActions: {
+    alignItems: "flex-start",
   },
   inputBar: {
-    backgroundColor: "#F1EFE9",
-    borderTopColor: "#E1DED5",
+    backgroundColor: theme.colors.surface,
+    borderTopColor: theme.colors.border,
     borderTopWidth: 1,
-    gap: 10,
-    padding: 16,
+    gap: theme.space.sm,
+    padding: theme.space.md,
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#D9E0DA",
-    borderRadius: 8,
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.medium,
     borderWidth: 1,
-    color: "#1F2A24",
+    color: theme.colors.ink,
     fontSize: 15,
-    minHeight: 70,
-    padding: 12,
+    minHeight: 74,
+    padding: theme.space.md,
     textAlignVertical: "top",
   },
 });

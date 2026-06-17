@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
+import { theme } from "../../shared/ui/design-system";
 import { useNotificationRecommendation } from "./useNotificationRecommendation";
 
 export function NotificationRecommendation() {
@@ -31,6 +32,7 @@ export function NotificationRecommendation() {
         />
         <PrimaryButton
           label="나중에"
+          variant="ghost"
           onPress={() => {
             void decideNotificationRecommendation("dismissed");
           }}
@@ -42,32 +44,28 @@ export function NotificationRecommendation() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#DCE4DD",
-    borderRadius: 8,
+    backgroundColor: theme.colors.secondarySoft,
+    borderColor: "#C8D4E4",
+    borderRadius: theme.radius.medium,
     borderWidth: 1,
-    gap: 16,
-    padding: 16,
+    gap: theme.space.md,
+    padding: theme.space.md,
   },
   copy: {
-    gap: 6,
+    gap: theme.space.xs,
   },
   title: {
-    color: "#1F2A24",
-    fontSize: 17,
-    fontWeight: "800",
-    letterSpacing: 0,
-    lineHeight: 23,
+    ...theme.type.sectionTitle,
+    color: theme.colors.ink,
   },
   description: {
-    color: "#526056",
-    fontSize: 14,
-    lineHeight: 20,
+    ...theme.type.supporting,
+    color: theme.colors.muted,
   },
   actions: {
     alignItems: "flex-start",
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: theme.space.xs,
   },
 });

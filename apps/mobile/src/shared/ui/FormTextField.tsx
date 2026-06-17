@@ -1,6 +1,8 @@
 import type { KeyboardTypeOptions } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
+import { theme } from "./design-system";
+
 type FormTextFieldProps = {
   error?: string;
   inputMode?: "email" | "text" | "numeric";
@@ -34,7 +36,7 @@ export function FormTextField({
         multiline={multiline}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#9AA49D"
+        placeholderTextColor={theme.colors.subtle}
         style={[styles.input, multiline && styles.multilineInput, error && styles.inputError]}
         value={value}
       />
@@ -45,34 +47,34 @@ export function FormTextField({
 
 const styles = StyleSheet.create({
   field: {
-    gap: 8,
+    gap: theme.space.xs,
   },
   label: {
-    color: "#26342C",
+    color: theme.colors.ink,
     fontSize: 14,
-    fontWeight: "700",
+    fontWeight: "800",
     letterSpacing: 0,
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#D9E0DA",
-    borderRadius: 8,
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.small,
     borderWidth: 1,
-    color: "#1F2A24",
+    color: theme.colors.ink,
     fontSize: 16,
     minHeight: 48,
-    paddingHorizontal: 14,
+    paddingHorizontal: theme.space.md,
   },
   inputError: {
-    borderColor: "#B95E4E",
+    borderColor: theme.colors.danger,
   },
   multilineInput: {
     minHeight: 92,
-    paddingTop: 12,
+    paddingTop: theme.space.sm,
     textAlignVertical: "top",
   },
   error: {
-    color: "#9A4B40",
+    color: theme.colors.danger,
     fontSize: 13,
     lineHeight: 18,
   },
