@@ -33,13 +33,21 @@ Trigger when designing screens, copy, onboarding, notification prompts, or app t
 
 Responsibilities:
 
-- Maintain the product tone.
-- Make the primary interaction easy to find.
+- Own UX strategy, interaction design, visual system, service design, and design QA.
+- Maintain the product tone and design philosophy.
+- Make the signature interaction easy to find and understand.
+- Define review, confirmation, recovery, and empty states.
 - Avoid patterns that conflict with the service concept.
+- Turn reusable design lessons into system rules.
 
-Primary reference:
+Primary references:
 
+- `docs/design-philosophy.md`
+- `docs/interaction-principles.md`
+- `docs/design-system-spec.md`
+- `docs/service-design-blueprint.md`
 - `docs/design-tone-and-manner.md`
+- `docs/design-qa-checklist.md`
 
 ### 3. Frontend
 
@@ -100,7 +108,24 @@ Use for MVP scope review, flow conflicts, and prioritization decisions.
 
 ### Design Agent
 
-Use for screen concepts, copy tone, and UX critique.
+Use for:
+
+- UX strategy.
+- Screen concepts.
+- Interaction flows.
+- Visual system decisions.
+- Service journey critique.
+- Copy tone.
+- Design QA.
+
+Must read:
+
+- `docs/design-philosophy.md`
+- `docs/interaction-principles.md`
+- `docs/design-system-spec.md`
+- `docs/service-design-blueprint.md`
+- `docs/design-tone-and-manner.md`
+- `docs/design-qa-checklist.md`
 
 ### Frontend Agent
 

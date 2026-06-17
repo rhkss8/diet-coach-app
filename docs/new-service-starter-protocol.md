@@ -122,6 +122,19 @@ Required outputs:
 - Regression checks.
 - Fallback behavior.
 
+### G6. Gestalt Stack
+
+Defines the product's design philosophy and experience system.
+
+Required outputs:
+
+- Design philosophy.
+- UX strategy.
+- Interaction principles.
+- Visual system rules.
+- Service design blueprint.
+- Design QA checklist.
+
 ## Superpowers
 
 Superpowers are the few abilities the service gives the user that existing products do not.
@@ -157,7 +170,12 @@ docs/
   g-stack.md
   superpowers.md
   mvp-execution-harness.md
+  design-philosophy.md
   design-tone-and-manner.md
+  design-system-spec.md
+  interaction-principles.md
+  service-design-blueprint.md
+  design-qa-checklist.md
   frontend-engineering-standards.md
   ai-contracts.md
   analytics-events.md
@@ -176,7 +194,7 @@ docs/
 Promote these to reusable Codex skills after the starter protocol is stable:
 
 - `new-service-product-stack`
-- `new-service-design-tone`
+- `new-service-design-system`
 - `new-service-frontend-senior`
 - `new-service-ai-contracts`
 - `new-service-qa-analytics`
@@ -189,7 +207,7 @@ Use these roles for every new service:
 
 - Lead Agent: owns coherence and integration.
 - Product Agent: owns scope and MVP loop.
-- Design Agent: owns tone, UX, and visual concept.
+- Design Agent: owns UX strategy, interaction design, visual system, service design, and design QA.
 - Frontend Agent: owns maintainable implementation.
 - AI Agent: owns structured AI behavior.
 - QA Agent: owns checks, events, and release gates.
@@ -202,11 +220,16 @@ Use these roles for every new service:
 4. Write 1 to 3 superpowers.
 5. Generate G-Stack.
 6. Generate MVP todo.
-7. Generate design tone.
-8. Generate frontend standards.
-9. Generate AI contracts if AI is part of the product.
-10. Generate analytics and QA gates.
-11. Start Phase 0 foundation.
+7. Generate design philosophy.
+8. Generate interaction principles.
+9. Generate design system spec.
+10. Generate service design blueprint.
+11. Generate design tone and copy rules.
+12. Generate design QA checklist.
+13. Generate frontend standards.
+14. Generate AI contracts if AI is part of the product.
+15. Generate analytics and QA gates.
+16. Start Phase 0 foundation.
 
 For the copy/paste starter pack, use `docs/new-service-copy-pack.md`.
 

@@ -1,5 +1,19 @@
 # Design Tone and Manner
 
+## Role
+
+This file defines copy tone and emotional manner.
+
+It does not replace:
+
+- `docs/design-philosophy.md`
+- `docs/interaction-principles.md`
+- `docs/design-system-spec.md`
+- `docs/service-design-blueprint.md`
+- `docs/design-qa-checklist.md`
+
+Use those files to define strategy, interaction, visual system, service experience, and QA.
+
 ## Concept
 
 `[Service name]` should feel like `[product personality]` for `[persona]`.

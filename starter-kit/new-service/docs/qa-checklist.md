@@ -32,6 +32,15 @@ The release cannot ship unless the core loop passes:
 - User state is understandable.
 - Navigation is stable.
 
+### Design QA
+
+- Screen supports the design philosophy.
+- Core interaction matches `docs/interaction-principles.md`.
+- Visual decisions follow `docs/design-system-spec.md`.
+- Service touchpoints match `docs/service-design-blueprint.md`.
+- Copy follows `docs/design-tone-and-manner.md`.
+- Detailed checks pass in `docs/design-qa-checklist.md`.
+
 ### Analytics
 
 - Every required event fires once.
@@ -62,6 +71,7 @@ Before closed MVP distribution:
 - Type check passes.
 - Unit or fixture tests pass.
 - Core flow manual QA passes.
+- Design QA passes.
 - One fresh install path passes.
 - Environment variables are documented.
 - Error logging is enabled.

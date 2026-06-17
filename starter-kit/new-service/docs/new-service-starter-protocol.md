@@ -119,6 +119,19 @@ Required outputs:
 - Regression checks.
 - Fallback behavior.
 
+### G6. Gestalt Stack
+
+Defines the product's design philosophy and experience system.
+
+Required outputs:
+
+- Design philosophy.
+- UX strategy.
+- Interaction principles.
+- Visual system rules.
+- Service design blueprint.
+- Design QA checklist.
+
 ## Superpowers
 
 Superpowers are the few abilities the service gives the user that existing products do not.
@@ -144,11 +157,16 @@ As a [persona], I can [new ability], so that [meaningful outcome].
 4. Write 1 to 3 superpowers.
 5. Generate G-Stack.
 6. Generate MVP todo.
-7. Generate design tone.
-8. Generate frontend standards.
-9. Generate AI contracts if AI is part of the product.
-10. Generate analytics and QA gates.
-11. Start Phase 0 foundation.
+7. Generate design philosophy.
+8. Generate interaction principles.
+9. Generate design system spec.
+10. Generate service design blueprint.
+11. Generate design tone and copy rules.
+12. Generate design QA checklist.
+13. Generate frontend standards.
+14. Generate AI contracts if AI is part of the product.
+15. Generate analytics and QA gates.
+16. Start Phase 0 foundation.
 
 ## Lesson-And-Run Memory
 

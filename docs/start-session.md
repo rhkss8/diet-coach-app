@@ -16,6 +16,6 @@ Existing diet apps turn a changed day into failure. The user wants to continue, 
 Before: The user feels that one broken day ruins the whole plan. After: The user feels they can adjust today and keep going.
 
 먼저 브레인스토밍으로 기획을 정리하고,
-G-Stack, Superpowers, MVP todo, 디자인 톤앤매너, 개발 하네스, AI/QA/analytics 기준을 만든 뒤,
+G-Stack, Superpowers, MVP todo, 디자인 철학, 인터랙션 원칙, 디자인 시스템, 서비스 디자인, 디자인 QA, 개발 하네스, AI/QA/analytics 기준을 만든 뒤,
 중요 의사결정 지점은 물어보고,
 그 외에는 MVP core loop가 끝날 때까지 계속 진행해줘.

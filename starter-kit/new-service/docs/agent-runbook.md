@@ -19,11 +19,11 @@ Use `docs/new-service-starter-protocol.md` as the reusable kickoff protocol.
 7. If resuming from another PC, read `docs/workstation-handoff.md`.
 8. If changing kickoff structure, read `docs/new-service-starter-protocol.md` and `docs/new-service-copy-pack.md`.
 9. If changing product definition, read `docs/service-definition.md`, `docs/g-stack.md`, and `docs/superpowers.md`.
-10. If touching UI or copy, read `docs/design-tone-and-manner.md`.
+10. If touching UI, UX, visual design, or copy, read `docs/design-philosophy.md`, `docs/interaction-principles.md`, `docs/design-system-spec.md`, `docs/service-design-blueprint.md`, `docs/design-tone-and-manner.md`, and `docs/design-qa-checklist.md`.
 11. If touching frontend code, read `docs/frontend-engineering-standards.md`.
 12. If touching AI behavior, read `docs/ai-contracts.md`.
 13. If touching metrics, read `docs/analytics-events.md`.
-14. If testing or preparing release, read `docs/qa-checklist.md`.
+14. If testing or preparing release, read `docs/qa-checklist.md` and `docs/design-qa-checklist.md`.
 
 ## Work Selection
 
@@ -51,9 +51,15 @@ Good:
 
 Bad:
 
-- Build a complete design system before any user flow works.
+- Build a large design library before any user flow works.
 - Build AI infrastructure before a mock flow exists.
 - Build auth before local core loop is proven.
+
+Design rule:
+
+- Define design philosophy, interaction principles, and the MVP design system before building repeated UI.
+- Keep the design system small enough to serve the first vertical slice.
+- Run design QA before marking a UI slice complete.
 
 ## Quality Rule
 
