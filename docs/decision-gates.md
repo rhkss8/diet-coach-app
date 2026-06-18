@@ -6,6 +6,14 @@ The agent should continue working by default, but must ask the user at important
 
 ## Ask The User Before
 
+### Ambiguity Or Mismatch
+
+- The implementation detail is not clearly defined in the docs, source design, or user request.
+- The current source of truth differs from the agent's memory, assumption, or previous implementation.
+- A visual, copy, icon, route, or product-flow choice requires interpretation rather than direct mapping.
+- The agent notices "this does not match what I expected" while reading code, docs, screenshots, or Figma Make.
+- Continuing would require guessing what the user intended.
+
 ### Product Direction
 
 - Adding a feature outside MVP scope.
@@ -48,6 +56,8 @@ The agent should continue working by default, but must ask the user at important
 - Adding tests for existing behavior.
 - Updating docs to record a decision already made in conversation.
 - Fixing obvious bugs.
+
+Exception: if any item above conflicts with "Ambiguity Or Mismatch", ask the user before proceeding.
 
 ## Branch Format
 

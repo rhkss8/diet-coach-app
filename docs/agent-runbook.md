@@ -71,10 +71,24 @@ Only stop when:
 
 - A todo requires user credentials or external account setup.
 - A product decision is impossible to infer safely.
+- The agent must guess because the docs, design source, code, and user request disagree or leave an important detail ambiguous.
 - A command needs user approval and cannot proceed.
 - The MVP definition of done is satisfied.
 
 Use `docs/decision-gates.md` to decide whether to ask the user or continue.
+
+## Ambiguity Rule
+
+Do not silently bridge gaps with assumptions.
+
+If a screen, icon, route, copy block, product rule, or implementation detail differs from the agent's understanding, pause and ask the user using the decision-gate format before editing.
+
+Default behavior:
+
+- Direct source exists: follow it exactly.
+- Source is missing: ask if the choice affects user-visible behavior, design, product positioning, data, cost, or release quality.
+- Source conflicts with previous work: ask which source wins before changing code.
+- Tiny internal implementation choice with no user-visible effect: proceed and document only if useful.
 
 ## Status Update Format
 

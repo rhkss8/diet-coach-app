@@ -225,3 +225,31 @@ Applies To:
 Promotion:
 
 - update-doc
+
+## 2026-06-18 - Ask Before Bridging Ambiguity
+
+Type: rule
+Area: process
+Source: user feedback
+
+Observation:
+
+- Moving forward by assumption caused design and implementation drift.
+- The user expects decision branches when the agent sees a mismatch between the source material, current code, and its own understanding.
+
+Rule:
+
+- Do not guess through ambiguity.
+- If the agent thinks "this differs from what I expected" or "the source is not explicit," pause and ask before making user-visible or product-significant changes.
+- Present the decision, recommended option, tradeoff, and next step.
+
+Applies To:
+
+- Figma Make parity work.
+- Product flow changes.
+- Copy, icon, route, and screen-layout decisions.
+- Any implementation where multiple valid interpretations exist.
+
+Promotion:
+
+- update-doc
