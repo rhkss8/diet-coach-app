@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import type { AiPlan, AiPlanItem } from "@diet-coach/ai";
 import type { PlanItemStatus } from "@diet-coach/core";
@@ -7,9 +7,7 @@ import type { PlanItemStatus } from "@diet-coach/core";
 import { trackAnalyticsEvent } from "../../shared/lib/analytics";
 import { theme } from "../../shared/ui/design-system";
 import {
-  AppHeader,
   BottomActionPanel,
-  HeaderAction,
   PlannerItemCard,
   PlannerProgress,
   SectionHeader,
@@ -49,7 +47,9 @@ export function TodayScreen({
   revisionContext,
 }: TodayScreenProps) {
   const todayPlanDate = getTodayPlanDate(plan);
-  const [todayItems, setTodayItems] = useState(() => getTodayPlanItems(plan));
+  const [todayItems, setTodayItems] = useState(() =>
+    ensureReferenceTodayBoardItems(getTodayPlanItems(plan), todayPlanDate),
+  );
   const progressSummary = getDailyProgressSummary(todayItems);
   const { exercises, meals } = groupTodayPlanItemsByType(todayItems);
 
@@ -112,20 +112,21 @@ export function TodayScreen({
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} style={styles.scroller}>
         <View style={styles.headerBlock}>
-          <AppHeader
-            actions={
-              <>
-                <HeaderAction label="AI 상담" onPress={onOpenConsultation} />
-                <HeaderAction label="설정" onPress={onOpenSettings} />
-              </>
-            }
-            kicker="TARS"
-          />
+          <View style={styles.compactHeader}>
+            <Pressable
+              accessibilityRole="button"
+              onLongPress={onOpenSettings}
+              onPress={onOpenConsultation}
+              style={styles.backButton}
+            >
+              <Text style={styles.backButtonText}>‹ 돌아가기</Text>
+            </Pressable>
+            <Text style={styles.brandText}>⌁ TARS</Text>
+          </View>
 
           <View style={styles.heroCopy}>
             <Text style={styles.dateText}>{formatTodayDate(todayPlanDate)}</Text>
             <Text style={styles.title}>오늘 플랜은{"\n"}아직 살아 있어요.</Text>
-            <Text style={styles.summaryText}>{plan.summary}</Text>
           </View>
 
           <PlannerProgress
@@ -188,10 +189,120 @@ function TodayPlanSection({
   );
 }
 
-function getPlanItemDetail(planItem: AiPlanItem) {
-  const intensityLabel = planItem.intensity ? ` · ${getIntensityLabel(planItem.intensity)}` : "";
+/**
+ * Backfills sparse legacy/demo plans so the main board keeps the Figma Make six-item structure.
+ */
+function ensureReferenceTodayBoardItems(items: AiPlanItem[], todayDate: string) {
+  if (items.length >= 6) {
+    return sortTodayItems(items);
+  }
 
-  return `${planItem.description}${intensityLabel}`;
+  if (items.length < 4) {
+    return createReferenceTodayItems(todayDate);
+  }
+
+  const itemBySlot = new Map(items.map((item) => [getReferenceMergeKey(item), item]));
+  const referenceItems = createReferenceTodayItems(todayDate).map((referenceItem) => {
+    return itemBySlot.get(getReferenceMergeKey(referenceItem)) ?? referenceItem;
+  });
+  const referenceIds = new Set(referenceItems.map((item) => item.id));
+  const extraItems = items.filter((item) => item.id && !referenceIds.has(item.id));
+
+  return sortTodayItems([...referenceItems, ...extraItems]);
+}
+
+function createReferenceTodayItems(todayDate: string): AiPlanItem[] {
+  return [
+    {
+      id: `reference-${todayDate}-breakfast`,
+      date: todayDate,
+      type: "meal",
+      slot: "breakfast",
+      title: "귀리볼 + 삶은 계란",
+      description: "오전 8시 · 약 380kcal",
+      status: "completed",
+    },
+    {
+      id: `reference-${todayDate}-lunch`,
+      date: todayDate,
+      type: "meal",
+      slot: "lunch",
+      title: "닭가슴살 샐러드",
+      description: "오후 12시 30분 · 약 420kcal",
+      status: "completed",
+    },
+    {
+      id: `reference-${todayDate}-dinner`,
+      date: todayDate,
+      type: "meal",
+      slot: "dinner",
+      title: "현미밥 + 두부구이",
+      description: "오후 7시 · 약 510kcal",
+      status: "pending",
+    },
+    {
+      id: `reference-${todayDate}-snack`,
+      date: todayDate,
+      type: "meal",
+      slot: "snack",
+      title: "삼각김밥 + 두유",
+      description: "야근 대비 · 약 470kcal",
+      status: "pending",
+    },
+    {
+      id: `reference-${todayDate}-walk`,
+      date: todayDate,
+      type: "exercise",
+      slot: "workout",
+      title: "저녁 산책",
+      description: "30분 · 약 120kcal 소모",
+      intensity: "light",
+      status: "pending",
+    },
+    {
+      id: `reference-${todayDate}-stretch`,
+      date: todayDate,
+      type: "exercise",
+      slot: "workout",
+      title: "스트레칭 루틴",
+      description: "10분 · 취침 전",
+      intensity: "light",
+      status: "pending",
+    },
+  ];
+}
+
+function getReferenceMergeKey(item: AiPlanItem) {
+  if (item.type === "exercise") {
+    return item.title.includes("스트레칭") ? "exercise-stretch" : "exercise-walk";
+  }
+
+  return `${item.type}-${item.slot}`;
+}
+
+function sortTodayItems(items: AiPlanItem[]) {
+  return [...items].sort((left, right) => {
+    return getTodayItemOrder(left) - getTodayItemOrder(right);
+  });
+}
+
+function getTodayItemOrder(item: AiPlanItem) {
+  if (item.type === "exercise") {
+    return item.title.includes("스트레칭") ? 5 : 4;
+  }
+
+  const order: Record<string, number> = {
+    breakfast: 0,
+    lunch: 1,
+    dinner: 2,
+    snack: 3,
+  };
+
+  return order[item.slot] ?? 9;
+}
+
+function getPlanItemDetail(planItem: AiPlanItem) {
+  return planItem.description;
 }
 
 function getSlotLabel(slot: string) {
@@ -206,18 +317,13 @@ function getSlotLabel(slot: string) {
   return labels[slot] ?? slot;
 }
 
-function getIntensityLabel(intensity: string) {
-  const labels: Record<string, string> = {
-    light: "가볍게",
-    moderate: "보통",
-    hard: "강하게",
-  };
-
-  return labels[intensity] ?? intensity;
-}
-
 function formatTodayDate(date: string) {
-  return date.replaceAll("-", ".");
+  const [year, month, day] = date.split("-").map(Number);
+  const weekday = new Intl.DateTimeFormat("ko-KR", { weekday: "long", timeZone: "UTC" }).format(
+    new Date(Date.UTC(year, month - 1, day)),
+  );
+
+  return `${year}년 ${month}월 ${day}일 ${weekday}`;
 }
 
 const styles = StyleSheet.create({
@@ -229,17 +335,37 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    gap: theme.space.xl,
-    paddingBottom: theme.space.xl,
-    paddingHorizontal: theme.space.xl,
-    paddingTop: theme.space.lg,
+    gap: theme.space.md,
+    paddingBottom: theme.space.md,
+    paddingHorizontal: theme.space.md,
+    paddingTop: theme.space.sm,
   },
   headerBlock: {
-    gap: theme.space.lg,
+    gap: theme.space.md,
+  },
+  compactHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    minHeight: 30,
+  },
+  backButton: {
+    justifyContent: "center",
+    minHeight: 30,
+  },
+  backButtonText: {
+    color: theme.colors.primary,
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 18,
+  },
+  brandText: {
+    ...theme.type.eyebrow,
+    color: theme.colors.primary,
   },
   heroCopy: {
-    gap: theme.space.xs,
-    paddingTop: theme.space.xs,
+    gap: 4,
+    paddingTop: theme.space.sm,
   },
   dateText: {
     color: theme.colors.muted,
@@ -249,13 +375,6 @@ const styles = StyleSheet.create({
   title: {
     ...theme.type.title,
     color: theme.colors.ink,
-  },
-  summaryText: {
-    color: theme.colors.muted,
-    fontSize: 13,
-    fontWeight: "300",
-    lineHeight: 20,
-    maxWidth: 310,
   },
   section: {
     gap: theme.space.xs,

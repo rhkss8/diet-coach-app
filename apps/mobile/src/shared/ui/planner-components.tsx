@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   progress: {
-    gap: theme.space.xs,
+    gap: 6,
   },
   progressCopy: {
     alignItems: "center",
@@ -663,6 +663,7 @@ const styles = StyleSheet.create({
   progressLabel: {
     color: theme.colors.inkSoft,
     fontSize: 12,
+    fontWeight: "700",
     lineHeight: 17,
   },
   progressRate: {
@@ -675,13 +676,13 @@ const styles = StyleSheet.create({
   progressTrack: {
     backgroundColor: theme.colors.backgroundAlt,
     borderRadius: 999,
-    height: 6,
+    height: 5,
     overflow: "hidden",
   },
   progressFill: {
     backgroundColor: theme.colors.primary,
     borderRadius: 999,
-    height: 6,
+    height: 5,
   },
   planItem: {
     alignItems: "center",
@@ -690,9 +691,10 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.medium,
     borderWidth: 1,
     flexDirection: "row",
-    gap: theme.space.sm,
+    gap: theme.space.md,
+    minHeight: 64,
     paddingHorizontal: theme.space.md,
-    paddingVertical: theme.space.sm,
+    paddingVertical: 10,
   },
   completedPlanItem: {
     backgroundColor: theme.colors.primarySoft,
@@ -728,8 +730,8 @@ const styles = StyleSheet.create({
   },
   planItemTitle: {
     color: theme.colors.ink,
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 15,
+    fontWeight: "700",
     lineHeight: 20,
   },
   skippedText: {
@@ -738,14 +740,14 @@ const styles = StyleSheet.create({
   },
   planItemDetail: {
     color: theme.colors.muted,
-    fontSize: 11,
-    lineHeight: 16,
+    fontSize: 12,
+    lineHeight: 17,
   },
   skipButton: {
     backgroundColor: theme.colors.backgroundAlt,
     borderRadius: theme.radius.small,
     paddingHorizontal: theme.space.sm,
-    paddingVertical: theme.space.xs,
+    paddingVertical: 8,
   },
   skipButtonText: {
     color: theme.colors.muted,
@@ -762,23 +764,23 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     borderTopColor: "rgba(42, 61, 46, 0.07)",
     borderTopWidth: 1,
-    gap: theme.space.xs,
-    paddingBottom: 34,
-    paddingHorizontal: theme.space.xl,
+    gap: theme.space.sm,
+    paddingBottom: 20,
+    paddingHorizontal: theme.space.md,
     paddingTop: theme.space.sm,
   },
   recoveryButton: {
     alignItems: "center",
     backgroundColor: theme.colors.warm,
-    borderRadius: theme.radius.large,
-    minHeight: 52,
+    borderRadius: theme.radius.medium,
+    minHeight: 50,
     justifyContent: "center",
   },
   recoveryButtonText: {
     color: theme.colors.surface,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
-    lineHeight: 18,
+    lineHeight: 19,
   },
   bottomHelper: {
     color: theme.colors.muted,

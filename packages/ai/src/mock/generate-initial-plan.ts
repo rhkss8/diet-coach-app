@@ -38,12 +38,9 @@ function createDayItems(
       date,
       type: "meal",
       slot: "breakfast",
-      title: dayIndex % 2 === 0 ? "가벼운 단백질 아침" : "준비 쉬운 아침",
-      description:
-        dayIndex % 2 === 0
-          ? "계란, 요거트, 과일처럼 부담 없는 조합으로 시작해요."
-          : "바나나와 요거트처럼 바로 먹을 수 있는 선택지를 준비해요.",
-      status: "pending",
+      title: dayIndex % 2 === 0 ? "귀리볼 + 삶은 계란" : "요거트 + 바나나",
+      description: dayIndex % 2 === 0 ? "오전 8시 · 약 380kcal" : "오전 8시 · 약 360kcal",
+      status: dayIndex === 0 ? "completed" : "pending",
     },
     {
       id: `mock-${date}-lunch`,
@@ -51,9 +48,9 @@ function createDayItems(
       date,
       type: "meal",
       slot: "lunch",
-      title: "현실적인 일반식 점심",
-      description: "평소 식사를 유지하되 단백질 반찬을 먼저 챙기고 과한 추가 메뉴만 줄여요.",
-      status: "pending",
+      title: "닭가슴살 샐러드",
+      description: "오후 12시 30분 · 약 420kcal",
+      status: dayIndex === 0 ? "completed" : "pending",
     },
     {
       id: `mock-${date}-dinner`,
@@ -61,8 +58,18 @@ function createDayItems(
       date,
       type: "meal",
       slot: "dinner",
-      title: "조정 가능한 저녁",
-      description: "점심이 무거웠다면 더 가볍게, 평소와 같았다면 단백질과 채소 중심으로 먹어요.",
+      title: "현미밥 + 두부구이",
+      description: "오후 7시 · 약 510kcal",
+      status: "pending",
+    },
+    {
+      id: `mock-${date}-night-meal`,
+      planId: "mock-plan-1",
+      date,
+      type: "meal",
+      slot: "snack",
+      title: "삼각김밥 + 두유",
+      description: "야근 대비 · 약 470kcal",
       status: "pending",
     },
     {
@@ -71,11 +78,19 @@ function createDayItems(
       date,
       type: "exercise",
       slot: "workout",
-      title: workoutIntensity === "light" ? "15분 걷기" : "25분 전신 루틴",
-      description:
-        workoutIntensity === "light"
-          ? "운동복을 갖추지 않아도 되는 산책으로 흐름을 이어가요."
-          : "무리하지 않는 강도로 스쿼트, 푸시 동작, 걷기를 섞어요.",
+      title: workoutIntensity === "light" ? "저녁 산책" : "25분 전신 루틴",
+      description: workoutIntensity === "light" ? "30분 · 약 120kcal 소모" : "25분 · 가볍게",
+      intensity: workoutIntensity,
+      status: "pending",
+    },
+    {
+      id: `mock-${date}-stretch`,
+      planId: "mock-plan-1",
+      date,
+      type: "exercise",
+      slot: "workout",
+      title: "스트레칭 루틴",
+      description: "10분 · 취침 전",
       intensity: workoutIntensity,
       status: "pending",
     },

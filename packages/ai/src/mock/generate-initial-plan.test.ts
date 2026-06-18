@@ -12,7 +12,7 @@ describe("generateMockInitialPlan", () => {
     expect(validation.ok).toBe(true);
     expect(output.plan.startDate).toBe("2026-06-16");
     expect(output.plan.endDate).toBe("2026-06-22");
-    expect(output.plan.items).toHaveLength(28);
+    expect(output.plan.items).toHaveLength(42);
   });
 
   it("keeps beginner exercise plans light", () => {

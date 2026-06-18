@@ -45,8 +45,75 @@ function createEmptyChatPlan(todayDate: string): AiPlan {
     startDate: todayDate,
     endDate: todayDate,
     summary: "상담을 통해 만든 플랜입니다.",
-    items: [],
+    items: createStarterTodayItems(todayDate),
   };
+}
+
+function createStarterTodayItems(todayDate: string): AiPlan["items"] {
+  return [
+    {
+      id: `chat-${todayDate}-breakfast`,
+      planId: "chat-plan",
+      date: todayDate,
+      type: "meal",
+      slot: "breakfast",
+      title: "귀리볼 + 삶은 계란",
+      description: "오전 8시 · 약 380kcal",
+      status: "completed",
+    },
+    {
+      id: `chat-${todayDate}-lunch`,
+      planId: "chat-plan",
+      date: todayDate,
+      type: "meal",
+      slot: "lunch",
+      title: "닭가슴살 샐러드",
+      description: "오후 12시 30분 · 약 420kcal",
+      status: "completed",
+    },
+    {
+      id: `chat-${todayDate}-dinner`,
+      planId: "chat-plan",
+      date: todayDate,
+      type: "meal",
+      slot: "dinner",
+      title: "현미밥 + 두부구이",
+      description: "오후 7시 · 약 510kcal",
+      status: "pending",
+    },
+    {
+      id: `chat-${todayDate}-night-meal`,
+      planId: "chat-plan",
+      date: todayDate,
+      type: "meal",
+      slot: "snack",
+      title: "삼각김밥 + 두유",
+      description: "야근 대비 · 약 470kcal",
+      status: "pending",
+    },
+    {
+      id: `chat-${todayDate}-walk`,
+      planId: "chat-plan",
+      date: todayDate,
+      type: "exercise",
+      slot: "workout",
+      title: "저녁 산책",
+      description: "30분 · 약 120kcal 소모",
+      intensity: "light",
+      status: "pending",
+    },
+    {
+      id: `chat-${todayDate}-stretch`,
+      planId: "chat-plan",
+      date: todayDate,
+      type: "exercise",
+      slot: "workout",
+      title: "스트레칭 루틴",
+      description: "10분 · 취침 전",
+      intensity: "light",
+      status: "pending",
+    },
+  ];
 }
 
 function getLatestPlanDate(items: AiPlan["items"], fallbackDate: string) {
