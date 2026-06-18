@@ -48,7 +48,7 @@ export function ConsultationChatScreen({
       <View style={styles.topBar}>
         <AppHeader
           actions={<HeaderAction label="오늘 플랜" onPress={onOpenPlan} />}
-          kicker="TARS · AI 상담"
+          kicker="TARS · 플랜 상담"
         />
       </View>
 
@@ -90,7 +90,7 @@ export function ConsultationChatScreen({
 }
 
 /**
- * Converts structured AI output into a short preview list that reads like a plan patch.
+ * Converts structured planner output into a short preview list that reads like a plan patch.
  */
 function getResponsePreviewItems(
   response: Exclude<ChatPlannerResponse, { type: "clarification_question" }>,

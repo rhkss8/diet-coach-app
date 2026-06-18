@@ -163,7 +163,7 @@ type PlanProposalCardProps = {
 };
 
 /**
- * Represents structured AI output as the approval card from the Figma Make proposal screen.
+ * Represents structured planner output as the approval card from the Figma Make proposal screen.
  */
 export function PlanProposalCard({
   actionLabel,

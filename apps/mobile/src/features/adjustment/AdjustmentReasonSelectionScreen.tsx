@@ -68,7 +68,7 @@ export function AdjustmentReasonSelectionScreen({
 
       <BottomActionPanel
         helperText="메모는 선택 입력이에요. 비워도 다음 단계로 갈 수 있어요."
-        label="AI에게 조정 요청하기"
+        label="조정안 만들기"
         onPress={onSubmitNote}
       />
     </View>

@@ -32,7 +32,7 @@ const initialConsultationMessages: ChatPlannerMessage[] = [
     id: "assistant-welcome",
     role: "assistant",
     content:
-      "안녕하세요. 식단, 운동, 오늘 플랜 수정 중 필요한 걸 편하게 말해주세요. 제가 제안으로 정리하고, 승인하면 플랜에 반영할게요.",
+      "온보딩에서 받은 정보를 바탕으로 시작해볼게요. 어떤 식단이나 운동 방법이 필요하신가요? 원하는 변화와 생활 패턴을 편하게 이야기해 주세요. 저랑 대화하면서 오늘부터 이어갈 플랜을 만들어볼게요.",
   },
 ];
 
