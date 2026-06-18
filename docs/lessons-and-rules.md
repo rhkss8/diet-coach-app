@@ -197,3 +197,31 @@ Applies To:
 Promotion:
 
 - add-checklist
+
+## 2026-06-18 - Do Not Infer Figma Make Visual Details
+
+Type: rule
+Area: design
+Source: user feedback
+
+Observation:
+
+- Figma Make already defines icons, headers, cards, and state-specific layouts.
+- Replacing a Figma Make icon with a hand-drawn approximation caused visible brand drift.
+- Adding or removing headers by interpretation made screens diverge from the published reference.
+
+Rule:
+
+- Treat `figma_make/src/app/App.tsx` as the source of truth for publishing parity.
+- Do not infer icon shape, header presence, card layout, or button color when the Figma Make file defines it.
+- Build a screen-by-screen parity map before implementation, then fix one screen group at a time.
+
+Applies To:
+
+- Figma Make publishing work.
+- Design QA.
+- Shared UI primitive changes.
+
+Promotion:
+
+- update-doc
