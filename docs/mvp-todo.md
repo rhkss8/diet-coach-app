@@ -150,6 +150,12 @@ Todos:
 - [x] Run test suite.
 - [x] Create build.
 - [ ] Recruit first tester cohort.
+  - [x] Prepare recruiting message.
+  - [x] Prepare first 10 tester operating packet.
+  - [ ] Confirm distribution path.
+  - [ ] Confirm feedback URL.
+  - [ ] Fill first tester list.
+  - [ ] Decide privacy/legal review scope before inviting non-close-contact users.
 
 Exit criteria:
 

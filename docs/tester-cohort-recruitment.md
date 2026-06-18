@@ -21,7 +21,7 @@ Avoid for first cohort:
 
 - Users who need medical or clinical diet support.
 - Users who only want calorie precision.
-- Users who expect a full AI chat coach as the primary interface.
+- Users who expect a fully open-ended coaching app as the primary interface.
 - Users who cannot install or open the MVP build path chosen for the test.
 
 ## Recruiting Channels
@@ -73,7 +73,7 @@ Week 3:
 Week 4:
 
 - Summarize retention, recovery behavior, and copy issues.
-- Decide whether to deepen AI planning, food logging, or notification loops next.
+- Decide whether to deepen planning quality, food logging, or notification loops next.
 
 ## Primary Metric
 
@@ -148,6 +148,73 @@ Long version:
 괜찮으시면 테스트 링크와 피드백 채널을 보내드릴게요.
 ```
 
+## First 10 Operating Packet
+
+Use this packet before scaling to the full 50-user cohort.
+
+### Before Inviting
+
+- Confirm the install path users will receive.
+- Confirm the feedback URL and add it to `EXPO_PUBLIC_FEEDBACK_URL`.
+- Prepare a first 10 tester list with persona fit and invite channel.
+- Decide whether the user can be observed live, async by screen recording, or async by written notes.
+- Send the short recruiting message first. Send the long version only when the tester asks for more context.
+
+### First 10 Tracker
+
+| ID  | Name | Channel  | Persona fit | Invite status | Install status | Onboarding | First plan approved | First adjustment | Returned within 24h | Feedback | Notes |
+| --- | ---- | -------- | ----------- | ------------- | -------------- | ---------- | ------------------- | ---------------- | ------------------- | -------- | ----- |
+| T01 |      | personal | high        | not sent      | not started    | no         | no                  | no               | no                  | no       |       |
+| T02 |      | personal | high        | not sent      | not started    | no         | no                  | no               | no                  | no       |       |
+| T03 |      | personal | high        | not sent      | not started    | no         | no                  | no               | no                  | no       |       |
+| T04 |      | personal | high        | not sent      | not started    | no         | no                  | no               | no                  | no       |       |
+| T05 |      | personal | high        | not sent      | not started    | no         | no                  | no               | no                  | no       |       |
+| T06 |      | personal | medium      | not sent      | not started    | no         | no                  | no               | no                  | no       |       |
+| T07 |      | personal | medium      | not sent      | not started    | no         | no                  | no               | no                  | no       |       |
+| T08 |      | personal | medium      | not sent      | not started    | no         | no                  | no               | no                  | no       |       |
+| T09 |      | personal | medium      | not sent      | not started    | no         | no                  | no               | no                  | no       |       |
+| T10 |      | personal | medium      | not sent      | not started    | no         | no                  | no               | no                  | no       |       |
+
+### Observation Script
+
+Do not explain the product deeply before the first run. Let the user read the app and say what they think.
+
+Ask before they start:
+
+1. 오늘 다이어트 계획을 관리할 때 제일 자주 깨지는 순간은 언제예요?
+2. 기존 다이어트 앱에서 가장 귀찮거나 싫었던 부분은 뭐였어요?
+
+Watch these moments:
+
+1. Does the user understand that the app creates a plan through conversation?
+2. Does the user understand that approved suggestions become plan items?
+3. Can the user find the Today plan after approving a suggestion?
+4. Can the user find a way to adjust the plan when reality changes?
+5. Does the revised plan feel like continuation rather than punishment?
+
+Ask after the first run:
+
+1. 이 앱이 무엇을 해주는 앱이라고 느껴졌어요?
+2. 첫 플랜을 만들 때 막히는 부분이 있었나요?
+3. "오늘 계획 조정하기"가 필요한 순간이 떠올랐나요?
+4. 실제로 다시 열 것 같은 순간이 있다면 언제예요?
+
+### First 10 Decision Thresholds
+
+Continue to 25 users only if:
+
+- At least 7 of 10 testers complete onboarding and approve a first plan.
+- At least 5 of 10 testers can explain the product as a continuation or recovery planner.
+- At least 4 of 10 testers try or clearly understand plan adjustment.
+- No critical install, navigation, or plan approval blocker remains.
+
+Pause and fix before scaling if:
+
+- Users describe the app as only a calorie tracker.
+- Users miss that chat suggestions can become plan items.
+- Users cannot find Today or plan adjustment without help.
+- Users feel judged, scolded, or pressured by the copy.
+
 ## Required Decisions Before Sending
 
 1. Distribution path
@@ -176,7 +243,7 @@ Long version:
 
 ## Current Status
 
-Recruitment materials are ready.
+Recruitment copy and first 10 operating materials are ready.
 
 Blocked before actual recruitment:
 
