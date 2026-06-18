@@ -102,6 +102,24 @@ Primary reference:
 
 - `.codex/skills/expo-mvp-delivery/SKILL.md`
 
+### 7. tars-maintenance
+
+Trigger when fixing bugs, correcting existing behavior, handling regressions, or refactoring after the MVP already exists.
+
+Responsibilities:
+
+- Preserve intended behavior outside the requested change.
+- Find root cause before editing.
+- Keep the fix small.
+- Add regression checks when practical.
+- Run `tars verify` before completion.
+
+Primary references:
+
+- `.codex/skills/tars-maintenance/SKILL.md`
+- `docs/maintenance-workflow.md`
+- `docs/lessons-quick.md`
+
 ## Agent Operating Model
 
 Use one lead agent and focused subagents only when the work can be split safely.

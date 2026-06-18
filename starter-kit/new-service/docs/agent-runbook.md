@@ -11,19 +11,21 @@ Use `docs/new-service-starter-protocol.md` as the reusable kickoff protocol.
 ## Start Every Work Cycle
 
 1. Read `docs/agent-runbook.md`.
-2. Read `docs/mvp-todo.md`.
-3. Read `docs/mvp-execution-harness.md`.
-4. Read `docs/decision-log.md`.
-5. Read `docs/lessons-and-rules.md`.
-6. Read `docs/decision-gates.md`.
-7. If resuming from another PC, read `docs/workstation-handoff.md`.
-8. If changing kickoff structure, read `docs/new-service-starter-protocol.md` and `docs/new-service-copy-pack.md`.
-9. If changing product definition, read `docs/service-definition.md`, `docs/g-stack.md`, and `docs/superpowers.md`.
-10. If touching UI, UX, visual design, or copy, read `docs/design-production-pipeline.md`, `docs/design-reference-brief.md`, `docs/design-philosophy.md`, `docs/interaction-principles.md`, `docs/design-system-spec.md`, `docs/service-design-blueprint.md`, `docs/design-tone-and-manner.md`, `docs/design-review-rubric.md`, and `docs/design-qa-checklist.md`.
-11. If touching frontend code, read `docs/frontend-engineering-standards.md`.
-12. If touching AI behavior, read `docs/ai-contracts.md`.
-13. If touching metrics, read `docs/analytics-events.md`.
-14. If testing or preparing release, read `docs/qa-checklist.md` and `docs/design-qa-checklist.md`.
+2. Read `docs/lessons-quick.md`.
+3. Read `docs/mvp-todo.md`.
+4. Read `docs/mvp-execution-harness.md`.
+5. Read `docs/decision-log.md`.
+6. Read `docs/lessons-and-rules.md`.
+7. Read `docs/decision-gates.md`.
+8. If doing maintenance, bug fixes, corrections, or refactors, read `.codex/skills/tars-maintenance/SKILL.md` and `docs/maintenance-workflow.md`.
+9. If resuming from another PC, read `docs/workstation-handoff.md`.
+10. If changing kickoff structure, read `docs/new-service-starter-protocol.md` and `docs/new-service-copy-pack.md`.
+11. If changing product definition, read `docs/service-definition.md`, `docs/g-stack.md`, and `docs/superpowers.md`.
+12. If touching UI, UX, visual design, or copy, read `docs/design-production-pipeline.md`, `docs/design-reference-brief.md`, `docs/design-philosophy.md`, `docs/interaction-principles.md`, `docs/design-system-spec.md`, `docs/service-design-blueprint.md`, `docs/design-tone-and-manner.md`, `docs/design-review-rubric.md`, and `docs/design-qa-checklist.md`.
+13. If touching frontend code, read `docs/frontend-engineering-standards.md`.
+14. If touching AI behavior, read `docs/ai-contracts.md`.
+15. If touching metrics, read `docs/analytics-events.md`.
+16. If testing or preparing release, read `docs/qa-checklist.md` and `docs/design-qa-checklist.md`.
 
 ## Work Selection
 
@@ -54,6 +56,19 @@ Bad:
 - Build a large design library before any user flow works.
 - Build AI infrastructure before a mock flow exists.
 - Build auth before local core loop is proven.
+
+## Maintenance Rule
+
+For existing behavior, use `.codex/skills/tars-maintenance/SKILL.md`.
+
+Maintenance work must:
+
+- Restate the requested outcome.
+- Establish current behavior and root cause before editing.
+- Keep the fix scoped to the request.
+- Preserve unrelated behavior.
+- Add a regression check when practical.
+- Run `tars verify` before completion.
 
 Design rule:
 
@@ -96,13 +111,10 @@ At the end of each cycle, report:
 
 Before moving to the next todo:
 
-1. Run `pnpm typecheck`.
-2. Run `pnpm lint`.
-3. Run `pnpm test`.
-4. Run `pnpm format:check`.
-5. Run `tars done`.
-6. Commit the completed slice.
-7. Then run `tars next`.
+1. Run `tars verify`.
+2. Run `tars done`.
+3. Commit the completed slice.
+4. Then run `tars next`.
 
 The git pre-commit hook should run the same checks. Do not bypass it unless the user explicitly asks.
 
