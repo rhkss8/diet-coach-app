@@ -14,6 +14,8 @@ import {
 type ConsultationChatScreenProps = {
   messages: ChatPlannerMessage[];
   onApproveResponse: (response: ChatPlannerResponse) => void;
+  onBack?: () => void;
+  onDismissPendingResponse: () => void;
   onOpenPlan: () => void;
   onSendMessage: (message: string) => void;
   pendingResponse: ChatPlannerResponse | null;
@@ -25,6 +27,8 @@ type ConsultationChatScreenProps = {
 export function ConsultationChatScreen({
   messages,
   onApproveResponse,
+  onBack,
+  onDismissPendingResponse,
   onOpenPlan,
   onSendMessage,
   pendingResponse,
@@ -49,6 +53,7 @@ export function ConsultationChatScreen({
         <AppHeader
           actions={<HeaderAction label="오늘 플랜" onPress={onOpenPlan} />}
           kicker="TARS · 플랜 상담"
+          onBack={onBack}
         />
       </View>
 
@@ -66,6 +71,7 @@ export function ConsultationChatScreen({
               description={pendingResponse.message}
               items={getResponsePreviewItems(pendingResponse)}
               onApprove={() => onApproveResponse(pendingResponse)}
+              onDismiss={onDismissPendingResponse}
               title={getProposalTitle(pendingResponse)}
               typeLabel={getResponseTypeLabel(pendingResponse)}
             />

@@ -6,6 +6,8 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+.playwright-cli/
+figma_make/
 
 # native builds
 ios/
@@ -27,4 +29,3 @@ pnpm-debug.*
 
 # macOS
 .DS_Store
-

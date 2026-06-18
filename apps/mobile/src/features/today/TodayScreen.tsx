@@ -8,6 +8,7 @@ import { trackAnalyticsEvent } from "../../shared/lib/analytics";
 import { theme } from "../../shared/ui/design-system";
 import {
   BottomActionPanel,
+  LeafMark,
   PlannerItemCard,
   PlannerProgress,
   SectionHeader,
@@ -121,7 +122,10 @@ export function TodayScreen({
             >
               <Text style={styles.backButtonText}>‹ 돌아가기</Text>
             </Pressable>
-            <Text style={styles.brandText}>⌁ TARS</Text>
+            <View style={styles.brand}>
+              <LeafMark backgroundColor="transparent" color={theme.colors.primary} size={18} />
+              <Text style={styles.brandText}>TARS</Text>
+            </View>
           </View>
 
           <View style={styles.heroCopy}>
@@ -358,6 +362,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
     lineHeight: 18,
+  },
+  brand: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
   },
   brandText: {
     ...theme.type.eyebrow,

@@ -1,5 +1,6 @@
 import type { AdjustmentReason } from "@diet-coach/core";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { FormTextField } from "../../shared/ui/FormTextField";
 import { theme } from "../../shared/ui/design-system";
@@ -8,15 +9,75 @@ import {
   ReasonTile,
   ScreenTitleBlock,
 } from "../../shared/ui/planner-components";
-import { getAdjustmentReasonOptions } from "./adjustment-reason";
 
 type AdjustmentReasonSelectionScreenProps = {
   note: string;
   onChangeNote: (note: string) => void;
+  onBack: () => void;
   onSelectReason: (reason: AdjustmentReason) => void;
   onSubmitNote: () => void;
   selectedReason?: AdjustmentReason;
 };
+
+type RecoveryReasonOption = {
+  icon: string;
+  id: string;
+  label: string;
+  note: string;
+  value: AdjustmentReason;
+};
+
+const recoveryReasonOptions = [
+  {
+    icon: "☕",
+    id: "dinner",
+    label: "회식",
+    note: "저녁 식사 변경",
+    value: "meal_changed",
+  },
+  {
+    icon: "◐",
+    id: "overtime",
+    label: "야근",
+    note: "식사 시간 불규칙",
+    value: "schedule_changed",
+  },
+  {
+    icon: "♨",
+    id: "binge",
+    label: "폭식",
+    note: "조정이 필요해요",
+    value: "meal_changed",
+  },
+  {
+    icon: "▧",
+    id: "no-exercise",
+    label: "운동 못했어요",
+    note: "오늘 미실행",
+    value: "missed_exercise",
+  },
+  {
+    icon: "✈",
+    id: "travel",
+    label: "여행 / 외출",
+    note: "환경이 달라요",
+    value: "schedule_changed",
+  },
+  {
+    icon: "♡",
+    id: "condition",
+    label: "몸 상태",
+    note: "컨디션 조절",
+    value: "want_replan",
+  },
+  {
+    icon: "?",
+    id: "other",
+    label: "기타",
+    note: "직접 말할게요",
+    value: "want_replan",
+  },
+] as const satisfies RecoveryReasonOption[];
 
 /**
  * Maps the adjustment entry route to the Figma Make recovery-reasons source screen.
@@ -24,30 +85,41 @@ type AdjustmentReasonSelectionScreenProps = {
 export function AdjustmentReasonSelectionScreen({
   note,
   onChangeNote,
+  onBack,
   onSelectReason,
   onSubmitNote,
-  selectedReason = "meal_changed",
+  selectedReason,
 }: AdjustmentReasonSelectionScreenProps) {
-  const reasonOptions = getAdjustmentReasonOptions();
+  const initialSelectedId =
+    recoveryReasonOptions.find((option) => option.value === selectedReason)?.id ?? "overtime";
+  const [selectedReasonId, setSelectedReasonId] = useState(initialSelectedId);
 
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} style={styles.scroller}>
+        <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
+          <Text style={styles.backButtonText}>‹ 돌아가기</Text>
+        </Pressable>
+
         <ScreenTitleBlock
           description={"괜찮아요. 지금 상황 기준으로\n오늘 플랜을 다시 맞춰볼게요."}
           title={"무슨 일이\n있으셨나요?"}
         />
 
         <View style={styles.reasonGrid}>
-          {chunkPairs(reasonOptions).map((row) => (
-            <View key={row.map((item) => item.value).join("-")} style={styles.reasonRow}>
+          {chunkPairs(recoveryReasonOptions).map((row) => (
+            <View key={row.map((item) => item.id).join("-")} style={styles.reasonRow}>
               {row.map((option) => (
                 <ReasonTile
-                  isSelected={option.value === selectedReason}
-                  key={option.value}
+                  icon={option.icon}
+                  isSelected={option.id === selectedReasonId}
+                  key={option.id}
                   label={option.label}
-                  note={getReasonNote(option.value)}
-                  onPress={() => onSelectReason(option.value)}
+                  note={option.note}
+                  onPress={() => {
+                    setSelectedReasonId(option.id);
+                    onSelectReason(option.value);
+                  }}
                 />
               ))}
               {row.length === 1 ? <View style={styles.reasonPlaceholder} /> : null}
@@ -85,17 +157,6 @@ function chunkPairs<T>(items: T[]) {
   return rows;
 }
 
-function getReasonNote(reason: AdjustmentReason) {
-  const notes: Record<AdjustmentReason, string> = {
-    meal_changed: "식사 변경",
-    missed_exercise: "오늘 미실행",
-    schedule_changed: "시간이 달라요",
-    want_replan: "다시 맞출래요",
-  };
-
-  return notes[reason];
-}
-
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: theme.colors.background,
@@ -105,10 +166,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    gap: theme.space.xl,
+    gap: theme.space.lg,
     paddingBottom: theme.space.xl,
     paddingHorizontal: theme.space.xl,
-    paddingTop: theme.space.lg,
+    paddingTop: theme.space.sm,
+  },
+  backButton: {
+    alignSelf: "flex-start",
+    minHeight: 32,
+    justifyContent: "center",
+  },
+  backButtonText: {
+    color: theme.colors.primary,
+    fontSize: 13,
+    lineHeight: 18,
   },
   reasonGrid: {
     gap: theme.space.xs,

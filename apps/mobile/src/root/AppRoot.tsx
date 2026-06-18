@@ -143,6 +143,7 @@ export function AppRoot() {
           <AdjustmentReasonSelectionScreen
             note={adjustmentNote}
             onChangeNote={setAdjustmentNote}
+            onBack={() => navigateBack(setRouteHistory)}
             onSelectReason={(reason) => {
               setSelectedAdjustmentReason(reason);
               trackAnalyticsEvent("ADJUSTMENT_REASON_SELECTED", {
@@ -153,7 +154,7 @@ export function AppRoot() {
               });
             }}
             onSubmitNote={() => {
-              const reason = selectedAdjustmentReason ?? "meal_changed";
+              const reason = selectedAdjustmentReason ?? "schedule_changed";
               trackAnalyticsEvent("ADJUSTMENT_NOTE_SUBMITTED", {
                 userId: "local-user",
                 planId: approvedPlanSnapshot?.plan.id ?? "local-plan",
@@ -228,6 +229,10 @@ export function AppRoot() {
               todayDate: getActivePlanDate(approvedPlanSnapshot?.plan),
               navigateToToday: () => navigateTo("today"),
             });
+          }}
+          onBack={routeHistory.length > 1 ? () => navigateBack(setRouteHistory) : undefined}
+          onDismissPendingResponse={() => {
+            setPendingChatResponse(null);
           }}
           onOpenPlan={() => {
             if (approvedPlanSnapshot) {

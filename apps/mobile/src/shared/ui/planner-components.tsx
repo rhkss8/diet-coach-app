@@ -9,6 +9,75 @@ type AppHeaderProps = {
   onBack?: () => void;
 };
 
+type LeafMarkProps = {
+  backgroundColor?: string;
+  color?: string;
+  size?: number;
+};
+
+/**
+ * Draws the small leaf brand mark used in the Figma Make reference without adding an icon package.
+ */
+export function LeafMark({
+  backgroundColor = theme.colors.primary,
+  color = theme.colors.surface,
+  size = 24,
+}: LeafMarkProps) {
+  const leafSize = Math.round(size * 0.36);
+  const stemHeight = Math.round(size * 0.42);
+
+  return (
+    <View
+      style={[
+        styles.leafMark,
+        {
+          backgroundColor,
+          borderRadius: size / 2,
+          height: size,
+          width: size,
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.leafBlade,
+          {
+            backgroundColor: color,
+            height: leafSize,
+            left: size * 0.31,
+            top: size * 0.26,
+            transform: [{ rotate: "-36deg" }],
+            width: leafSize,
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.leafBlade,
+          {
+            backgroundColor: color,
+            height: leafSize,
+            right: size * 0.29,
+            top: size * 0.23,
+            transform: [{ rotate: "36deg" }],
+            width: leafSize,
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.leafStem,
+          {
+            backgroundColor: color,
+            height: stemHeight,
+            top: size * 0.34,
+          },
+        ]}
+      />
+    </View>
+  );
+}
+
 /**
  * Provides the compact app chrome used by Figma Make screens.
  */
@@ -23,9 +92,7 @@ export function AppHeader({ actions, kicker = "TARS", onBack }: AppHeaderProps) 
         ) : null}
       </View>
       <View style={styles.brand}>
-        <View style={styles.brandLeaf}>
-          <Text style={styles.brandLeafText}>T</Text>
-        </View>
+        <LeafMark />
         <Text style={styles.brandText}>{kicker}</Text>
       </View>
       <View style={[styles.appHeaderSide, styles.headerActions]}>{actions}</View>
@@ -99,7 +166,11 @@ export function ChatBubble({ children, role }: ChatBubbleProps) {
     <View style={[styles.chatRow, isAssistant ? styles.assistantRow : styles.userRow]}>
       {isAssistant ? (
         <View style={styles.chatAvatar}>
-          <Text style={styles.chatAvatarText}>T</Text>
+          <LeafMark
+            backgroundColor={theme.colors.primarySoft}
+            color={theme.colors.primary}
+            size={24}
+          />
         </View>
       ) : null}
       <View style={[styles.chatBubble, isAssistant ? styles.assistantBubble : styles.userBubble]}>
@@ -158,6 +229,7 @@ type PlanProposalCardProps = {
   description: string;
   items: string[];
   onApprove: () => void;
+  onDismiss?: () => void;
   title: string;
   typeLabel: string;
 };
@@ -170,12 +242,14 @@ export function PlanProposalCard({
   description,
   items,
   onApprove,
+  onDismiss,
   title,
   typeLabel,
 }: PlanProposalCardProps) {
   return (
     <View style={styles.proposalCard}>
       <View style={styles.proposalHeader}>
+        <LeafMark backgroundColor="transparent" color={theme.colors.primary} size={18} />
         <Text style={styles.proposalKicker}>TARS 제안</Text>
         <Text style={styles.proposalType}>· {typeLabel}</Text>
       </View>
@@ -191,15 +265,31 @@ export function PlanProposalCard({
           ))}
         </View>
         <Text style={styles.proposalFootnote}>승인 전까지 현재 플랜은 바뀌지 않아요.</Text>
-        <Pressable accessibilityRole="button" onPress={onApprove} style={styles.proposalButton}>
-          <Text style={styles.proposalButtonText}>{actionLabel}</Text>
-        </Pressable>
+        <View style={styles.proposalActions}>
+          {onDismiss ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={onDismiss}
+              style={styles.proposalSecondaryButton}
+            >
+              <Text style={styles.proposalSecondaryButtonText}>지금은 괜찮아요</Text>
+            </Pressable>
+          ) : null}
+          <Pressable
+            accessibilityRole="button"
+            onPress={onApprove}
+            style={[styles.proposalButton, onDismiss && styles.proposalPrimaryButton]}
+          >
+            <Text style={styles.proposalButtonText}>✓ {actionLabel}</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
 }
 
 type ReasonTileProps = {
+  icon: string;
   isSelected: boolean;
   label: string;
   note: string;
@@ -209,7 +299,7 @@ type ReasonTileProps = {
 /**
  * Provides the two-column reason tile used by the recovery-reason source screen.
  */
-export function ReasonTile({ isSelected, label, note, onPress }: ReasonTileProps) {
+export function ReasonTile({ icon, isSelected, label, note, onPress }: ReasonTileProps) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -218,7 +308,7 @@ export function ReasonTile({ isSelected, label, note, onPress }: ReasonTileProps
     >
       <View style={[styles.reasonIcon, isSelected && styles.selectedReasonIcon]}>
         <Text style={[styles.reasonIconText, isSelected && styles.selectedReasonIconText]}>
-          {label.slice(0, 1)}
+          {icon}
         </Text>
       </View>
       <Text style={[styles.reasonLabel, isSelected && styles.selectedReasonLabel]}>{label}</Text>
@@ -350,19 +440,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: theme.space.xs,
   },
-  brandLeaf: {
+  leafMark: {
     alignItems: "center",
-    backgroundColor: theme.colors.primary,
-    borderRadius: 12,
-    height: 24,
     justifyContent: "center",
-    width: 24,
+    overflow: "hidden",
   },
-  brandLeafText: {
-    color: theme.colors.surface,
-    fontSize: 11,
-    fontWeight: "800",
-    lineHeight: 14,
+  leafBlade: {
+    borderBottomLeftRadius: 999,
+    borderTopRightRadius: 999,
+    position: "absolute",
+  },
+  leafStem: {
+    borderRadius: 999,
+    position: "absolute",
+    width: 2,
   },
   brandText: {
     ...theme.type.eyebrow,
@@ -433,19 +524,11 @@ const styles = StyleSheet.create({
   },
   chatAvatar: {
     alignItems: "center",
-    backgroundColor: theme.colors.primarySoft,
-    borderRadius: 12,
     height: 24,
     justifyContent: "center",
     marginRight: theme.space.xs,
     marginTop: 2,
     width: 24,
-  },
-  chatAvatarText: {
-    color: theme.colors.primary,
-    fontSize: 10,
-    fontWeight: "800",
-    lineHeight: 13,
   },
   chatBubble: {
     maxWidth: "78%",
@@ -530,7 +613,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "rgba(61, 97, 66, 0.18)",
     borderBottomWidth: 1,
     flexDirection: "row",
-    gap: theme.space.xs,
+    gap: 6,
     paddingHorizontal: theme.space.md,
     paddingVertical: theme.space.sm,
   },
@@ -593,13 +676,37 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: theme.colors.primary,
     borderRadius: theme.radius.medium,
+    flex: 1,
     minHeight: 42,
     justifyContent: "center",
+  },
+  proposalActions: {
+    flexDirection: "row",
+    gap: theme.space.xs,
+  },
+  proposalPrimaryButton: {
+    flex: 2,
   },
   proposalButtonText: {
     color: theme.colors.surface,
     fontSize: 12,
     fontWeight: "700",
+    lineHeight: 17,
+  },
+  proposalSecondaryButton: {
+    alignItems: "center",
+    backgroundColor: "transparent",
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.medium,
+    borderWidth: 1,
+    flex: 1,
+    minHeight: 42,
+    justifyContent: "center",
+  },
+  proposalSecondaryButtonText: {
+    color: theme.colors.muted,
+    fontSize: 12,
+    fontWeight: "600",
     lineHeight: 17,
   },
   reasonTile: {
@@ -630,7 +737,7 @@ const styles = StyleSheet.create({
   },
   reasonIconText: {
     color: theme.colors.subtle,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "800",
     lineHeight: 17,
   },
