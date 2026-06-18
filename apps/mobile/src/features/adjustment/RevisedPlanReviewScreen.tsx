@@ -1,9 +1,9 @@
 import type { AdjustTodayPlanOutput } from "@diet-coach/ai";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { PrimaryButton } from "../../shared/ui/PrimaryButton";
-import { commonStyles, theme } from "../../shared/ui/design-system";
-import { countChangedTodayItems, getChangedTodayItems } from "./revised-plan-review";
+import { ChatBubble, ScreenTitleBlock } from "../../shared/ui/planner-components";
+import { theme } from "../../shared/ui/design-system";
+import { getChangedTodayItems } from "./revised-plan-review";
 
 type RevisedPlanReviewScreenProps = {
   output: AdjustTodayPlanOutput;
@@ -11,6 +11,9 @@ type RevisedPlanReviewScreenProps = {
   onDismiss: () => void;
 };
 
+/**
+ * Maps generated revisions to the Figma Make plan-approval comparison layout.
+ */
 export function RevisedPlanReviewScreen({
   onApprove,
   onDismiss,
@@ -19,36 +22,87 @@ export function RevisedPlanReviewScreen({
   const changedItems = getChangedTodayItems(output.revision);
 
   return (
-    <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>조정안 검토</Text>
-        <Text style={styles.title}>{output.revision.summary}</Text>
-        <Text style={styles.description}>{output.revision.userMessage}</Text>
-      </View>
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.content} style={styles.scroller}>
+        <ScreenTitleBlock title={"수정안이\n준비됐어요."} />
 
-      <View style={styles.summaryBand}>
-        <Text style={styles.summaryTitle}>
-          변경된 항목 {countChangedTodayItems(changedItems)}개
-        </Text>
-        <Text style={styles.summaryText}>승인하기 전까지 기존 플랜은 그대로 유지됩니다.</Text>
-      </View>
+        <ChatBubble role="assistant">{output.revision.userMessage}</ChatBubble>
 
-      <View style={styles.section}>
-        {changedItems.map((planItem) => (
-          <View key={planItem.id ?? `${planItem.date}-${planItem.slot}`} style={styles.planItem}>
-            <Text style={styles.planItemSlot}>{planItem.slot}</Text>
-            <Text style={styles.planItemTitle}>{planItem.title}</Text>
-            <Text style={styles.planItemDescription}>{planItem.description}</Text>
+        <View style={styles.compareCard}>
+          <View style={styles.beforePanel}>
+            <Text style={styles.beforeKicker}>변경 전</Text>
+            <View style={styles.changeList}>
+              {changedItems.map((item) => (
+                <View key={`before-${item.id ?? item.slot}`} style={styles.changeItem}>
+                  <View style={styles.beforeRail} />
+                  <View style={styles.changeCopy}>
+                    <Text style={styles.beforeTitle}>
+                      {getSlotLabel(item.slot)} · 기존 플랜 항목
+                    </Text>
+                    <Text style={styles.beforeText}>오늘 상황이 바뀌기 전 계획</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
           </View>
-        ))}
-      </View>
 
-      <View style={styles.actions}>
-        <PrimaryButton label="조정안 승인" onPress={onApprove} />
-        <PrimaryButton label="나중에 볼게요" onPress={onDismiss} variant="ghost" />
+          <View style={styles.dividerPanel}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>수정</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <View style={styles.afterPanel}>
+            <Text style={styles.afterKicker}>변경 후</Text>
+            <View style={styles.changeList}>
+              {changedItems.map((item) => (
+                <View key={item.id ?? `${item.date}-${item.slot}`} style={styles.changeItem}>
+                  <View style={styles.afterRail} />
+                  <View style={styles.changeCopy}>
+                    <View style={styles.afterTitleRow}>
+                      <Text style={styles.afterTitle}>
+                        {getSlotLabel(item.slot)} · {item.title}
+                      </Text>
+                      <Text style={styles.badge}>새로 조정</Text>
+                    </View>
+                    <Text style={styles.afterText}>{item.description}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.reassurance}>
+          <View style={styles.infoMark}>
+            <Text style={styles.infoMarkText}>i</Text>
+          </View>
+          <Text style={styles.reassuranceText}>승인 전까지 현재 플랜은 바뀌지 않아요.</Text>
+        </View>
+      </ScrollView>
+
+      <View style={styles.bottomPanel}>
+        <Pressable accessibilityRole="button" onPress={onApprove} style={styles.approveButton}>
+          <Text style={styles.approveButtonText}>✓ 이 수정안 승인하기</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={onDismiss} style={styles.secondaryButton}>
+          <Text style={styles.secondaryButtonText}>다시 제안받기</Text>
+        </Pressable>
       </View>
-    </ScrollView>
+    </View>
   );
+}
+
+function getSlotLabel(slot: string) {
+  const labels: Record<string, string> = {
+    breakfast: "아침",
+    lunch: "점심",
+    dinner: "저녁",
+    snack: "간식",
+    workout: "운동",
+  };
+
+  return labels[slot] ?? slot;
 }
 
 const styles = StyleSheet.create({
@@ -56,66 +110,185 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     flex: 1,
   },
+  scroller: {
+    flex: 1,
+  },
   content: {
     gap: theme.space.lg,
-    padding: theme.space.xl,
-    paddingBottom: 36,
+    paddingBottom: theme.space.xl,
+    paddingHorizontal: theme.space.xl,
+    paddingTop: theme.space.lg,
   },
-  header: {
-    backgroundColor: theme.colors.ink,
+  compareCard: {
+    borderColor: theme.colors.border,
     borderRadius: theme.radius.large,
-    gap: theme.space.sm,
-    padding: theme.space.lg,
+    borderWidth: 1,
+    overflow: "hidden",
   },
-  eyebrow: {
+  beforePanel: {
+    backgroundColor: "#FDF8F5",
+    gap: theme.space.sm,
+    padding: theme.space.md,
+  },
+  afterPanel: {
+    backgroundColor: theme.colors.primarySoft,
+    gap: theme.space.sm,
+    padding: theme.space.md,
+  },
+  beforeKicker: {
     ...theme.type.eyebrow,
-    color: "#B8CFC2",
-  },
-  title: {
-    ...theme.type.title,
-    color: theme.colors.white,
-  },
-  description: {
-    ...theme.type.body,
-    color: "#D8E0DA",
-  },
-  summaryBand: {
-    ...commonStyles.insetCard,
-    gap: theme.space.xs,
-    padding: theme.space.md,
-  },
-  summaryTitle: {
-    ...theme.type.sectionTitle,
-    color: theme.colors.ink,
-  },
-  summaryText: {
-    ...theme.type.supporting,
     color: theme.colors.muted,
   },
-  section: {
-    gap: theme.space.sm,
-  },
-  planItem: {
-    ...commonStyles.card,
-    gap: theme.space.xs,
-    padding: theme.space.md,
-  },
-  planItemSlot: {
-    ...theme.type.caption,
+  afterKicker: {
+    ...theme.type.eyebrow,
     color: theme.colors.primary,
-    fontWeight: "900",
   },
-  planItemTitle: {
-    ...theme.type.body,
-    color: theme.colors.ink,
-    fontWeight: "900",
-  },
-  planItemDescription: {
-    ...theme.type.supporting,
-    color: theme.colors.muted,
-  },
-  actions: {
-    alignItems: "flex-start",
+  changeList: {
     gap: theme.space.sm,
+  },
+  changeItem: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: theme.space.sm,
+  },
+  beforeRail: {
+    backgroundColor: "rgba(168, 100, 80, 0.25)",
+    borderRadius: 2,
+    height: 40,
+    width: 3,
+  },
+  afterRail: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 2,
+    height: 40,
+    width: 3,
+  },
+  changeCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  beforeTitle: {
+    color: "rgba(150, 130, 120, 0.8)",
+    fontSize: 13,
+    lineHeight: 18,
+    textDecorationLine: "line-through",
+  },
+  beforeText: {
+    color: "rgba(150, 130, 120, 0.6)",
+    fontSize: 11,
+    lineHeight: 16,
+  },
+  afterTitleRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.space.xs,
+  },
+  afterTitle: {
+    color: theme.colors.ink,
+    fontSize: 13,
+    fontWeight: "500",
+    lineHeight: 18,
+  },
+  badge: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 999,
+    color: theme.colors.surface,
+    fontSize: 9,
+    fontWeight: "700",
+    lineHeight: 13,
+    overflow: "hidden",
+    paddingHorizontal: theme.space.xs,
+    paddingVertical: 1,
+  },
+  afterText: {
+    color: theme.colors.subtle,
+    fontSize: 11,
+    lineHeight: 16,
+  },
+  dividerPanel: {
+    alignItems: "center",
+    backgroundColor: theme.colors.backgroundAlt,
+    flexDirection: "row",
+    gap: theme.space.sm,
+    paddingHorizontal: theme.space.md,
+    paddingVertical: theme.space.sm,
+  },
+  dividerLine: {
+    backgroundColor: theme.colors.border,
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    color: theme.colors.subtle,
+    fontSize: 10,
+    fontWeight: "700",
+    lineHeight: 14,
+  },
+  reassurance: {
+    alignItems: "center",
+    backgroundColor: theme.colors.backgroundAlt,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.medium,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: theme.space.sm,
+    padding: theme.space.md,
+  },
+  infoMark: {
+    alignItems: "center",
+    backgroundColor: theme.colors.muted,
+    borderRadius: 8,
+    height: 16,
+    justifyContent: "center",
+    width: 16,
+  },
+  infoMarkText: {
+    color: theme.colors.surface,
+    fontSize: 9,
+    fontWeight: "800",
+    lineHeight: 12,
+  },
+  reassuranceText: {
+    color: theme.colors.muted,
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  bottomPanel: {
+    backgroundColor: theme.colors.background,
+    borderTopColor: "rgba(42, 61, 46, 0.07)",
+    borderTopWidth: 1,
+    gap: theme.space.xs,
+    paddingBottom: 34,
+    paddingHorizontal: theme.space.xl,
+    paddingTop: theme.space.sm,
+  },
+  approveButton: {
+    alignItems: "center",
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radius.large,
+    minHeight: 52,
+    justifyContent: "center",
+  },
+  approveButtonText: {
+    color: theme.colors.surface,
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 18,
+  },
+  secondaryButton: {
+    alignItems: "center",
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.large,
+    borderWidth: 1,
+    minHeight: 46,
+    justifyContent: "center",
+  },
+  secondaryButtonText: {
+    color: theme.colors.inkSoft,
+    fontSize: 13,
+    fontWeight: "500",
+    lineHeight: 18,
   },
 });

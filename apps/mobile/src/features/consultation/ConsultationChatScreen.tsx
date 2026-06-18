@@ -1,9 +1,15 @@
 import type { ChatPlannerMessage, ChatPlannerResponse } from "@diet-coach/ai";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { PrimaryButton } from "../../shared/ui/PrimaryButton";
 import { theme } from "../../shared/ui/design-system";
+import {
+  AppHeader,
+  ChatBubble,
+  HeaderAction,
+  PlanProposalCard,
+  PlannerChatInput,
+} from "../../shared/ui/planner-components";
 
 type ConsultationChatScreenProps = {
   messages: ChatPlannerMessage[];
@@ -14,10 +20,7 @@ type ConsultationChatScreenProps = {
 };
 
 /**
- * Coordinates the chat-first planning workspace where AI answers become explicit plan actions.
- *
- * Draft text stays local to the screen, while approved AI suggestions are delegated to the caller so
- * plan mutation remains reviewable and reversible.
+ * Maps the active consultation route to the Figma Make chat and chat-proposal source screens.
  */
 export function ConsultationChatScreen({
   messages,
@@ -42,88 +45,46 @@ export function ConsultationChatScreen({
 
   return (
     <View style={styles.screen}>
-      <View style={styles.headerShell}>
-        <View style={styles.headerTop}>
-          <View style={styles.brandMark}>
-            <Text style={styles.brandMarkText}>T</Text>
-          </View>
-          <Pressable accessibilityRole="button" onPress={onOpenPlan} style={styles.planButton}>
-            <Text style={styles.planButtonText}>오늘 플랜</Text>
-          </Pressable>
-        </View>
-        <View style={styles.headerCopy}>
-          <Text style={styles.eyebrow}>RECOVERY PLANNER</Text>
-          <Text style={styles.title}>상담은 가볍게, 변경은 승인 후에</Text>
-          <Text style={styles.description}>
-            식단, 운동, 수정안은 먼저 플랜 패치 카드로 정리됩니다. 현재 계획은 사용자가 승인하기
-            전까지 그대로 유지돼요.
-          </Text>
-        </View>
+      <View style={styles.topBar}>
+        <AppHeader
+          actions={<HeaderAction label="오늘 플랜" onPress={onOpenPlan} />}
+          kicker="TARS · AI 상담"
+        />
       </View>
 
       <ScrollView contentContainerStyle={styles.messages} style={styles.messageList}>
         {messages.map((message) => (
-          <View
-            key={message.id}
-            style={[styles.messageBubble, message.role === "user" && styles.userMessageBubble]}
-          >
-            <Text style={[styles.messageText, message.role === "user" && styles.userMessageText]}>
-              {message.content}
-            </Text>
-          </View>
+          <ChatBubble key={message.id} role={message.role === "assistant" ? "assistant" : "user"}>
+            {message.content}
+          </ChatBubble>
         ))}
 
         {pendingResponse ? (
-          <View style={styles.confirmationCard}>
-            <View style={styles.confirmationHeader}>
-              <View style={styles.confirmationHeaderTop}>
-                <Text style={styles.confirmationKicker}>
-                  {getResponseTypeLabel(pendingResponse)}
-                </Text>
-                {"confirmation" in pendingResponse ? (
-                  <Text style={styles.pendingBadge}>승인 전</Text>
-                ) : null}
-              </View>
-              <Text style={styles.confirmationTitle}>{pendingResponse.message}</Text>
-            </View>
-            {"confirmation" in pendingResponse ? (
-              <>
-                <View style={styles.patchBody}>
-                  {getResponsePreviewItems(pendingResponse).map((previewItem, index) => (
-                    <View key={`${previewItem}-${index}`} style={styles.patchItem}>
-                      <View style={styles.patchDot} />
-                      <Text style={styles.patchItemText}>{previewItem}</Text>
-                    </View>
-                  ))}
-                </View>
-                <Text style={styles.confirmationFootnote}>
-                  승인 전까지 오늘 플랜은 바뀌지 않아요.
-                </Text>
-                <View style={styles.confirmationActions}>
-                  <PrimaryButton
-                    label={pendingResponse.confirmation.label}
-                    onPress={() => onApproveResponse(pendingResponse)}
-                  />
-                </View>
-              </>
-            ) : (
-              <Text style={styles.confirmationDescription}>{pendingResponse.question}</Text>
-            )}
-          </View>
+          "confirmation" in pendingResponse ? (
+            <PlanProposalCard
+              actionLabel={getConfirmationActionLabel(pendingResponse)}
+              description={pendingResponse.message}
+              items={getResponsePreviewItems(pendingResponse)}
+              onApprove={() => onApproveResponse(pendingResponse)}
+              title={getProposalTitle(pendingResponse)}
+              typeLabel={getResponseTypeLabel(pendingResponse)}
+            />
+          ) : (
+            <Pressable style={styles.questionCard}>
+              <Text style={styles.questionKicker}>추가 질문</Text>
+              <Text style={styles.questionText}>{pendingResponse.question}</Text>
+            </Pressable>
+          )
         ) : null}
       </ScrollView>
 
-      <View style={styles.inputBar}>
-        <TextInput
-          multiline
-          onChangeText={setDraftMessage}
-          placeholder="예: 회식이 잦아서 저녁 식단을 현실적으로 맞추고 싶어요"
-          placeholderTextColor="#8A968E"
-          style={styles.input}
-          value={draftMessage}
-        />
-        <PrimaryButton disabled={!canSendMessage} label="제안 받기" onPress={submitMessage} />
-      </View>
+      <PlannerChatInput
+        disabled={!canSendMessage}
+        onChangeText={setDraftMessage}
+        onSubmit={submitMessage}
+        placeholder="편하게 이야기해 주세요..."
+        value={draftMessage}
+      />
     </View>
   );
 }
@@ -135,11 +96,8 @@ function getResponsePreviewItems(
   response: Exclude<ChatPlannerResponse, { type: "clarification_question" }>,
 ) {
   if (response.type === "plan_revision_suggestion") {
-    const changedCount = response.revision.changedItemIds.length;
-
     return [
       response.revision.summary,
-      `오늘 항목 ${changedCount}개를 다시 맞춰요`,
       ...response.revision.updatedTodayItems.slice(0, 2).map((item) => {
         return `${getSlotLabel(item.slot)} · ${item.title}`;
       }),
@@ -151,17 +109,41 @@ function getResponsePreviewItems(
   });
 }
 
+function getProposalTitle(
+  response: Exclude<ChatPlannerResponse, { type: "clarification_question" }>,
+) {
+  if (response.type === "plan_revision_suggestion") {
+    return response.revision.summary;
+  }
+
+  return response.suggestedItems.at(0)?.title ?? "상담 기반 플랜 제안";
+}
+
+function getConfirmationActionLabel(
+  response: Exclude<ChatPlannerResponse, { type: "clarification_question" }>,
+) {
+  if (response.confirmation.action === "add_to_meal_plan") {
+    return "식단에 추가하기";
+  }
+
+  if (response.confirmation.action === "add_to_exercise_plan") {
+    return "운동에 추가하기";
+  }
+
+  return "이 수정안 승인하기";
+}
+
 function getResponseTypeLabel(response: ChatPlannerResponse) {
   if (response.type === "meal_plan_suggestion") {
-    return "식단 제안";
+    return "식단 패치";
   }
 
   if (response.type === "exercise_plan_suggestion") {
-    return "운동 제안";
+    return "운동 패치";
   }
 
   if (response.type === "plan_revision_suggestion") {
-    return "수정 제안";
+    return "수정 패치";
   }
 
   return "추가 질문";
@@ -184,184 +166,34 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     flex: 1,
   },
-  headerShell: {
-    backgroundColor: theme.colors.ink,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    gap: theme.space.xl,
-    padding: theme.space.xl,
-    paddingBottom: theme.space.xxl,
-  },
-  headerTop: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  brandMark: {
-    alignItems: "center",
-    backgroundColor: theme.colors.warmSoft,
-    borderRadius: theme.radius.medium,
-    height: 42,
-    justifyContent: "center",
-    width: 42,
-  },
-  brandMarkText: {
-    color: theme.colors.warm,
-    fontSize: 18,
-    fontWeight: "900",
-    letterSpacing: 0,
-  },
-  headerCopy: {
-    gap: theme.space.sm,
-  },
-  eyebrow: {
-    ...theme.type.eyebrow,
-    color: "#B8CFC2",
-  },
-  title: {
-    ...theme.type.title,
-    color: theme.colors.white,
-    maxWidth: 360,
-  },
-  description: {
-    ...theme.type.body,
-    color: "#D8E0DA",
-    maxWidth: 440,
-  },
-  planButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderColor: "rgba(255, 255, 255, 0.22)",
-    borderRadius: theme.radius.small,
-    borderWidth: 1,
-    minHeight: 40,
-    justifyContent: "center",
+  topBar: {
+    borderBottomColor: "rgba(42, 61, 46, 0.07)",
+    borderBottomWidth: 1,
     paddingHorizontal: theme.space.md,
-  },
-  planButtonText: {
-    ...theme.type.button,
-    color: theme.colors.white,
+    paddingVertical: theme.space.sm,
   },
   messageList: {
     flex: 1,
   },
   messages: {
-    gap: theme.space.md,
-    padding: theme.space.xl,
-  },
-  messageBubble: {
-    alignSelf: "flex-start",
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.large,
-    borderTopLeftRadius: theme.radius.small,
-    borderWidth: 1,
-    maxWidth: "86%",
+    gap: theme.space.sm,
     padding: theme.space.md,
   },
-  userMessageBubble: {
-    alignSelf: "flex-end",
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
-    borderTopLeftRadius: theme.radius.large,
-    borderTopRightRadius: theme.radius.small,
-  },
-  messageText: {
-    ...theme.type.supporting,
-    color: theme.colors.inkSoft,
-  },
-  userMessageText: {
-    color: theme.colors.white,
-  },
-  confirmationCard: {
-    backgroundColor: theme.colors.surface,
-    borderColor: "#D9B8A8",
-    borderRadius: theme.radius.large,
+  questionCard: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: "rgba(61, 97, 66, 0.15)",
+    borderRadius: theme.radius.medium,
     borderWidth: 1,
-    gap: theme.space.md,
-    padding: theme.space.lg,
-  },
-  confirmationHeader: {
     gap: theme.space.xs,
+    padding: theme.space.md,
   },
-  confirmationHeaderTop: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  confirmationKicker: {
+  questionKicker: {
     ...theme.type.eyebrow,
-    color: theme.colors.warm,
+    color: theme.colors.primary,
   },
-  pendingBadge: {
-    ...theme.type.caption,
-    backgroundColor: theme.colors.warmSoft,
-    borderColor: "#E3C7B8",
-    borderRadius: theme.radius.small,
-    borderWidth: 1,
-    color: theme.colors.warm,
-    fontWeight: "900",
-    overflow: "hidden",
-    paddingHorizontal: theme.space.xs,
-    paddingVertical: theme.space.xxs,
-  },
-  confirmationTitle: {
-    ...theme.type.sectionTitle,
-    color: theme.colors.ink,
-  },
-  confirmationDescription: {
-    ...theme.type.supporting,
-    color: theme.colors.muted,
-  },
-  patchBody: {
-    backgroundColor: theme.colors.surfaceMuted,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.medium,
-    borderWidth: 1,
-    gap: theme.space.sm,
-    padding: theme.space.md,
-  },
-  patchItem: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: theme.space.xs,
-  },
-  patchDot: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: 4,
-    height: 8,
-    marginTop: 7,
-    width: 8,
-  },
-  patchItemText: {
-    ...theme.type.supporting,
-    color: theme.colors.inkSoft,
-    flex: 1,
-    fontWeight: "700",
-  },
-  confirmationFootnote: {
-    ...theme.type.caption,
-    color: theme.colors.subtle,
-    fontWeight: "800",
-  },
-  confirmationActions: {
-    alignItems: "flex-start",
-  },
-  inputBar: {
-    backgroundColor: theme.colors.surface,
-    borderTopColor: theme.colors.border,
-    borderTopWidth: 1,
-    gap: theme.space.sm,
-    padding: theme.space.md,
-  },
-  input: {
-    backgroundColor: theme.colors.surfaceMuted,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.medium,
-    borderWidth: 1,
-    color: theme.colors.ink,
-    fontSize: 15,
-    minHeight: 74,
-    padding: theme.space.md,
-    textAlignVertical: "top",
+  questionText: {
+    color: theme.colors.primary,
+    fontSize: 12,
+    lineHeight: 18,
   },
 });

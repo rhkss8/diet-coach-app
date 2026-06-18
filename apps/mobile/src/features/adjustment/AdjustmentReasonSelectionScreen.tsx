@@ -1,10 +1,13 @@
 import type { AdjustmentReason } from "@diet-coach/core";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 import { FormTextField } from "../../shared/ui/FormTextField";
-import { PrimaryButton } from "../../shared/ui/PrimaryButton";
-import { SegmentedChoice } from "../../shared/ui/SegmentedChoice";
-import { commonStyles, theme } from "../../shared/ui/design-system";
+import { theme } from "../../shared/ui/design-system";
+import {
+  BottomActionPanel,
+  ReasonTile,
+  ScreenTitleBlock,
+} from "../../shared/ui/planner-components";
 import { getAdjustmentReasonOptions } from "./adjustment-reason";
 
 type AdjustmentReasonSelectionScreenProps = {
@@ -15,6 +18,9 @@ type AdjustmentReasonSelectionScreenProps = {
   selectedReason?: AdjustmentReason;
 };
 
+/**
+ * Maps the adjustment entry route to the Figma Make recovery-reasons source screen.
+ */
 export function AdjustmentReasonSelectionScreen({
   note,
   onChangeNote,
@@ -22,40 +28,72 @@ export function AdjustmentReasonSelectionScreen({
   onSubmitNote,
   selectedReason = "meal_changed",
 }: AdjustmentReasonSelectionScreenProps) {
+  const reasonOptions = getAdjustmentReasonOptions();
+
   return (
-    <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>오늘 계획 조정</Text>
-        <Text style={styles.title}>무엇이 달라졌나요?</Text>
-        <Text style={styles.description}>
-          사유만 빠르게 고르면 남은 하루 기준으로 다시 맞춰볼게요.
-        </Text>
-      </View>
-
-      <View style={styles.reasonBand}>
-        <SegmentedChoice
-          label="조정 사유"
-          onChange={onSelectReason}
-          options={getAdjustmentReasonOptions()}
-          value={selectedReason}
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.content} style={styles.scroller}>
+        <ScreenTitleBlock
+          description={"괜찮아요. 지금 상황 기준으로\n오늘 플랜을 다시 맞춰볼게요."}
+          title={"무슨 일이\n있으셨나요?"}
         />
-      </View>
 
-      <View style={styles.noteBand}>
-        <FormTextField
-          label="짧은 메모"
-          multiline
-          onChangeText={onChangeNote}
-          placeholder="예: 점심을 많이 먹었어요. 오늘 운동은 어려울 것 같아요."
-          value={note}
-        />
-        <Text style={styles.helperText}>
-          메모는 선택 입력이에요. 비워도 다음 단계로 갈 수 있어요.
-        </Text>
-        <PrimaryButton label="조정안 만들기" onPress={onSubmitNote} />
-      </View>
-    </ScrollView>
+        <View style={styles.reasonGrid}>
+          {chunkPairs(reasonOptions).map((row) => (
+            <View key={row.map((item) => item.value).join("-")} style={styles.reasonRow}>
+              {row.map((option) => (
+                <ReasonTile
+                  isSelected={option.value === selectedReason}
+                  key={option.value}
+                  label={option.label}
+                  note={getReasonNote(option.value)}
+                  onPress={() => onSelectReason(option.value)}
+                />
+              ))}
+              {row.length === 1 ? <View style={styles.reasonPlaceholder} /> : null}
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.noteCard}>
+          <FormTextField
+            label="짧은 메모"
+            multiline
+            onChangeText={onChangeNote}
+            placeholder="예: 점심을 많이 먹었어요. 오늘 운동은 어려울 것 같아요."
+            value={note}
+          />
+        </View>
+      </ScrollView>
+
+      <BottomActionPanel
+        helperText="메모는 선택 입력이에요. 비워도 다음 단계로 갈 수 있어요."
+        label="AI에게 조정 요청하기"
+        onPress={onSubmitNote}
+      />
+    </View>
   );
+}
+
+function chunkPairs<T>(items: T[]) {
+  const rows: T[][] = [];
+
+  for (let index = 0; index < items.length; index += 2) {
+    rows.push(items.slice(index, index + 2));
+  }
+
+  return rows;
+}
+
+function getReasonNote(reason: AdjustmentReason) {
+  const notes: Record<AdjustmentReason, string> = {
+    meal_changed: "식사 변경",
+    missed_exercise: "오늘 미실행",
+    schedule_changed: "시간이 달라요",
+    want_replan: "다시 맞출래요",
+  };
+
+  return notes[reason];
 }
 
 const styles = StyleSheet.create({
@@ -63,40 +101,30 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     flex: 1,
   },
+  scroller: {
+    flex: 1,
+  },
   content: {
     gap: theme.space.xl,
-    padding: theme.space.xl,
-    paddingBottom: 36,
+    paddingBottom: theme.space.xl,
+    paddingHorizontal: theme.space.xl,
+    paddingTop: theme.space.lg,
   },
-  header: {
-    backgroundColor: theme.colors.ink,
+  reasonGrid: {
+    gap: theme.space.xs,
+  },
+  reasonRow: {
+    flexDirection: "row",
+    gap: theme.space.xs,
+  },
+  reasonPlaceholder: {
+    flex: 1,
+  },
+  noteCard: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
     borderRadius: theme.radius.large,
-    gap: theme.space.sm,
-    padding: theme.space.lg,
-  },
-  eyebrow: {
-    ...theme.type.eyebrow,
-    color: "#B8CFC2",
-  },
-  title: {
-    ...theme.type.title,
-    color: theme.colors.white,
-  },
-  description: {
-    ...theme.type.body,
-    color: "#D8E0DA",
-  },
-  reasonBand: {
-    ...commonStyles.card,
+    borderWidth: 1,
     padding: theme.space.md,
-  },
-  noteBand: {
-    ...commonStyles.card,
-    gap: theme.space.sm,
-    padding: theme.space.md,
-  },
-  helperText: {
-    ...theme.type.supporting,
-    color: theme.colors.muted,
   },
 });
