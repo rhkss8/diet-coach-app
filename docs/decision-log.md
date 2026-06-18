@@ -168,3 +168,29 @@ Tradeoff:
 Review Trigger:
 
 - After testing whether users find the tone too soft, too generic, or sufficiently supportive.
+
+## 2026-06-18 - Use Recovery Planner As The MVP Visual Direction
+
+Status: accepted
+Area: design
+
+Decision:
+
+- Use Recovery Planner as the primary visual direction.
+- The app should feel like a calm daily planner where AI suggestions become reviewable plan cards.
+- Avoid building toward a generic chatbot, calorie tracker, hospital dashboard, or neon fitness app.
+
+Reason:
+
+- The product promise is continuation after a broken plan.
+- The selected direction balances warmth, structure, and MVP implementation speed.
+- It makes the AI suggestion card feel like the signature interaction while keeping Today calm and usable.
+
+Tradeoff:
+
+- Easier to make the app feel trustworthy and repeatable.
+- Harder to make the product feel visually loud or instantly flashy.
+
+Review Trigger:
+
+- After first tester feedback on whether the UI feels too plain, too system-heavy, or correctly planner-like.
