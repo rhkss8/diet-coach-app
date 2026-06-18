@@ -74,27 +74,35 @@ if [[ -n "${PORT:-}" ]]; then
   EXPO_START_ARGS+=(--port "$PORT")
 fi
 
+run_expo_start() {
+  if ((${#EXPO_START_ARGS[@]})); then
+    exec "${EXPO_CMD[@]}" start "$@" "${EXPO_START_ARGS[@]}"
+  fi
+
+  exec "${EXPO_CMD[@]}" start "$@"
+}
+
 case "$MODE" in
   start | run)
-    exec "${EXPO_CMD[@]}" start "${EXPO_START_ARGS[@]}"
+    run_expo_start
     ;;
   --ios | ios)
-    exec "${EXPO_CMD[@]}" start --ios "${EXPO_START_ARGS[@]}"
+    run_expo_start --ios
     ;;
   --android | android)
-    exec "${EXPO_CMD[@]}" start --android "${EXPO_START_ARGS[@]}"
+    run_expo_start --android
     ;;
   --web | web)
-    exec "${EXPO_CMD[@]}" start --web "${EXPO_START_ARGS[@]}"
+    run_expo_start --web
     ;;
   --dev-client | dev-client)
-    exec "${EXPO_CMD[@]}" start --dev-client "${EXPO_START_ARGS[@]}"
+    run_expo_start --dev-client
     ;;
   --lan | lan)
-    exec "${EXPO_CMD[@]}" start --lan "${EXPO_START_ARGS[@]}"
+    run_expo_start --lan
     ;;
   --tunnel | tunnel)
-    exec "${EXPO_CMD[@]}" start --tunnel "${EXPO_START_ARGS[@]}"
+    run_expo_start --tunnel
     ;;
   --export-web | export-web)
     cd "$ROOT_DIR"
