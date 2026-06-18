@@ -30,6 +30,12 @@ type TodayScreenProps = {
   };
 };
 
+/**
+ * Renders the approved plan as a continuation board for the current day.
+ *
+ * This screen avoids direct planning decisions; it shows progress, lets users mark execution, and
+ * sends recovery events into the adjustment flow when reality changes.
+ */
 export function TodayScreen({
   onAdjustToday,
   onOpenConsultation,
@@ -112,10 +118,16 @@ export function TodayScreen({
         </View>
         <View style={styles.heroCopy}>
           <Text style={styles.eyebrow}>TODAY BOARD</Text>
-          <Text style={styles.title}>오늘은 이어가는 것만 챙겨요</Text>
+          <Text style={styles.title}>오늘 플랜은 아직 살아 있어요</Text>
           <Text style={styles.description}>
-            남은 항목 {pendingItemCount}개. 계획이 달라지면 상담이나 조정으로 바로 다시 맞출 수
-            있어요.
+            남은 항목 {pendingItemCount}개. 회식, 야근, 운동 실패가 생겨도 남은 하루 기준으로 다시
+            맞추면 됩니다.
+          </Text>
+        </View>
+        <View style={styles.recoveryStrip}>
+          <Text style={styles.recoveryStripLabel}>복구 원칙</Text>
+          <Text style={styles.recoveryStripText}>
+            완벽하게 지키는 것보다, 끊기지 않게 이어가는 것
           </Text>
         </View>
       </View>
@@ -132,10 +144,10 @@ export function TodayScreen({
       </View>
 
       <View style={styles.summaryBand}>
-        <Text style={styles.summaryEyebrow}>현재 플랜</Text>
+        <Text style={styles.summaryEyebrow}>APPROVED PLAN</Text>
         <Text style={styles.summaryTitle}>{plan.summary}</Text>
-        <Text style={styles.summaryText}>
-          오늘은 식사와 운동을 합쳐 {todayItems.length}개 항목으로 시작합니다.
+        <Text style={styles.summaryTextOnDark}>
+          오늘은 식사와 운동을 합쳐 {todayItems.length}개 항목으로 이어갑니다.
         </Text>
       </View>
 
@@ -214,12 +226,20 @@ function TodayPlanSection({
         <View style={[styles.sectionAccent, sectionAccentStyle]} />
         <Text style={styles.sectionTitle}>{title}</Text>
       </View>
+      {items.length === 0 ? (
+        <View style={styles.emptySection}>
+          <Text style={styles.emptySectionText}>오늘 등록된 항목이 없어요.</Text>
+        </View>
+      ) : null}
       {items.map((planItem) => {
         const planItemId = planItem.id ?? `${planItem.date}-${planItem.slot}`;
 
         return (
           <View key={planItemId} style={styles.planItem}>
-            <Text style={styles.planItemSlot}>{getSlotLabel(planItem.slot)}</Text>
+            <View style={styles.planItemMetaRow}>
+              <Text style={styles.planItemSlot}>{getSlotLabel(planItem.slot)}</Text>
+              <Text style={styles.planItemState}>{getStatusLabel(planItem.status)}</Text>
+            </View>
             <Text style={styles.planItemTitle}>{planItem.title}</Text>
             <Text style={styles.planItemDescription}>{planItem.description}</Text>
             <View style={styles.controls}>
@@ -275,6 +295,18 @@ function getSlotLabel(slot: string) {
   return labels[slot] ?? slot;
 }
 
+function getStatusLabel(status?: PlanItemStatus) {
+  if (status === "completed") {
+    return "완료됨";
+  }
+
+  if (status === "skipped") {
+    return "건너뜀";
+  }
+
+  return "대기";
+}
+
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: theme.colors.background,
@@ -286,8 +318,12 @@ const styles = StyleSheet.create({
     paddingBottom: 36,
   },
   hero: {
-    backgroundColor: theme.colors.ink,
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderLeftColor: theme.colors.warm,
+    borderLeftWidth: 5,
     borderRadius: theme.radius.large,
+    borderWidth: 1,
     gap: theme.space.xl,
     padding: theme.space.lg,
   },
@@ -301,8 +337,8 @@ const styles = StyleSheet.create({
     gap: theme.space.xs,
   },
   datePill: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: theme.colors.warmSoft,
+    borderColor: "#E3C7B8",
     borderRadius: theme.radius.small,
     borderWidth: 1,
     paddingHorizontal: theme.space.sm,
@@ -310,12 +346,12 @@ const styles = StyleSheet.create({
   },
   datePillText: {
     ...theme.type.caption,
-    color: "#D8E0DA",
+    color: theme.colors.warm,
     fontWeight: "800",
   },
   headerActionButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    borderColor: "rgba(255, 255, 255, 0.22)",
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
     borderRadius: theme.radius.small,
     borderWidth: 1,
     justifyContent: "center",
@@ -324,7 +360,7 @@ const styles = StyleSheet.create({
   },
   headerActionButtonLabel: {
     ...theme.type.caption,
-    color: theme.colors.white,
+    color: theme.colors.primary,
     fontWeight: "900",
   },
   heroCopy: {
@@ -332,15 +368,33 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...theme.type.eyebrow,
-    color: "#B8CFC2",
+    color: theme.colors.primary,
   },
   title: {
     ...theme.type.title,
-    color: theme.colors.white,
+    color: theme.colors.ink,
   },
   description: {
     ...theme.type.body,
-    color: "#D8E0DA",
+    color: theme.colors.muted,
+  },
+  recoveryStrip: {
+    backgroundColor: theme.colors.surfaceTint,
+    borderColor: "#CADCD0",
+    borderRadius: theme.radius.medium,
+    borderWidth: 1,
+    gap: theme.space.xxs,
+    padding: theme.space.md,
+  },
+  recoveryStripLabel: {
+    ...theme.type.caption,
+    color: theme.colors.primary,
+    fontWeight: "900",
+  },
+  recoveryStripText: {
+    ...theme.type.supporting,
+    color: theme.colors.inkSoft,
+    fontWeight: "800",
   },
   statusGrid: {
     flexDirection: "row",
@@ -374,21 +428,28 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   summaryBand: {
-    ...commonStyles.insetCard,
+    backgroundColor: theme.colors.ink,
+    borderColor: theme.colors.ink,
+    borderRadius: theme.radius.medium,
+    borderWidth: 1,
     gap: theme.space.xs,
     padding: theme.space.md,
   },
   summaryEyebrow: {
     ...theme.type.eyebrow,
-    color: theme.colors.primary,
+    color: "#B8CFC2",
   },
   summaryTitle: {
     ...theme.type.sectionTitle,
-    color: theme.colors.ink,
+    color: theme.colors.white,
   },
   summaryText: {
     ...theme.type.supporting,
     color: theme.colors.muted,
+  },
+  summaryTextOnDark: {
+    ...theme.type.supporting,
+    color: "#D8E0DA",
   },
   progressBand: {
     ...commonStyles.card,
@@ -449,10 +510,27 @@ const styles = StyleSheet.create({
     gap: theme.space.xs,
     padding: theme.space.md,
   },
+  planItemMetaRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
   planItemSlot: {
     ...theme.type.caption,
     color: theme.colors.primary,
     fontWeight: "900",
+  },
+  planItemState: {
+    ...theme.type.caption,
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.small,
+    borderWidth: 1,
+    color: theme.colors.subtle,
+    fontWeight: "900",
+    overflow: "hidden",
+    paddingHorizontal: theme.space.xs,
+    paddingVertical: theme.space.xxs,
   },
   planItemTitle: {
     ...theme.type.body,
@@ -467,6 +545,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: theme.space.xs,
     paddingTop: theme.space.xs,
+  },
+  emptySection: {
+    ...commonStyles.insetCard,
+    padding: theme.space.md,
+  },
+  emptySectionText: {
+    ...theme.type.supporting,
+    color: theme.colors.muted,
   },
   statusButton: {
     alignItems: "center",

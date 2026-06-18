@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
-import { commonStyles, theme } from "../../shared/ui/design-system";
+import { theme } from "../../shared/ui/design-system";
 
 type ConsultationChatScreenProps = {
   messages: ChatPlannerMessage[];
@@ -13,6 +13,12 @@ type ConsultationChatScreenProps = {
   pendingResponse: ChatPlannerResponse | null;
 };
 
+/**
+ * Coordinates the chat-first planning workspace where AI answers become explicit plan actions.
+ *
+ * Draft text stays local to the screen, while approved AI suggestions are delegated to the caller so
+ * plan mutation remains reviewable and reversible.
+ */
 export function ConsultationChatScreen({
   messages,
   onApproveResponse,
@@ -46,11 +52,11 @@ export function ConsultationChatScreen({
           </Pressable>
         </View>
         <View style={styles.headerCopy}>
-          <Text style={styles.eyebrow}>ADAPTIVE PLANNER</Text>
-          <Text style={styles.title}>상담하고, 제안만 골라 담아요</Text>
+          <Text style={styles.eyebrow}>RECOVERY PLANNER</Text>
+          <Text style={styles.title}>상담은 가볍게, 변경은 승인 후에</Text>
           <Text style={styles.description}>
-            AI가 플랜을 바로 바꾸지 않아요. 식단, 운동, 수정안은 먼저 카드로 보여드리고 승인한 것만
-            반영합니다.
+            식단, 운동, 수정안은 먼저 플랜 패치 카드로 정리됩니다. 현재 계획은 사용자가 승인하기
+            전까지 그대로 유지돼요.
           </Text>
         </View>
       </View>
@@ -70,13 +76,28 @@ export function ConsultationChatScreen({
         {pendingResponse ? (
           <View style={styles.confirmationCard}>
             <View style={styles.confirmationHeader}>
-              <Text style={styles.confirmationKicker}>{getResponseTypeLabel(pendingResponse)}</Text>
+              <View style={styles.confirmationHeaderTop}>
+                <Text style={styles.confirmationKicker}>
+                  {getResponseTypeLabel(pendingResponse)}
+                </Text>
+                {"confirmation" in pendingResponse ? (
+                  <Text style={styles.pendingBadge}>승인 전</Text>
+                ) : null}
+              </View>
               <Text style={styles.confirmationTitle}>{pendingResponse.message}</Text>
             </View>
             {"confirmation" in pendingResponse ? (
               <>
-                <Text style={styles.confirmationDescription}>
-                  {getResponsePreviewText(pendingResponse)}
+                <View style={styles.patchBody}>
+                  {getResponsePreviewItems(pendingResponse).map((previewItem, index) => (
+                    <View key={`${previewItem}-${index}`} style={styles.patchItem}>
+                      <View style={styles.patchDot} />
+                      <Text style={styles.patchItemText}>{previewItem}</Text>
+                    </View>
+                  ))}
+                </View>
+                <Text style={styles.confirmationFootnote}>
+                  승인 전까지 오늘 플랜은 바뀌지 않아요.
                 </Text>
                 <View style={styles.confirmationActions}>
                   <PrimaryButton
@@ -107,14 +128,27 @@ export function ConsultationChatScreen({
   );
 }
 
-function getResponsePreviewText(
+/**
+ * Converts structured AI output into a short preview list that reads like a plan patch.
+ */
+function getResponsePreviewItems(
   response: Exclude<ChatPlannerResponse, { type: "clarification_question" }>,
 ) {
   if (response.type === "plan_revision_suggestion") {
-    return response.revision.summary;
+    const changedCount = response.revision.changedItemIds.length;
+
+    return [
+      response.revision.summary,
+      `오늘 항목 ${changedCount}개를 다시 맞춰요`,
+      ...response.revision.updatedTodayItems.slice(0, 2).map((item) => {
+        return `${getSlotLabel(item.slot)} · ${item.title}`;
+      }),
+    ];
   }
 
-  return response.suggestedItems.map((item) => item.title).join(", ");
+  return response.suggestedItems.slice(0, 3).map((item) => {
+    return `${getSlotLabel(item.slot)} · ${item.title}`;
+  });
 }
 
 function getResponseTypeLabel(response: ChatPlannerResponse) {
@@ -131,6 +165,18 @@ function getResponseTypeLabel(response: ChatPlannerResponse) {
   }
 
   return "추가 질문";
+}
+
+function getSlotLabel(slot: string) {
+  const labels: Record<string, string> = {
+    breakfast: "아침",
+    lunch: "점심",
+    dinner: "저녁",
+    snack: "간식",
+    workout: "운동",
+  };
+
+  return labels[slot] ?? slot;
 }
 
 const styles = StyleSheet.create({
@@ -227,21 +273,36 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
   },
   confirmationCard: {
-    ...commonStyles.card,
-    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.surface,
+    borderColor: "#D9B8A8",
+    borderRadius: theme.radius.large,
     borderWidth: 1,
     gap: theme.space.md,
     padding: theme.space.lg,
   },
   confirmationHeader: {
-    borderLeftColor: theme.colors.warm,
-    borderLeftWidth: 4,
     gap: theme.space.xs,
-    paddingLeft: theme.space.md,
+  },
+  confirmationHeaderTop: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   confirmationKicker: {
     ...theme.type.eyebrow,
     color: theme.colors.warm,
+  },
+  pendingBadge: {
+    ...theme.type.caption,
+    backgroundColor: theme.colors.warmSoft,
+    borderColor: "#E3C7B8",
+    borderRadius: theme.radius.small,
+    borderWidth: 1,
+    color: theme.colors.warm,
+    fontWeight: "900",
+    overflow: "hidden",
+    paddingHorizontal: theme.space.xs,
+    paddingVertical: theme.space.xxs,
   },
   confirmationTitle: {
     ...theme.type.sectionTitle,
@@ -250,6 +311,37 @@ const styles = StyleSheet.create({
   confirmationDescription: {
     ...theme.type.supporting,
     color: theme.colors.muted,
+  },
+  patchBody: {
+    backgroundColor: theme.colors.surfaceMuted,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.medium,
+    borderWidth: 1,
+    gap: theme.space.sm,
+    padding: theme.space.md,
+  },
+  patchItem: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: theme.space.xs,
+  },
+  patchDot: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 4,
+    height: 8,
+    marginTop: 7,
+    width: 8,
+  },
+  patchItemText: {
+    ...theme.type.supporting,
+    color: theme.colors.inkSoft,
+    flex: 1,
+    fontWeight: "700",
+  },
+  confirmationFootnote: {
+    ...theme.type.caption,
+    color: theme.colors.subtle,
+    fontWeight: "800",
   },
   confirmationActions: {
     alignItems: "flex-start",
