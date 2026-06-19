@@ -19,6 +19,7 @@ type ConsultationChatScreenProps = {
   onOpenPlan: () => void;
   onSendMessage: (message: string) => void;
   pendingResponse: ChatPlannerResponse | null;
+  showPlanAction: boolean;
 };
 
 /**
@@ -32,6 +33,7 @@ export function ConsultationChatScreen({
   onOpenPlan,
   onSendMessage,
   pendingResponse,
+  showPlanAction,
 }: ConsultationChatScreenProps) {
   const [draftMessage, setDraftMessage] = useState("");
   const canSendMessage = draftMessage.trim().length > 0;
@@ -51,7 +53,7 @@ export function ConsultationChatScreen({
     <View style={styles.screen}>
       <View style={styles.topBar}>
         <AppHeader
-          actions={<HeaderAction label="오늘 플랜" onPress={onOpenPlan} />}
+          actions={showPlanAction ? <HeaderAction label="오늘 플랜" onPress={onOpenPlan} /> : null}
           kicker="TARS · 플랜 상담"
           onBack={onBack}
         />
@@ -182,6 +184,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   messages: {
+    flexGrow: 1,
     gap: theme.space.sm,
     padding: theme.space.md,
   },

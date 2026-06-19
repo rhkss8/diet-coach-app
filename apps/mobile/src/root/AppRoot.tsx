@@ -18,7 +18,11 @@ import {
   usePlanRevisionPersistence,
 } from "../features/adjustment";
 import { AuthScreen, useAuthSession } from "../features/auth";
-import { applyChatPlannerResponseToPlan, ConsultationChatScreen } from "../features/consultation";
+import {
+  applyChatPlannerResponseToPlan,
+  ConsultationChatScreen,
+  createInitialConsultationMessages,
+} from "../features/consultation";
 import { useApprovedPlanPersistence } from "../features/plan";
 import { SettingsScreen } from "../features/settings";
 import { TodayScreen } from "../features/today";
@@ -26,15 +30,6 @@ import { getTodayPlanDate, getTodayPlanItems } from "../features/today";
 import { trackAnalyticsEvent } from "../shared/lib/analytics";
 
 type AppRoute = "adjustment" | "consultation" | "settings" | "today";
-
-const initialConsultationMessages: ChatPlannerMessage[] = [
-  {
-    id: "assistant-welcome",
-    role: "assistant",
-    content:
-      "온보딩에서 받은 정보를 바탕으로 시작해볼게요. 어떤 식단이나 운동 방법이 필요하신가요? 원하는 변화와 생활 패턴을 편하게 이야기해 주세요. 저랑 대화하면서 오늘부터 이어갈 플랜을 만들어볼게요.",
-  },
-];
 
 export function AppRoot() {
   const {
@@ -50,7 +45,7 @@ export function AppRoot() {
   const [routeHistory, setRouteHistory] = useState<AppRoute[]>(["consultation"]);
   const currentRoute = routeHistory.at(-1) ?? "consultation";
   const [consultationMessages, setConsultationMessages] = useState<ChatPlannerMessage[]>(
-    initialConsultationMessages,
+    createInitialConsultationMessages,
   );
   const [pendingChatResponse, setPendingChatResponse] = useState<ChatPlannerResponse | null>(null);
   const [selectedAdjustmentReason, setSelectedAdjustmentReason] = useState<
@@ -262,6 +257,7 @@ export function AppRoot() {
             });
           }}
           pendingResponse={pendingChatResponse}
+          showPlanAction={Boolean(approvedPlanSnapshot)}
         />
       )}
     </SafeAreaView>
