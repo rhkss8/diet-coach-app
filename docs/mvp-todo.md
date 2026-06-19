@@ -220,9 +220,9 @@ Todos:
   - [x] Match the dashed proposal header, icon, type label, item rows, footnote, dismiss button, and approve button.
   - [x] Use the Figma Make two-button action layout.
   - [x] Do not mutate the plan before approval.
-- [ ] Rebuild the today plan screen.
-  - [ ] Match the compact top area, date, serif title, progress rail, meal/exercise section headers, cards, skip pills, and bottom coral recovery CTA.
-  - [ ] Confirm the design matches the user-approved Image #1 compact version, not the earlier oversized Image #2 version.
+- [x] Rebuild the today plan screen.
+  - [x] Match the compact top area, date, serif title, progress rail, meal/exercise section headers, cards, skip pills, and bottom coral recovery CTA.
+  - [x] Confirm the design matches the user-approved Image #1 compact version, not the earlier oversized Image #2 version.
 - [ ] Rebuild the recovery reason screen.
   - [ ] Show seven Figma Make reasons: 회식, 야근, 폭식, 운동 못했어요, 여행 / 외출, 몸 상태, 기타.
   - [ ] Use the actual Figma Make icon set and selected coral styling.

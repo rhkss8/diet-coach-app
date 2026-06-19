@@ -342,9 +342,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    gap: theme.space.md,
-    paddingBottom: theme.space.md,
-    paddingHorizontal: theme.space.md,
+    gap: theme.space.lg,
+    paddingBottom: theme.space.sm,
+    paddingHorizontal: theme.space.xl,
     paddingTop: theme.space.sm,
   },
   headerBlock: {
@@ -388,8 +388,11 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   title: {
-    ...theme.type.title,
     color: theme.colors.ink,
+    fontFamily: "serif",
+    fontSize: 21,
+    fontWeight: "400",
+    lineHeight: 33,
   },
   section: {
     gap: theme.space.xs,
