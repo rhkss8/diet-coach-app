@@ -223,10 +223,10 @@ Todos:
 - [x] Rebuild the today plan screen.
   - [x] Match the compact top area, date, serif title, progress rail, meal/exercise section headers, cards, skip pills, and bottom coral recovery CTA.
   - [x] Confirm the design matches the user-approved Image #1 compact version, not the earlier oversized Image #2 version.
-- [ ] Rebuild the recovery reason screen.
-  - [ ] Show seven Figma Make reasons: 회식, 야근, 폭식, 운동 못했어요, 여행 / 외출, 몸 상태, 기타.
-  - [ ] Use the actual Figma Make icon set and selected coral styling.
-  - [ ] Keep domain mapping internal when multiple UI reasons map to one adjustment reason.
+- [x] Rebuild the recovery reason screen.
+  - [x] Show seven Figma Make reasons: 회식, 야근, 폭식, 운동 못했어요, 여행 / 외출, 몸 상태, 기타.
+  - [x] Use the actual Figma Make icon set and selected coral styling.
+  - [x] Keep domain mapping internal when multiple UI reasons map to one adjustment reason.
 - [ ] Rebuild the revised plan approval screen.
   - [ ] Match assistant bubble, before/after comparison card, divider, badges, reassurance row, approve button, and secondary "다시 제안받기" button.
 - [ ] Run visual QA before marking this phase done.

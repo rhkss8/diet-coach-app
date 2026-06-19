@@ -1,6 +1,7 @@
 import type { AdjustmentReason } from "@diet-coach/core";
 import { useState } from "react";
 import {
+  ArrowRight,
   ChevronLeft,
   Coffee,
   Dumbbell,
@@ -12,21 +13,13 @@ import {
 } from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { FormTextField } from "../../shared/ui/FormTextField";
 import { theme } from "../../shared/ui/design-system";
-import {
-  BottomActionPanel,
-  type PlannerIcon,
-  ReasonTile,
-  ScreenTitleBlock,
-} from "../../shared/ui/planner-components";
+import { type PlannerIcon, ReasonTile, ScreenTitleBlock } from "../../shared/ui/planner-components";
 
 type AdjustmentReasonSelectionScreenProps = {
-  note: string;
-  onChangeNote: (note: string) => void;
   onBack: () => void;
   onSelectReason: (reason: AdjustmentReason) => void;
-  onSubmitNote: () => void;
+  onSubmitReason: () => void;
   selectedReason?: AdjustmentReason;
 };
 
@@ -94,16 +87,15 @@ const recoveryReasonOptions = [
  * Maps the adjustment entry route to the Figma Make recovery-reasons source screen.
  */
 export function AdjustmentReasonSelectionScreen({
-  note,
-  onChangeNote,
   onBack,
   onSelectReason,
-  onSubmitNote,
+  onSubmitReason,
   selectedReason,
 }: AdjustmentReasonSelectionScreenProps) {
   const initialSelectedId =
-    recoveryReasonOptions.find((option) => option.value === selectedReason)?.id ?? "overtime";
+    recoveryReasonOptions.find((option) => option.value === selectedReason)?.id ?? "";
   const [selectedReasonId, setSelectedReasonId] = useState(initialSelectedId);
+  const canSubmit = selectedReasonId.length > 0;
 
   return (
     <View style={styles.screen}>
@@ -138,23 +130,25 @@ export function AdjustmentReasonSelectionScreen({
             </View>
           ))}
         </View>
-
-        <View style={styles.noteCard}>
-          <FormTextField
-            label="짧은 메모"
-            multiline
-            onChangeText={onChangeNote}
-            placeholder="예: 점심을 많이 먹었어요. 오늘 운동은 어려울 것 같아요."
-            value={note}
-          />
-        </View>
       </ScrollView>
 
-      <BottomActionPanel
-        helperText="메모는 선택 입력이에요. 비워도 다음 단계로 갈 수 있어요."
-        label="조정안 만들기"
-        onPress={onSubmitNote}
-      />
+      <View style={styles.bottomPanel}>
+        <Pressable
+          accessibilityRole="button"
+          disabled={!canSubmit}
+          onPress={onSubmitReason}
+          style={[styles.submitButton, !canSubmit && styles.disabledSubmitButton]}
+        >
+          <Text style={[styles.submitButtonText, !canSubmit && styles.disabledSubmitButtonText]}>
+            AI에게 조정 요청하기
+          </Text>
+          <ArrowRight
+            color={canSubmit ? theme.colors.surface : theme.colors.muted}
+            size={15}
+            strokeWidth={2}
+          />
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -206,11 +200,33 @@ const styles = StyleSheet.create({
   reasonPlaceholder: {
     flex: 1,
   },
-  noteCard: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
+  bottomPanel: {
+    backgroundColor: theme.colors.background,
+    borderTopColor: "rgba(42, 61, 46, 0.07)",
+    borderTopWidth: 1,
+    paddingBottom: 40,
+    paddingHorizontal: theme.space.xl,
+    paddingTop: theme.space.sm,
+  },
+  submitButton: {
+    alignItems: "center",
+    backgroundColor: theme.colors.primary,
     borderRadius: theme.radius.large,
-    borderWidth: 1,
-    padding: theme.space.md,
+    flexDirection: "row",
+    gap: theme.space.xs,
+    minHeight: 52,
+    justifyContent: "center",
+  },
+  disabledSubmitButton: {
+    backgroundColor: theme.colors.backgroundAlt,
+  },
+  submitButtonText: {
+    color: theme.colors.surface,
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 18,
+  },
+  disabledSubmitButtonText: {
+    color: theme.colors.muted,
   },
 });

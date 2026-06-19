@@ -51,7 +51,6 @@ export function AppRoot() {
   const [selectedAdjustmentReason, setSelectedAdjustmentReason] = useState<
     AdjustmentReason | undefined
   >();
-  const [adjustmentNote, setAdjustmentNote] = useState("");
   const [adjustedPlanOutput, setAdjustedPlanOutput] = useState<AdjustTodayPlanOutput | null>(null);
   const [isApprovingAdjustedPlan, setIsApprovingAdjustedPlan] = useState(false);
   const { latestRevisionSnapshot, persistPlanRevision } = usePlanRevisionPersistence();
@@ -113,7 +112,6 @@ export function AppRoot() {
                 },
                 resetAdjustmentFlow: () => {
                   setAdjustedPlanOutput(null);
-                  setAdjustmentNote("");
                   setSelectedAdjustmentReason(undefined);
                   navigateTo("today");
                 },
@@ -139,8 +137,6 @@ export function AppRoot() {
           />
         ) : (
           <AdjustmentReasonSelectionScreen
-            note={adjustmentNote}
-            onChangeNote={setAdjustmentNote}
             onBack={() => navigateBack(setRouteHistory)}
             onSelectReason={(reason) => {
               setSelectedAdjustmentReason(reason);
@@ -151,13 +147,17 @@ export function AppRoot() {
                 reason,
               });
             }}
-            onSubmitNote={() => {
-              const reason = selectedAdjustmentReason ?? "schedule_changed";
+            onSubmitReason={() => {
+              if (!selectedAdjustmentReason) {
+                return;
+              }
+
+              const reason = selectedAdjustmentReason;
               trackAnalyticsEvent("ADJUSTMENT_NOTE_SUBMITTED", {
                 userId: "local-user",
                 planId: approvedPlanSnapshot?.plan.id ?? "local-plan",
                 affectedDate: approvedPlanSnapshot?.plan.startDate ?? "local-date",
-                hasNote: adjustmentNote.trim().length > 0,
+                hasNote: false,
                 reason,
               });
               trackAnalyticsEvent("PLAN_ADJUSTMENT_GENERATION_STARTED", {
@@ -182,7 +182,6 @@ export function AppRoot() {
                   planId: approvedPlanSnapshot?.plan.id ?? "local-plan",
                   affectedDate: approvedPlanSnapshot?.plan.startDate ?? "local-date",
                   reason,
-                  note: adjustmentNote.trim() || undefined,
                 },
               });
               trackAnalyticsEvent("PLAN_ADJUSTMENT_GENERATION_SUCCEEDED", {
