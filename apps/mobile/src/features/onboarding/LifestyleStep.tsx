@@ -2,6 +2,7 @@ import type { LifestyleAnswers } from "@diet-coach/core";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
+import { PlannerBrandRow } from "../../shared/ui/planner-components";
 import { SegmentedChoice } from "../../shared/ui/SegmentedChoice";
 import { useLifestyleStep } from "./useLifestyleStep";
 
@@ -33,6 +34,7 @@ export function LifestyleStep({ onComplete }: LifestyleStepProps) {
 
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
+      <PlannerBrandRow />
       <View style={styles.header}>
         <Text style={styles.eyebrow}>온보딩 3/3</Text>
         <Text style={styles.title}>생활 패턴을 짧게 맞출게요</Text>

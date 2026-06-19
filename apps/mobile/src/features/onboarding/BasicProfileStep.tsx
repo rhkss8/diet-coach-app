@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { FormTextField } from "../../shared/ui/FormTextField";
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
+import { PlannerBrandRow } from "../../shared/ui/planner-components";
 import { SegmentedChoice } from "../../shared/ui/SegmentedChoice";
 import { normalizeDecimalInput, normalizeIntegerInput } from "./profile-step";
 import { useBasicProfileStep } from "./useBasicProfileStep";
@@ -24,6 +25,7 @@ export function BasicProfileStep({ onComplete }: BasicProfileStepProps) {
 
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
+      <PlannerBrandRow />
       <View style={styles.header}>
         <Text style={styles.eyebrow}>온보딩 1/3</Text>
         <Text style={styles.title}>기본 정보를 알려주세요</Text>

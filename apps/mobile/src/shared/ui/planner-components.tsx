@@ -22,6 +22,10 @@ type BrandLeafProps = {
   size?: number;
 };
 
+type PlannerBrandRowProps = {
+  label?: string;
+};
+
 /**
  * Renders the Figma Make Leaf icon in the circular brand container used by the reference screens.
  */
@@ -43,6 +47,22 @@ export function BrandLeaf({
       ]}
     >
       <Leaf color={color} size={Math.round(size * 0.48)} strokeWidth={2} />
+    </View>
+  );
+}
+
+/**
+ * Shows the small brand row used by the Figma Make login and onboarding screens.
+ */
+export function PlannerBrandRow({ label = "TARS · Recovery Planner" }: PlannerBrandRowProps) {
+  return (
+    <View style={styles.brandRow}>
+      <BrandLeaf
+        backgroundColor={theme.colors.primarySoft}
+        color={theme.colors.primary}
+        size={28}
+      />
+      <Text style={styles.brandRowText}>{label}</Text>
     </View>
   );
 }
@@ -419,6 +439,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: theme.space.xs,
+  },
+  brandRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: theme.space.xs,
+  },
+  brandRowText: {
+    color: theme.colors.primary,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.8,
+    lineHeight: 15,
+    textTransform: "uppercase",
   },
   brandLeaf: {
     alignItems: "center",

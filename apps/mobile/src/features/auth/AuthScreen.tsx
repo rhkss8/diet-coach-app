@@ -5,7 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { FormTextField } from "../../shared/ui/FormTextField";
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
 import { commonStyles, theme } from "../../shared/ui/design-system";
-import { BrandLeaf } from "../../shared/ui/planner-components";
+import { PlannerBrandRow } from "../../shared/ui/planner-components";
 
 type AuthScreenProps = {
   error: string | null;
@@ -28,14 +28,7 @@ export function AuthScreen({
 
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
-      <View style={styles.brandRow}>
-        <BrandLeaf
-          backgroundColor={theme.colors.primarySoft}
-          color={theme.colors.primary}
-          size={28}
-        />
-        <Text style={styles.brandText}>TARS · Recovery Planner</Text>
-      </View>
+      <PlannerBrandRow />
 
       <View style={styles.header}>
         <Text style={styles.eyebrow}>로그인</Text>
@@ -89,20 +82,6 @@ const styles = StyleSheet.create({
   content: {
     gap: theme.space.md,
     padding: theme.space.xl,
-  },
-  brandRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: theme.space.xs,
-    paddingTop: theme.space.sm,
-  },
-  brandText: {
-    color: theme.colors.primary,
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 1.8,
-    lineHeight: 15,
-    textTransform: "uppercase",
   },
   header: {
     backgroundColor: theme.colors.ink,

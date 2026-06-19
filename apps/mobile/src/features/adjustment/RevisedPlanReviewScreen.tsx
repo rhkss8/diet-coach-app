@@ -1,5 +1,5 @@
 import type { AdjustTodayPlanOutput } from "@diet-coach/ai";
-import { ArrowRight, Check } from "lucide-react-native";
+import { ArrowRight, Check, ChevronLeft } from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ChatBubble, ScreenTitleBlock } from "../../shared/ui/planner-components";
@@ -9,6 +9,7 @@ import { getChangedTodayItems } from "./revised-plan-review";
 type RevisedPlanReviewScreenProps = {
   output: AdjustTodayPlanOutput;
   onApprove: () => void;
+  onBack: () => void;
   onDismiss: () => void;
 };
 
@@ -17,6 +18,7 @@ type RevisedPlanReviewScreenProps = {
  */
 export function RevisedPlanReviewScreen({
   onApprove,
+  onBack,
   onDismiss,
   output,
 }: RevisedPlanReviewScreenProps) {
@@ -25,6 +27,11 @@ export function RevisedPlanReviewScreen({
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} style={styles.scroller}>
+        <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
+          <ChevronLeft color={theme.colors.primary} size={18} strokeWidth={2} />
+          <Text style={styles.backButtonText}>돌아가기</Text>
+        </Pressable>
+
         <ScreenTitleBlock title={"수정안이\n준비됐어요."} />
 
         <ChatBubble role="assistant">{output.revision.userMessage}</ChatBubble>
@@ -122,7 +129,20 @@ const styles = StyleSheet.create({
     gap: theme.space.lg,
     paddingBottom: theme.space.xl,
     paddingHorizontal: theme.space.xl,
-    paddingTop: theme.space.lg,
+    paddingTop: theme.space.sm,
+  },
+  backButton: {
+    alignItems: "center",
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    gap: 2,
+    minHeight: 32,
+    justifyContent: "center",
+  },
+  backButtonText: {
+    color: theme.colors.primary,
+    fontSize: 13,
+    lineHeight: 18,
   },
   compareCard: {
     borderColor: theme.colors.border,

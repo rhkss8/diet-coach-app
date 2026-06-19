@@ -125,6 +125,9 @@ export function AppRoot() {
                 setIsApprovingAdjustedPlan,
               });
             }}
+            onBack={() => {
+              setAdjustedPlanOutput(null);
+            }}
             onDismiss={() => {
               const revision = adjustedPlanOutput.revision;
 

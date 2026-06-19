@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { FormTextField } from "../../shared/ui/FormTextField";
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
+import { PlannerBrandRow } from "../../shared/ui/planner-components";
 import { CalendarDatePicker } from "./CalendarDatePicker";
 import { getTargetDateRange, normalizeGoalWeightInput } from "./goal-step";
 import { useGoalSetupStep } from "./useGoalSetupStep";
@@ -21,6 +22,7 @@ export function GoalSetupStep({ onComplete, profile }: GoalSetupStepProps) {
 
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
+      <PlannerBrandRow />
       <View style={styles.header}>
         <Text style={styles.eyebrow}>온보딩 2/3</Text>
         <Text style={styles.title}>목표를 정해볼게요</Text>
