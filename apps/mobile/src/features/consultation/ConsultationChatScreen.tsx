@@ -10,6 +10,7 @@ import {
   PlanProposalCard,
   PlannerChatInput,
 } from "../../shared/ui/planner-components";
+import { getChatProposalPreviewItems } from "./chat-proposal-preview";
 
 type ConsultationChatScreenProps = {
   messages: ChatPlannerMessage[];
@@ -71,7 +72,7 @@ export function ConsultationChatScreen({
             <PlanProposalCard
               actionLabel={getConfirmationActionLabel(pendingResponse)}
               description={pendingResponse.message}
-              items={getResponsePreviewItems(pendingResponse)}
+              items={getChatProposalPreviewItems(pendingResponse)}
               onApprove={() => onApproveResponse(pendingResponse)}
               onDismiss={onDismissPendingResponse}
               title={getProposalTitle(pendingResponse)}
@@ -95,26 +96,6 @@ export function ConsultationChatScreen({
       />
     </View>
   );
-}
-
-/**
- * Converts structured planner output into a short preview list that reads like a plan patch.
- */
-function getResponsePreviewItems(
-  response: Exclude<ChatPlannerResponse, { type: "clarification_question" }>,
-) {
-  if (response.type === "plan_revision_suggestion") {
-    return [
-      response.revision.summary,
-      ...response.revision.updatedTodayItems.slice(0, 2).map((item) => {
-        return `${getSlotLabel(item.slot)} · ${item.title}`;
-      }),
-    ];
-  }
-
-  return response.suggestedItems.slice(0, 3).map((item) => {
-    return `${getSlotLabel(item.slot)} · ${item.title}`;
-  });
 }
 
 function getProposalTitle(
@@ -156,19 +137,6 @@ function getResponseTypeLabel(response: ChatPlannerResponse) {
 
   return "추가 질문";
 }
-
-function getSlotLabel(slot: string) {
-  const labels: Record<string, string> = {
-    breakfast: "아침",
-    lunch: "점심",
-    dinner: "저녁",
-    snack: "간식",
-    workout: "운동",
-  };
-
-  return labels[slot] ?? slot;
-}
-
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: theme.colors.background,

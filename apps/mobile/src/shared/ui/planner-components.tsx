@@ -215,10 +215,15 @@ export function PlannerChatInput({
   );
 }
 
+export type PlanProposalItem = {
+  detail: string;
+  title: string;
+};
+
 type PlanProposalCardProps = {
   actionLabel: string;
   description: string;
-  items: string[];
+  items: PlanProposalItem[];
   onApprove: () => void;
   onDismiss?: () => void;
   title: string;
@@ -249,9 +254,12 @@ export function PlanProposalCard({
         <Text style={styles.proposalDescription}>{description}</Text>
         <View style={styles.proposalItems}>
           {items.map((item) => (
-            <View key={item} style={styles.proposalItem}>
+            <View key={`${item.title}-${item.detail}`} style={styles.proposalItem}>
               <View style={styles.proposalRail} />
-              <Text style={styles.proposalItemText}>{item}</Text>
+              <View style={styles.proposalItemCopy}>
+                <Text style={styles.proposalItemTitle}>{item.title}</Text>
+                <Text style={styles.proposalItemDetail}>{item.detail}</Text>
+              </View>
             </View>
           ))}
         </View>
@@ -650,12 +658,21 @@ const styles = StyleSheet.create({
     height: 32,
     width: 3,
   },
-  proposalItemText: {
-    color: theme.colors.ink,
+  proposalItemCopy: {
     flex: 1,
+    gap: 2,
+    minWidth: 0,
+  },
+  proposalItemTitle: {
+    color: theme.colors.ink,
     fontSize: 12,
     fontWeight: "500",
     lineHeight: 17,
+  },
+  proposalItemDetail: {
+    color: theme.colors.muted,
+    fontSize: 11,
+    lineHeight: 16,
   },
   proposalFootnote: {
     color: theme.colors.muted,
