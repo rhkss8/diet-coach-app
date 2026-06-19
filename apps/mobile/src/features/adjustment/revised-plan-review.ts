@@ -2,8 +2,22 @@ import type { AdjustTodayPlanOutput, AiPlanItem } from "@diet-coach/ai";
 
 export function getChangedTodayItems(revision: AdjustTodayPlanOutput["revision"]) {
   const changedItemIdSet = new Set(revision.changedItemIds);
+  const displayedSlots = new Set<string>();
 
-  return revision.updatedTodayItems.filter((planItem) => changedItemIdSet.has(planItem.id ?? ""));
+  return revision.updatedTodayItems.filter((planItem) => {
+    if (!changedItemIdSet.has(planItem.id ?? "")) {
+      return false;
+    }
+
+    const displayKey = `${planItem.type}:${planItem.slot}`;
+
+    if (displayedSlots.has(displayKey)) {
+      return false;
+    }
+
+    displayedSlots.add(displayKey);
+    return true;
+  });
 }
 
 export function countChangedTodayItems(planItems: AiPlanItem[]) {

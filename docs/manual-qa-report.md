@@ -52,3 +52,33 @@ Passed.
 
 - Browser QA used a fresh `localhost` origin to avoid stale `127.0.0.1` AsyncStorage from earlier form-onboarding builds.
 - Native device QA is still needed before external tester distribution.
+
+## 2026-06-19 - Phase 9 Figma Make Visual QA
+
+Scope: Figma Make publishing parity for the currently routable web states.
+
+Environment:
+
+- Export command: `pnpm mobile:build:web`
+- Static server: `python3 -m http.server 4174 --directory dist/mobile-web-qa`
+- Browser target: `http://127.0.0.1:4174`
+- Captures: `output/playwright/qa-login.png`, `qa-chat-initial.png`, `qa-chat-proposal.png`, `qa-today.png`, `qa-recovery-reasons.png`, `qa-plan-approval.png`
+
+Result: partially passed.
+
+Checked:
+
+- Login renders the small brand row and guest entry.
+- Chat initial state renders the bordered top bar, one assistant welcome bubble, empty canvas, and docked input.
+- Chat proposal renders the proposal shell, type label, item row, footnote, dismiss action, and approval action.
+- Today renders compact header, date/title, progress rail, grouped meal/exercise cards, skip pills, and coral recovery CTA.
+- Recovery reasons render seven Figma Make reasons, selected coral styling, and disabled/enabled bottom CTA.
+- Revised plan approval renders assistant bubble, "변경 내용", before/after card, divider, badges, reassurance row, approve button, and secondary action.
+
+Fixed during QA:
+
+- Revised plan approval displayed duplicate workout comparison rows when multiple `workout` items changed. The review helper now shows one comparison row per changed type/slot.
+
+Blocked:
+
+- Onboarding could not be captured because the current `AppRoot` guest flow routes from login directly to chat-first consultation. Decide whether to restore a routable onboarding screen for Figma Make parity or keep chat-first entry as the MVP flow.

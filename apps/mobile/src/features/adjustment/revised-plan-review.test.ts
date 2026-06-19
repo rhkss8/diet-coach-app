@@ -48,6 +48,39 @@ describe("revised plan review", () => {
     ]);
   });
 
+  it("shows only one comparison row per changed type and slot", () => {
+    const changedItems = getChangedTodayItems({
+      ...output.revision,
+      changedItemIds: ["walk-1", "stretch-1"],
+      updatedTodayItems: [
+        {
+          id: "walk-1",
+          date: "2026-06-16",
+          type: "exercise",
+          slot: "workout",
+          title: "산책",
+          description: "10분 걷기",
+          status: "adjusted",
+        },
+        {
+          id: "stretch-1",
+          date: "2026-06-16",
+          type: "exercise",
+          slot: "workout",
+          title: "스트레칭",
+          description: "취침 전",
+          status: "adjusted",
+        },
+      ],
+    });
+
+    expect(changedItems).toEqual([
+      expect.objectContaining({
+        id: "walk-1",
+      }),
+    ]);
+  });
+
   it("counts changed items", () => {
     expect(countChangedTodayItems(getChangedTodayItems(output.revision))).toBe(1);
   });

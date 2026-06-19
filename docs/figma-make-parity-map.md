@@ -62,11 +62,12 @@ Current React Native token coverage:
 - Native icon strategy is resolved with `lucide-react-native` and `react-native-svg`. The former hand-drawn `LeafMark` and text-symbol icons have been replaced with lucide icons in the shared planner UI and mapped Phase 9 screens.
 - Header rules are implemented for the current RN route structure: login/onboarding use the small brand row, chat uses the bordered centered app header, today uses the compact split header, and recovery/revised approval use back button/title blocks.
 - Onboarding is the largest structural mismatch. RN's 3-step product flow conflicts with Figma Make's single-screen published state and should go through a decision gate before removing fields or collapsing the flow.
-- Visual QA is still required for all seven states after implementation fixes.
+- Visual QA captured the currently routable states: login, chat, chat-proposal, today, recovery-reasons, and plan-approval.
+- Onboarding is not currently reachable from `AppRoot` in the chat-first guest flow, so it remains a decision gate before Phase 9 can be marked fully complete.
 
 ## Recommended Next Slice
 
 Run visual QA before marking Phase 9 done:
 
-1. Export the web build.
-2. Capture and compare login, onboarding, chat, chat-proposal, today, recovery-reasons, and plan-approval against the Figma Make states.
+1. Decide whether RN should restore a routable onboarding screen or keep the chat-first guest entry.
+2. If onboarding remains in scope, capture and compare it against the Figma Make state.

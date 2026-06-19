@@ -230,10 +230,11 @@ Todos:
 - [x] Rebuild the revised plan approval screen.
   - [x] Match assistant bubble, before/after comparison card, divider, badges, reassurance row, approve button, and secondary "다시 제안받기" button.
 - [ ] Run visual QA before marking this phase done.
-  - [ ] Export web build.
-  - [ ] Capture screenshots for login, onboarding, chat, chat-proposal, today, recovery-reasons, and plan-approval.
-  - [ ] Compare screenshots against `figma_make` state by state.
-  - [ ] Fix mismatches before committing.
+  - [x] Export web build.
+  - [x] Capture screenshots for login, chat, chat-proposal, today, recovery-reasons, and plan-approval.
+  - [ ] Decide whether RN should restore a routable onboarding screen or keep the chat-first guest entry before capturing onboarding.
+  - [x] Compare captured screenshots against `figma_make` state by state.
+  - [x] Fix mismatches before committing.
 
 Exit criteria:
 
