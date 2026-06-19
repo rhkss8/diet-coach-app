@@ -196,10 +196,10 @@ Do not infer shapes, icons, headers, or screen states when the Figma Make file d
 
 Todos:
 
-- [ ] Create a Figma Make parity map.
-  - [ ] List each Figma Make screen: login, onboarding, chat, chat-proposal, today-plan, recovery-reasons, plan-approval.
-  - [ ] Map each screen to the current React Native screen/component file.
-  - [ ] Mark missing, extra, or structurally different UI regions.
+- [x] Create a Figma Make parity map.
+  - [x] List each Figma Make screen: login, onboarding, chat, chat-proposal, today-plan, recovery-reasons, plan-approval.
+  - [x] Map each screen to the current React Native screen/component file.
+  - [x] Mark missing, extra, or structurally different UI regions.
 - [ ] Replace the incorrect custom brand mark.
   - [ ] Use the actual Figma Make icon source instead of a hand-drawn approximation.
   - [ ] Add the required native icon strategy, such as `lucide-react-native`, if the app does not already have it.
