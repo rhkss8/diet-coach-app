@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import type { AdjustTodayPlanOutput } from "@diet-coach/ai";
 
-import { countChangedTodayItems, getChangedTodayItems } from "./revised-plan-review";
+import {
+  countChangedTodayItems,
+  getChangeBadgeLabel,
+  getChangedTodayItems,
+} from "./revised-plan-review";
 
 const output = {
   revision: {
@@ -46,5 +50,20 @@ describe("revised plan review", () => {
 
   it("counts changed items", () => {
     expect(countChangedTodayItems(getChangedTodayItems(output.revision))).toBe(1);
+  });
+
+  it("labels meal and workout changes like the Figma Make approval badges", () => {
+    expect(getChangeBadgeLabel(output.revision.updatedTodayItems[0])).toBe("새로 추가");
+    expect(
+      getChangeBadgeLabel({
+        id: "workout-1",
+        date: "2026-06-16",
+        type: "exercise",
+        slot: "workout",
+        title: "산책",
+        description: "내일 오전으로 이동",
+        status: "adjusted",
+      }),
+    ).toBe("이동");
   });
 });

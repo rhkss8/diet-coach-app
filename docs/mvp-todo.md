@@ -227,8 +227,8 @@ Todos:
   - [x] Show seven Figma Make reasons: 회식, 야근, 폭식, 운동 못했어요, 여행 / 외출, 몸 상태, 기타.
   - [x] Use the actual Figma Make icon set and selected coral styling.
   - [x] Keep domain mapping internal when multiple UI reasons map to one adjustment reason.
-- [ ] Rebuild the revised plan approval screen.
-  - [ ] Match assistant bubble, before/after comparison card, divider, badges, reassurance row, approve button, and secondary "다시 제안받기" button.
+- [x] Rebuild the revised plan approval screen.
+  - [x] Match assistant bubble, before/after comparison card, divider, badges, reassurance row, approve button, and secondary "다시 제안받기" button.
 - [ ] Run visual QA before marking this phase done.
   - [ ] Export web build.
   - [ ] Capture screenshots for login, onboarding, chat, chat-proposal, today, recovery-reasons, and plan-approval.

@@ -47,7 +47,7 @@ Current React Native token coverage:
 | `chat-proposal`    | `ChatProposalScreen`, `ProposalCard` | `ConsultationChatScreen.tsx`, `PlanProposalCard` in `apps/mobile/src/shared/ui/planner-components.tsx`                     | Partial                | RN has the proposal card shell, dashed header, icon, type label, two-line item rows, footnote, dismiss action, and approve action. Shared proposal icons use lucide `Leaf` and `Check`, and plan mutation remains behind explicit approval. Visual QA is still required against the published state.                                                                                              |
 | `today-plan`       | `TodayPlanScreen`, `PlanItemCard`    | `apps/mobile/src/features/today/TodayScreen.tsx`, `PlannerItemCard`, `PlannerProgress`, `BottomActionPanel`                | Implemented            | Compact header, date/title block, progress rail, grouped meal/exercise cards, skip controls, and coral recovery CTA now follow the compact Figma Make rhythm. RN section headers use `Utensils` and `Dumbbell`, the header brand uses lucide `Leaf`, and controls use lucide icons. Needs visual QA against the user-approved compact Image #1.                                                   |
 | `recovery-reasons` | `RecoveryReasonsScreen`, `REASONS`   | `apps/mobile/src/features/adjustment/AdjustmentReasonSelectionScreen.tsx`                                                  | Implemented            | Seven reasons exist and map internally to domain reasons. RN uses lucide `Coffee`, `Moon`, `Utensils`, `Dumbbell`, `Plane`, `Heart`, `HelpCircle`, selected coral tile styling, the Figma Make back/title block rhythm, and the disabled/enabled "AI에게 조정 요청하기" bottom CTA. The extra note card was removed to match Figma Make.                                                          |
-| `plan-approval`    | `PlanApprovalScreen`                 | `apps/mobile/src/features/adjustment/RevisedPlanReviewScreen.tsx`                                                          | Partial                | Revised approval comparison structure exists: back button/title block, assistant bubble, before/after card, divider, badges, reassurance row, approve button, and "다시 제안받기" button. Divider and approve affordances now use lucide `ArrowRight` and `Check`.                                                                                                                                |
+| `plan-approval`    | `PlanApprovalScreen`                 | `apps/mobile/src/features/adjustment/RevisedPlanReviewScreen.tsx`                                                          | Implemented            | Revised approval comparison structure follows the Figma Make back/title block, assistant bubble, "변경 내용" label, before/after card, divider, meal/workout badges, reassurance row, approve button, and "다시 제안받기" button. Divider and approve affordances use lucide `ArrowRight` and `Check`.                                                                                            |
 
 ## Extra Or Adjacent RN Screens
 
@@ -66,7 +66,7 @@ Current React Native token coverage:
 
 ## Recommended Next Slice
 
-Rebuild the revised plan approval screen:
+Run visual QA before marking Phase 9 done:
 
-1. Match the assistant bubble, comparison card, divider, badges, reassurance row, approve button, and secondary "다시 제안받기" button.
-2. Keep revision application behind explicit approval.
+1. Export the web build.
+2. Capture and compare login, onboarding, chat, chat-proposal, today, recovery-reasons, and plan-approval against the Figma Make states.

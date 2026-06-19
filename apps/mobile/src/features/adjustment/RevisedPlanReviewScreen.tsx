@@ -2,9 +2,9 @@ import type { AdjustTodayPlanOutput } from "@diet-coach/ai";
 import { ArrowRight, Check, ChevronLeft } from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { ChatBubble, ScreenTitleBlock } from "../../shared/ui/planner-components";
+import { ChatBubble } from "../../shared/ui/planner-components";
 import { theme } from "../../shared/ui/design-system";
-import { getChangedTodayItems } from "./revised-plan-review";
+import { getChangeBadgeLabel, getChangedTodayItems } from "./revised-plan-review";
 
 type RevisedPlanReviewScreenProps = {
   output: AdjustTodayPlanOutput;
@@ -32,9 +32,11 @@ export function RevisedPlanReviewScreen({
           <Text style={styles.backButtonText}>돌아가기</Text>
         </Pressable>
 
-        <ScreenTitleBlock title={"수정안이\n준비됐어요."} />
+        <Text style={styles.title}>수정안이{"\n"}준비됐어요.</Text>
 
         <ChatBubble role="assistant">{output.revision.userMessage}</ChatBubble>
+
+        <Text style={styles.sectionKicker}>변경 내용</Text>
 
         <View style={styles.compareCard}>
           <View style={styles.beforePanel}>
@@ -74,7 +76,7 @@ export function RevisedPlanReviewScreen({
                       <Text style={styles.afterTitle}>
                         {getSlotLabel(item.slot)} · {item.title}
                       </Text>
-                      <Text style={styles.badge}>새로 조정</Text>
+                      <Text style={styles.badge}>{getChangeBadgeLabel(item)}</Text>
                     </View>
                     <Text style={styles.afterText}>{item.description}</Text>
                   </View>
@@ -143,6 +145,18 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: 13,
     lineHeight: 18,
+  },
+  title: {
+    color: theme.colors.ink,
+    fontFamily: "serif",
+    fontSize: 22,
+    fontWeight: "400",
+    lineHeight: 34,
+    marginTop: -theme.space.xs,
+  },
+  sectionKicker: {
+    ...theme.type.eyebrow,
+    color: theme.colors.muted,
   },
   compareCard: {
     borderColor: theme.colors.border,
@@ -290,7 +304,7 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(42, 61, 46, 0.07)",
     borderTopWidth: 1,
     gap: theme.space.xs,
-    paddingBottom: 34,
+    paddingBottom: 40,
     paddingHorizontal: theme.space.xl,
     paddingTop: theme.space.sm,
   },
