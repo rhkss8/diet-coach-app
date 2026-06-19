@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ChevronLeft, Dumbbell, Leaf, Utensils } from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import type { AiPlan, AiPlanItem } from "@diet-coach/ai";
@@ -8,7 +9,6 @@ import { trackAnalyticsEvent } from "../../shared/lib/analytics";
 import { theme } from "../../shared/ui/design-system";
 import {
   BottomActionPanel,
-  LeafMark,
   PlannerItemCard,
   PlannerProgress,
   SectionHeader,
@@ -120,10 +120,11 @@ export function TodayScreen({
               onPress={onOpenConsultation}
               style={styles.backButton}
             >
-              <Text style={styles.backButtonText}>‹ 돌아가기</Text>
+              <ChevronLeft color={theme.colors.primary} size={18} strokeWidth={2} />
+              <Text style={styles.backButtonText}>돌아가기</Text>
             </Pressable>
             <View style={styles.brand}>
-              <LeafMark backgroundColor="transparent" color={theme.colors.primary} size={18} />
+              <Leaf color={theme.colors.primary} size={12} strokeWidth={2} />
               <Text style={styles.brandText}>TARS</Text>
             </View>
           </View>
@@ -162,9 +163,11 @@ function TodayPlanSection({
   onStatusChange: (planItemId: string, status: PlanItemStatus) => void;
   title: string;
 }) {
+  const sectionIcon = title === "식단" ? Utensils : Dumbbell;
+
   return (
     <View style={styles.section}>
-      <SectionHeader label={title} />
+      <SectionHeader icon={sectionIcon} label={title} />
       <View style={styles.itemList}>
         {items.length === 0 ? (
           <View style={styles.emptyCard}>
@@ -354,6 +357,9 @@ const styles = StyleSheet.create({
     minHeight: 30,
   },
   backButton: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 2,
     justifyContent: "center",
     minHeight: 30,
   },

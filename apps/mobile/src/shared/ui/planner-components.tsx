@@ -1,7 +1,14 @@
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
+import { ChevronLeft, Check, Leaf, RotateCcw, Send } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { theme } from "./design-system";
+
+export type PlannerIcon = ComponentType<{
+  color?: string;
+  size?: number;
+  strokeWidth?: number;
+}>;
 
 type AppHeaderProps = {
   actions?: ReactNode;
@@ -9,27 +16,24 @@ type AppHeaderProps = {
   onBack?: () => void;
 };
 
-type LeafMarkProps = {
+type BrandLeafProps = {
   backgroundColor?: string;
   color?: string;
   size?: number;
 };
 
 /**
- * Draws the small leaf brand mark used in the Figma Make reference without adding an icon package.
+ * Renders the Figma Make Leaf icon in the circular brand container used by the reference screens.
  */
-export function LeafMark({
+export function BrandLeaf({
   backgroundColor = theme.colors.primary,
   color = theme.colors.surface,
   size = 24,
-}: LeafMarkProps) {
-  const leafSize = Math.round(size * 0.36);
-  const stemHeight = Math.round(size * 0.42);
-
+}: BrandLeafProps) {
   return (
     <View
       style={[
-        styles.leafMark,
+        styles.brandLeaf,
         {
           backgroundColor,
           borderRadius: size / 2,
@@ -38,42 +42,7 @@ export function LeafMark({
         },
       ]}
     >
-      <View
-        style={[
-          styles.leafBlade,
-          {
-            backgroundColor: color,
-            height: leafSize,
-            left: size * 0.31,
-            top: size * 0.26,
-            transform: [{ rotate: "-36deg" }],
-            width: leafSize,
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.leafBlade,
-          {
-            backgroundColor: color,
-            height: leafSize,
-            right: size * 0.29,
-            top: size * 0.23,
-            transform: [{ rotate: "36deg" }],
-            width: leafSize,
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.leafStem,
-          {
-            backgroundColor: color,
-            height: stemHeight,
-            top: size * 0.34,
-          },
-        ]}
-      />
+      <Leaf color={color} size={Math.round(size * 0.48)} strokeWidth={2} />
     </View>
   );
 }
@@ -87,12 +56,13 @@ export function AppHeader({ actions, kicker = "TARS", onBack }: AppHeaderProps) 
       <View style={styles.appHeaderSide}>
         {onBack ? (
           <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
-            <Text style={styles.backButtonText}>‹ 돌아가기</Text>
+            <ChevronLeft color={theme.colors.primary} size={18} strokeWidth={2} />
+            <Text style={styles.backButtonText}>돌아가기</Text>
           </Pressable>
         ) : null}
       </View>
       <View style={styles.brand}>
-        <LeafMark />
+        <BrandLeaf />
         <Text style={styles.brandText}>{kicker}</Text>
       </View>
       <View style={[styles.appHeaderSide, styles.headerActions]}>{actions}</View>
@@ -117,16 +87,17 @@ export function HeaderAction({ label, onPress }: HeaderActionProps) {
 }
 
 type SectionHeaderProps = {
+  icon?: PlannerIcon;
   label: string;
 };
 
 /**
  * Labels a plan section with the small uppercase rhythm from the Figma Make reference.
  */
-export function SectionHeader({ label }: SectionHeaderProps) {
+export function SectionHeader({ icon: Icon, label }: SectionHeaderProps) {
   return (
     <View style={styles.sectionHeader}>
-      <View style={styles.sectionDot} />
+      {Icon ? <Icon color={theme.colors.muted} size={11} strokeWidth={2} /> : null}
       <Text style={styles.sectionLabel}>{label}</Text>
     </View>
   );
@@ -166,7 +137,7 @@ export function ChatBubble({ children, role }: ChatBubbleProps) {
     <View style={[styles.chatRow, isAssistant ? styles.assistantRow : styles.userRow]}>
       {isAssistant ? (
         <View style={styles.chatAvatar}>
-          <LeafMark
+          <BrandLeaf
             backgroundColor={theme.colors.primarySoft}
             color={theme.colors.primary}
             size={24}
@@ -217,7 +188,7 @@ export function PlannerChatInput({
           onPress={onSubmit}
           style={[styles.sendButton, disabled && styles.disabledSendButton]}
         >
-          <Text style={styles.sendButtonText}>›</Text>
+          <Send color={theme.colors.surface} size={13} strokeWidth={2} />
         </Pressable>
       </View>
     </View>
@@ -249,7 +220,7 @@ export function PlanProposalCard({
   return (
     <View style={styles.proposalCard}>
       <View style={styles.proposalHeader}>
-        <LeafMark backgroundColor="transparent" color={theme.colors.primary} size={18} />
+        <Leaf color={theme.colors.primary} size={12} strokeWidth={2} />
         <Text style={styles.proposalKicker}>TARS 제안</Text>
         <Text style={styles.proposalType}>· {typeLabel}</Text>
       </View>
@@ -280,7 +251,8 @@ export function PlanProposalCard({
             onPress={onApprove}
             style={[styles.proposalButton, onDismiss && styles.proposalPrimaryButton]}
           >
-            <Text style={styles.proposalButtonText}>✓ {actionLabel}</Text>
+            <Check color={theme.colors.surface} size={13} strokeWidth={3} />
+            <Text style={styles.proposalButtonText}>{actionLabel}</Text>
           </Pressable>
         </View>
       </View>
@@ -289,7 +261,7 @@ export function PlanProposalCard({
 }
 
 type ReasonTileProps = {
-  icon: string;
+  icon: PlannerIcon;
   isSelected: boolean;
   label: string;
   note: string;
@@ -300,6 +272,8 @@ type ReasonTileProps = {
  * Provides the two-column reason tile used by the recovery-reason source screen.
  */
 export function ReasonTile({ icon, isSelected, label, note, onPress }: ReasonTileProps) {
+  const Icon = icon;
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -307,9 +281,11 @@ export function ReasonTile({ icon, isSelected, label, note, onPress }: ReasonTil
       style={[styles.reasonTile, isSelected && styles.selectedReasonTile]}
     >
       <View style={[styles.reasonIcon, isSelected && styles.selectedReasonIcon]}>
-        <Text style={[styles.reasonIconText, isSelected && styles.selectedReasonIconText]}>
-          {icon}
-        </Text>
+        <Icon
+          color={isSelected ? theme.colors.surface : theme.colors.subtle}
+          size={15}
+          strokeWidth={2}
+        />
       </View>
       <Text style={[styles.reasonLabel, isSelected && styles.selectedReasonLabel]}>{label}</Text>
       <Text style={styles.reasonNote}>{note}</Text>
@@ -380,7 +356,7 @@ export function PlannerItemCard({
         onPress={onComplete}
         style={[styles.checkButton, isCompleted && styles.checkedButton]}
       >
-        {isCompleted ? <Text style={styles.checkMark}>✓</Text> : null}
+        {isCompleted ? <Check color={theme.colors.surface} size={12} strokeWidth={3} /> : null}
       </Pressable>
       <View style={styles.planItemCopy}>
         <Text style={[styles.planItemTitle, isSkipped && styles.skippedText]}>{title}</Text>
@@ -409,7 +385,8 @@ export function BottomActionPanel({ helperText, label, onPress }: BottomActionPa
   return (
     <View style={styles.bottomPanel}>
       <Pressable accessibilityRole="button" onPress={onPress} style={styles.recoveryButton}>
-        <Text style={styles.recoveryButtonText}>↻ {label}</Text>
+        <RotateCcw color={theme.colors.surface} size={15} strokeWidth={2} />
+        <Text style={styles.recoveryButtonText}>{label}</Text>
       </Pressable>
       <Text style={styles.bottomHelper}>{helperText}</Text>
     </View>
@@ -426,7 +403,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backButton: {
+    alignItems: "center",
     alignSelf: "flex-start",
+    flexDirection: "row",
+    gap: 2,
     minHeight: 32,
     justifyContent: "center",
   },
@@ -440,20 +420,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: theme.space.xs,
   },
-  leafMark: {
+  brandLeaf: {
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
-  },
-  leafBlade: {
-    borderBottomLeftRadius: 999,
-    borderTopRightRadius: 999,
-    position: "absolute",
-  },
-  leafStem: {
-    borderRadius: 999,
-    position: "absolute",
-    width: 2,
   },
   brandText: {
     ...theme.type.eyebrow,
@@ -485,12 +455,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: theme.space.xs,
     marginBottom: theme.space.xs,
-  },
-  sectionDot: {
-    backgroundColor: theme.colors.muted,
-    borderRadius: 5,
-    height: 10,
-    width: 10,
   },
   sectionLabel: {
     ...theme.type.eyebrow,
@@ -594,12 +558,6 @@ const styles = StyleSheet.create({
   disabledSendButton: {
     backgroundColor: theme.colors.backgroundAlt,
   },
-  sendButtonText: {
-    color: theme.colors.surface,
-    fontSize: 20,
-    fontWeight: "800",
-    lineHeight: 22,
-  },
   proposalCard: {
     backgroundColor: "#FAFCFA",
     borderColor: "rgba(61, 97, 66, 0.22)",
@@ -677,6 +635,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     borderRadius: theme.radius.medium,
     flex: 1,
+    flexDirection: "row",
+    gap: 6,
     minHeight: 42,
     justifyContent: "center",
   },
@@ -734,15 +694,6 @@ const styles = StyleSheet.create({
   },
   selectedReasonIcon: {
     backgroundColor: theme.colors.warm,
-  },
-  reasonIconText: {
-    color: theme.colors.subtle,
-    fontSize: 14,
-    fontWeight: "800",
-    lineHeight: 17,
-  },
-  selectedReasonIconText: {
-    color: theme.colors.surface,
   },
   reasonLabel: {
     color: theme.colors.ink,
@@ -824,12 +775,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     borderColor: theme.colors.primary,
   },
-  checkMark: {
-    color: theme.colors.surface,
-    fontSize: 14,
-    fontWeight: "900",
-    lineHeight: 18,
-  },
   planItemCopy: {
     flex: 1,
     gap: 2,
@@ -880,6 +825,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: theme.colors.warm,
     borderRadius: theme.radius.medium,
+    flexDirection: "row",
+    gap: theme.space.xs,
     minHeight: 50,
     justifyContent: "center",
   },

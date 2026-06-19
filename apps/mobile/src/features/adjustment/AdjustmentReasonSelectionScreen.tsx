@@ -1,11 +1,22 @@
 import type { AdjustmentReason } from "@diet-coach/core";
 import { useState } from "react";
+import {
+  ChevronLeft,
+  Coffee,
+  Dumbbell,
+  Heart,
+  HelpCircle,
+  Moon,
+  Plane,
+  Utensils,
+} from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { FormTextField } from "../../shared/ui/FormTextField";
 import { theme } from "../../shared/ui/design-system";
 import {
   BottomActionPanel,
+  type PlannerIcon,
   ReasonTile,
   ScreenTitleBlock,
 } from "../../shared/ui/planner-components";
@@ -20,7 +31,7 @@ type AdjustmentReasonSelectionScreenProps = {
 };
 
 type RecoveryReasonOption = {
-  icon: string;
+  icon: PlannerIcon;
   id: string;
   label: string;
   note: string;
@@ -29,49 +40,49 @@ type RecoveryReasonOption = {
 
 const recoveryReasonOptions = [
   {
-    icon: "☕",
+    icon: Coffee,
     id: "dinner",
     label: "회식",
     note: "저녁 식사 변경",
     value: "meal_changed",
   },
   {
-    icon: "◐",
+    icon: Moon,
     id: "overtime",
     label: "야근",
     note: "식사 시간 불규칙",
     value: "schedule_changed",
   },
   {
-    icon: "♨",
+    icon: Utensils,
     id: "binge",
     label: "폭식",
     note: "조정이 필요해요",
     value: "meal_changed",
   },
   {
-    icon: "▧",
+    icon: Dumbbell,
     id: "no-exercise",
     label: "운동 못했어요",
     note: "오늘 미실행",
     value: "missed_exercise",
   },
   {
-    icon: "✈",
+    icon: Plane,
     id: "travel",
     label: "여행 / 외출",
     note: "환경이 달라요",
     value: "schedule_changed",
   },
   {
-    icon: "♡",
+    icon: Heart,
     id: "condition",
     label: "몸 상태",
     note: "컨디션 조절",
     value: "want_replan",
   },
   {
-    icon: "?",
+    icon: HelpCircle,
     id: "other",
     label: "기타",
     note: "직접 말할게요",
@@ -98,7 +109,8 @@ export function AdjustmentReasonSelectionScreen({
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} style={styles.scroller}>
         <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
-          <Text style={styles.backButtonText}>‹ 돌아가기</Text>
+          <ChevronLeft color={theme.colors.primary} size={18} strokeWidth={2} />
+          <Text style={styles.backButtonText}>돌아가기</Text>
         </Pressable>
 
         <ScreenTitleBlock
@@ -172,7 +184,10 @@ const styles = StyleSheet.create({
     paddingTop: theme.space.sm,
   },
   backButton: {
+    alignItems: "center",
     alignSelf: "flex-start",
+    flexDirection: "row",
+    gap: 2,
     minHeight: 32,
     justifyContent: "center",
   },

@@ -200,11 +200,11 @@ Todos:
   - [x] List each Figma Make screen: login, onboarding, chat, chat-proposal, today-plan, recovery-reasons, plan-approval.
   - [x] Map each screen to the current React Native screen/component file.
   - [x] Mark missing, extra, or structurally different UI regions.
-- [ ] Replace the incorrect custom brand mark.
-  - [ ] Use the actual Figma Make icon source instead of a hand-drawn approximation.
-  - [ ] Add the required native icon strategy, such as `lucide-react-native`, if the app does not already have it.
-  - [ ] Use `Leaf` exactly where Figma Make uses `Leaf`.
-  - [ ] Use `Coffee`, `Moon`, `Dumbbell`, `Plane`, `Heart`, `HelpCircle`, `RotateCcw`, `Send`, `Utensils`, `Zap`, `Check`, `ArrowRight`, and `ChevronLeft` only where the Figma Make file uses them.
+- [x] Replace the incorrect custom brand mark.
+  - [x] Use the actual Figma Make icon source instead of a hand-drawn approximation.
+  - [x] Add the required native icon strategy, such as `lucide-react-native`, if the app does not already have it.
+  - [x] Use `Leaf` exactly where Figma Make uses `Leaf`.
+  - [x] Use `Coffee`, `Moon`, `Dumbbell`, `Plane`, `Heart`, `HelpCircle`, `RotateCcw`, `Send`, `Utensils`, `Zap`, `Check`, `ArrowRight`, and `ChevronLeft` only where the Figma Make file uses them.
 - [ ] Fix screen header rules.
   - [ ] Login and onboarding use the small brand row, not the chat top bar.
   - [ ] Chat and chat-proposal use the bordered top bar with back button on the left, centered brand, and right spacer or action.

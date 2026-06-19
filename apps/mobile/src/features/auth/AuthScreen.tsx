@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { ArrowRight } from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { FormTextField } from "../../shared/ui/FormTextField";
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
 import { commonStyles, theme } from "../../shared/ui/design-system";
-import { LeafMark } from "../../shared/ui/planner-components";
+import { BrandLeaf } from "../../shared/ui/planner-components";
 
 type AuthScreenProps = {
   error: string | null;
@@ -28,7 +29,7 @@ export function AuthScreen({
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
       <View style={styles.brandRow}>
-        <LeafMark
+        <BrandLeaf
           backgroundColor={theme.colors.primarySoft}
           color={theme.colors.primary}
           size={28}
@@ -65,6 +66,11 @@ export function AuthScreen({
       <View style={styles.footer}>
         <PrimaryButton
           disabled={isSubmitting}
+          iconRight={
+            !isSubmitting ? (
+              <ArrowRight color={theme.colors.surface} size={15} strokeWidth={2} />
+            ) : undefined
+          }
           label={isSubmitting ? "링크 보내는 중" : "이메일 링크 받기"}
           onPress={() => onRequestMagicLink(email)}
         />

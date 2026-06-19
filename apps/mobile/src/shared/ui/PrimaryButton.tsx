@@ -1,8 +1,10 @@
+import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 
 import { theme } from "./design-system";
 
 type PrimaryButtonProps = {
+  iconRight?: ReactNode;
   label: string;
   variant?: "ghost" | "primary" | "secondary";
   disabled?: boolean;
@@ -11,6 +13,7 @@ type PrimaryButtonProps = {
 
 export function PrimaryButton({
   disabled = false,
+  iconRight,
   label,
   onPress,
   variant = "primary",
@@ -37,6 +40,7 @@ export function PrimaryButton({
       >
         {label}
       </Text>
+      {iconRight}
     </Pressable>
   );
 }
@@ -47,6 +51,8 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     backgroundColor: theme.colors.primary,
     borderRadius: theme.radius.small,
+    flexDirection: "row",
+    gap: theme.space.xs,
     minHeight: 48,
     justifyContent: "center",
     paddingHorizontal: theme.space.lg,

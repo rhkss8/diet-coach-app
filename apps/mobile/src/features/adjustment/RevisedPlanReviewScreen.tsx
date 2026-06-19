@@ -1,4 +1,5 @@
 import type { AdjustTodayPlanOutput } from "@diet-coach/ai";
+import { ArrowRight, Check } from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ChatBubble, ScreenTitleBlock } from "../../shared/ui/planner-components";
@@ -48,7 +49,10 @@ export function RevisedPlanReviewScreen({
 
           <View style={styles.dividerPanel}>
             <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>수정</Text>
+            <View style={styles.dividerCopy}>
+              <ArrowRight color={theme.colors.subtle} size={12} strokeWidth={2} />
+              <Text style={styles.dividerText}>수정</Text>
+            </View>
             <View style={styles.dividerLine} />
           </View>
 
@@ -83,7 +87,8 @@ export function RevisedPlanReviewScreen({
 
       <View style={styles.bottomPanel}>
         <Pressable accessibilityRole="button" onPress={onApprove} style={styles.approveButton}>
-          <Text style={styles.approveButtonText}>✓ 이 수정안 승인하기</Text>
+          <Check color={theme.colors.surface} size={15} strokeWidth={2.5} />
+          <Text style={styles.approveButtonText}>이 수정안 승인하기</Text>
         </Pressable>
         <Pressable accessibilityRole="button" onPress={onDismiss} style={styles.secondaryButton}>
           <Text style={styles.secondaryButtonText}>다시 제안받기</Text>
@@ -219,6 +224,11 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 1,
   },
+  dividerCopy: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
+  },
   dividerText: {
     color: theme.colors.subtle,
     fontSize: 10,
@@ -268,6 +278,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: theme.colors.primary,
     borderRadius: theme.radius.large,
+    flexDirection: "row",
+    gap: theme.space.xs,
     minHeight: 52,
     justifyContent: "center",
   },

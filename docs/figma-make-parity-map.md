@@ -59,7 +59,7 @@ Current React Native token coverage:
 
 ## Global Gaps
 
-- Native icon strategy is unresolved. The next implementation slice should replace `LeafMark` and text symbols with Figma Make's lucide icon language, likely through `lucide-react-native`.
+- Native icon strategy is resolved with `lucide-react-native` and `react-native-svg`. The former hand-drawn `LeafMark` and text-symbol icons have been replaced with lucide icons in the shared planner UI and mapped Phase 9 screens.
 - Header rules are only partially implemented. Chat uses a right action where Figma Make uses a spacer; revised approval lacks the top back button; login/onboarding need the small brand row only.
 - Onboarding is the largest structural mismatch. RN's 3-step product flow conflicts with Figma Make's single-screen published state and should go through a decision gate before removing fields or collapsing the flow.
 - Recovery reasons include an extra note card. Because the Figma Make state does not show it, keeping, moving, or hiding the note field needs a product/design decision.
@@ -67,10 +67,10 @@ Current React Native token coverage:
 
 ## Recommended Next Slice
 
-Replace the incorrect custom brand mark and icon approximations:
+Fix the screen header rules:
 
-1. Add or confirm `lucide-react-native`.
-2. Replace `LeafMark` usage where Figma Make uses `Leaf`.
-3. Replace text/symbol icons in shared planner components and recovery reasons with the exact Figma Make icon set.
-4. Keep domain reason mapping internal.
-5. Run focused tests, then visual QA for login, chat, today, recovery reasons, and plan approval.
+1. Login and onboarding should use the small brand row, not the chat top bar.
+2. Chat and chat-proposal should use the bordered top bar with back button on the left, centered brand, and right spacer or action.
+3. Today should keep the compact header from Figma Make: back on left, small brand on right.
+4. Recovery reasons and revised plan approval should use the back button/title block layout.
+5. Avoid adding headers where the Figma Make screen does not define them.
