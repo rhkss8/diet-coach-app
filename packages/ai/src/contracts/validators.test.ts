@@ -13,7 +13,25 @@ const planItem = {
   slot: "breakfast",
   title: "단백질 중심 아침",
   description: "계란과 과일로 가볍게 시작해요.",
+  foods: [
+    {
+      name: "삶은 계란",
+      amount: "2개",
+      caloriesKcal: 156,
+      proteinG: 12,
+      carbsG: 1,
+      fatG: 10,
+    },
+  ],
   intensity: "light",
+  nutrition: {
+    caloriesKcal: 373,
+    proteinG: 34,
+    carbsG: 12,
+    fatG: 21,
+    source: "estimated",
+    confidence: "medium",
+  },
   status: "pending",
 };
 
@@ -58,6 +76,42 @@ describe("AI contract validators", () => {
         "plan.items.0.slot must be one of: breakfast, lunch, dinner, snack, workout",
         "rationale must be a non-empty string",
         "userMessage contains banned coaching copy: 실패",
+      ]),
+    );
+  });
+
+  it("rejects nutrition values outside the renderable estimate range", () => {
+    const result = validateGenerateInitialPlanOutput({
+      plan: {
+        goalId: "goal-1",
+        startDate: "2026-06-16",
+        endDate: "2026-06-22",
+        summary: "이번 주 계획",
+        items: [
+          {
+            ...planItem,
+            nutrition: {
+              caloriesKcal: 12000,
+              proteinG: 900,
+              carbsG: 12,
+              fatG: 21,
+            },
+          },
+        ],
+      },
+      rationale: "아침을 건너뛰지 않는 흐름부터 만듭니다.",
+      userMessage: "좋아요. 이번 주는 무리하지 않고 이어갈 수 있게 맞춰볼게요.",
+      adjustmentNotes: ["회식이 있으면 저녁과 다음 아침을 조정합니다."],
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) {
+      throw new Error("Expected invalid nutrition output");
+    }
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        "plan.items.0.nutrition.caloriesKcal must be between 0 and 3000",
+        "plan.items.0.nutrition.proteinG must be between 0 and 300",
       ]),
     );
   });

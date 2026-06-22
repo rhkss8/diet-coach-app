@@ -38,8 +38,59 @@ function createDayItems(
       date,
       type: "meal",
       slot: "breakfast",
-      title: dayIndex % 2 === 0 ? "귀리볼 + 삶은 계란" : "요거트 + 바나나",
-      description: dayIndex % 2 === 0 ? "오전 8시 · 약 380kcal" : "오전 8시 · 약 360kcal",
+      title: dayIndex % 2 === 0 ? "호두 계란 단백질 쉐이크" : "요거트 바나나 단백질볼",
+      description: dayIndex % 2 === 0 ? "오전 8시 · 앱 기준 추정치" : "오전 8시 · 앱 기준 추정치",
+      foods:
+        dayIndex % 2 === 0
+          ? [
+              { name: "호두", amount: "2알", caloriesKcal: 52, proteinG: 1, carbsG: 1, fatG: 5 },
+              {
+                name: "삶은 계란",
+                amount: "2개",
+                caloriesKcal: 156,
+                proteinG: 12,
+                carbsG: 1,
+                fatG: 10,
+              },
+              {
+                name: "단백질 음료",
+                amount: "1병",
+                caloriesKcal: 165,
+                proteinG: 21,
+                carbsG: 10,
+                fatG: 6,
+              },
+            ]
+          : [
+              {
+                name: "그릭요거트",
+                amount: "150g",
+                caloriesKcal: 135,
+                proteinG: 15,
+                carbsG: 7,
+                fatG: 5,
+              },
+              {
+                name: "바나나",
+                amount: "1개",
+                caloriesKcal: 105,
+                proteinG: 1,
+                carbsG: 27,
+                fatG: 0,
+              },
+              {
+                name: "아몬드",
+                amount: "8알",
+                caloriesKcal: 56,
+                proteinG: 2,
+                carbsG: 2,
+                fatG: 5,
+              },
+            ],
+      nutrition:
+        dayIndex % 2 === 0
+          ? createEstimatedNutrition(373, 34, 12, 21)
+          : createEstimatedNutrition(296, 18, 36, 10),
       status: dayIndex === 0 ? "completed" : "pending",
     },
     {
@@ -49,7 +100,13 @@ function createDayItems(
       type: "meal",
       slot: "lunch",
       title: "닭가슴살 샐러드",
-      description: "오후 12시 30분 · 약 420kcal",
+      description: "오후 12시 30분 · 단백질 우선 일반식",
+      foods: [
+        { name: "닭가슴살", amount: "120g", caloriesKcal: 198, proteinG: 37, carbsG: 0, fatG: 4 },
+        { name: "현미밥", amount: "120g", caloriesKcal: 180, proteinG: 4, carbsG: 38, fatG: 1 },
+        { name: "샐러드 채소", amount: "150g", caloriesKcal: 35, proteinG: 2, carbsG: 7, fatG: 0 },
+      ],
+      nutrition: createEstimatedNutrition(413, 43, 45, 5),
       status: dayIndex === 0 ? "completed" : "pending",
     },
     {
@@ -59,7 +116,13 @@ function createDayItems(
       type: "meal",
       slot: "dinner",
       title: "현미밥 + 두부구이",
-      description: "오후 7시 · 약 510kcal",
+      description: "오후 7시 · 부담 낮춘 균형 저녁",
+      foods: [
+        { name: "현미밥", amount: "150g", caloriesKcal: 225, proteinG: 5, carbsG: 48, fatG: 2 },
+        { name: "두부구이", amount: "150g", caloriesKcal: 180, proteinG: 16, carbsG: 5, fatG: 11 },
+        { name: "데친 채소", amount: "120g", caloriesKcal: 45, proteinG: 3, carbsG: 8, fatG: 0 },
+      ],
+      nutrition: createEstimatedNutrition(450, 24, 61, 13),
       status: "pending",
     },
     {
@@ -69,7 +132,12 @@ function createDayItems(
       type: "meal",
       slot: "snack",
       title: "삼각김밥 + 두유",
-      description: "야근 대비 · 약 470kcal",
+      description: "야근 대비 · 편의점 선택지",
+      foods: [
+        { name: "삼각김밥", amount: "1개", caloriesKcal: 210, proteinG: 5, carbsG: 39, fatG: 4 },
+        { name: "무가당 두유", amount: "1팩", caloriesKcal: 120, proteinG: 9, carbsG: 8, fatG: 5 },
+      ],
+      nutrition: createEstimatedNutrition(330, 14, 47, 9),
       status: "pending",
     },
     {
@@ -95,6 +163,22 @@ function createDayItems(
       status: "pending",
     },
   ];
+}
+
+function createEstimatedNutrition(
+  caloriesKcal: number,
+  proteinG: number,
+  carbsG: number,
+  fatG: number,
+): AiPlanItem["nutrition"] {
+  return {
+    caloriesKcal,
+    proteinG,
+    carbsG,
+    fatG,
+    source: "estimated",
+    confidence: "medium",
+  };
 }
 
 function getWorkoutIntensity(

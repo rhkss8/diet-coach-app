@@ -35,4 +35,30 @@ describe("generateMockAdjustedPlan", () => {
       ]),
     );
   });
+
+  it("keeps adjusted dinner nutrition renderable", () => {
+    const fixtureCase = adjustmentFixtureCases.find(
+      (candidate) => candidate.id === "heavy-lunch-adjust-dinner",
+    );
+
+    if (!fixtureCase) {
+      throw new Error("Expected meal changed fixture");
+    }
+
+    const output = generateMockAdjustedPlan(fixtureCase.input);
+
+    expect(output.revision.updatedTodayItems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          slot: "dinner",
+          status: "adjusted",
+          foods: expect.arrayContaining([expect.objectContaining({ name: "두부" })]),
+          nutrition: expect.objectContaining({
+            caloriesKcal: 413,
+            proteinG: 33,
+          }),
+        }),
+      ]),
+    );
+  });
 });

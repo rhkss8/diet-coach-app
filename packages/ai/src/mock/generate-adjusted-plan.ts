@@ -41,7 +41,14 @@ function createAdjustedPlanItem(
     return {
       ...planItem,
       title: "가벼운 조정 저녁",
-      description: "오늘 상황에 맞춰 단백질과 채소 중심으로 부담 없이 마무리해요.",
+      description: "오늘 상황에 맞춰 탄수화물은 낮추고 단백질은 유지해요.",
+      foods: [
+        { name: "두부", amount: "150g", caloriesKcal: 180, proteinG: 16, carbsG: 5, fatG: 11 },
+        { name: "삶은 계란", amount: "1개", caloriesKcal: 78, proteinG: 6, carbsG: 1, fatG: 5 },
+        { name: "샐러드 채소", amount: "150g", caloriesKcal: 35, proteinG: 2, carbsG: 7, fatG: 0 },
+        { name: "무가당 두유", amount: "1팩", caloriesKcal: 120, proteinG: 9, carbsG: 8, fatG: 5 },
+      ],
+      nutrition: createEstimatedNutrition(413, 33, 21, 21),
       status: "adjusted",
     };
   }
@@ -80,6 +87,22 @@ function getTargetSlots(reason: AdjustTodayPlanInput["request"]["reason"]): AiPl
   }
 
   return ["dinner"];
+}
+
+function createEstimatedNutrition(
+  caloriesKcal: number,
+  proteinG: number,
+  carbsG: number,
+  fatG: number,
+): AiPlanItem["nutrition"] {
+  return {
+    caloriesKcal,
+    proteinG,
+    carbsG,
+    fatG,
+    source: "estimated",
+    confidence: "medium",
+  };
 }
 
 function getRevisionSummary(reason: AdjustTodayPlanInput["request"]["reason"]) {

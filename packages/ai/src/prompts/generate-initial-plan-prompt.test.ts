@@ -24,6 +24,8 @@ describe("buildGenerateInitialPlanPrompt", () => {
     expect(userMessage).toContain('"task": "generateInitialPlan"');
     expect(userMessage).toContain(`"targetWeightKg": ${fixtureUser.input.goal.targetWeightKg}`);
     expect(userMessage).toContain('"items"');
+    expect(userMessage).toContain('"nutrition"');
+    expect(userMessage).toContain('"foods"');
     expect(userMessage).toContain("breakfast | lunch | dinner | snack | workout");
     expect(userMessage).toContain("Return at least 7 dates of plan items.");
   });
@@ -35,6 +37,7 @@ describe("buildGenerateInitialPlanPrompt", () => {
     expect(promptText).toContain("Do not shame the user");
     expect(promptText).toContain("not a medical diagnosis tool");
     expect(promptText).toContain("not a precise calorie tracker");
+    expect(promptText).toContain("app-level estimates");
     expect(promptText).toContain("easy to adjust later");
   });
 });

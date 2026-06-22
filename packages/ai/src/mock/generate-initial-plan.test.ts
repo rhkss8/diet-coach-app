@@ -13,6 +13,21 @@ describe("generateMockInitialPlan", () => {
     expect(output.plan.startDate).toBe("2026-06-16");
     expect(output.plan.endDate).toBe("2026-06-22");
     expect(output.plan.items).toHaveLength(42);
+    expect(output.plan.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          slot: "breakfast",
+          foods: expect.arrayContaining([
+            expect.objectContaining({ amount: "2알", name: "호두" }),
+            expect.objectContaining({ amount: "2개", name: "삶은 계란" }),
+          ]),
+          nutrition: expect.objectContaining({
+            caloriesKcal: 373,
+            proteinG: 34,
+          }),
+        }),
+      ]),
+    );
   });
 
   it("keeps beginner exercise plans light", () => {

@@ -12,12 +12,32 @@ export type PlanItem = {
   id: EntityId;
   planId: EntityId;
   date: ISODate;
+  foods?: PlanItemFood[];
+  nutrition?: PlanItemNutrition;
   type: PlanItemType;
   slot: PlanItemSlot;
   title: string;
   description: string;
   intensity?: PlanItemIntensity;
   status: PlanItemStatus;
+};
+
+export type PlanItemFood = {
+  amount: string;
+  name: string;
+  caloriesKcal?: number;
+  proteinG?: number;
+  carbsG?: number;
+  fatG?: number;
+};
+
+export type PlanItemNutrition = {
+  caloriesKcal: number;
+  proteinG: number;
+  carbsG: number;
+  fatG: number;
+  source?: "estimated" | "user_provided" | "database" | "attachment_inferred";
+  confidence?: "low" | "medium" | "high";
 };
 
 export type Plan = {

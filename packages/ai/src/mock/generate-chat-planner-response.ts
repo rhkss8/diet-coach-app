@@ -17,6 +17,12 @@ export function generateMockChatPlannerResponse(
       ...(dinnerItem ?? createAttachmentMealItem(input.todayDate, attachments)),
       title: "첨부 분석 반영 저녁 플랜",
       description: `${formatAttachmentNames(attachments)} 내용을 기준으로 오늘 식단 부담을 낮춰 조정해요.`,
+      foods: [
+        { name: "두부", amount: "150g", caloriesKcal: 180, proteinG: 16, carbsG: 5, fatG: 11 },
+        { name: "샐러드 채소", amount: "150g", caloriesKcal: 35, proteinG: 2, carbsG: 7, fatG: 0 },
+        { name: "무가당 두유", amount: "1팩", caloriesKcal: 120, proteinG: 9, carbsG: 8, fatG: 5 },
+      ],
+      nutrition: createEstimatedNutrition(335, 27, 20, 16),
       status: "adjusted" as const,
     };
 
@@ -131,6 +137,12 @@ function createMealItem(date: string): AiPlanItem {
     slot: "dinner",
     title: "상담 기반 저녁 식단",
     description: "대화에서 나온 생활 패턴을 반영해 부담 없는 단백질 중심으로 구성해요.",
+    foods: [
+      { name: "삶은 계란", amount: "2개", caloriesKcal: 156, proteinG: 12, carbsG: 1, fatG: 10 },
+      { name: "샐러드 채소", amount: "150g", caloriesKcal: 35, proteinG: 2, carbsG: 7, fatG: 0 },
+      { name: "무가당 두유", amount: "1팩", caloriesKcal: 120, proteinG: 9, carbsG: 8, fatG: 5 },
+    ],
+    nutrition: createEstimatedNutrition(311, 23, 16, 15),
     status: "pending",
   };
 }
@@ -144,6 +156,12 @@ function createAttachmentMealItem(date: string, attachments: { name: string }[])
     slot: "dinner",
     title: "첨부 분석 기반 식단",
     description: `${formatAttachmentNames(attachments)} 내용을 참고해 오늘 실행 가능한 식단으로 반영해요.`,
+    foods: [
+      { name: "두부", amount: "150g", caloriesKcal: 180, proteinG: 16, carbsG: 5, fatG: 11 },
+      { name: "샐러드 채소", amount: "150g", caloriesKcal: 35, proteinG: 2, carbsG: 7, fatG: 0 },
+      { name: "삶은 계란", amount: "1개", caloriesKcal: 78, proteinG: 6, carbsG: 1, fatG: 5 },
+    ],
+    nutrition: createEstimatedNutrition(293, 24, 13, 16),
     status: "pending",
   };
 }
@@ -164,6 +182,22 @@ function createExerciseItem(date: string): AiPlanItem {
 
 function findDinnerItem(items: AiPlanItem[]) {
   return items.find((item) => item.type === "meal" && item.slot === "dinner");
+}
+
+function createEstimatedNutrition(
+  caloriesKcal: number,
+  proteinG: number,
+  carbsG: number,
+  fatG: number,
+): AiPlanItem["nutrition"] {
+  return {
+    caloriesKcal,
+    proteinG,
+    carbsG,
+    fatG,
+    source: "estimated",
+    confidence: "medium",
+  };
 }
 
 function formatAttachmentNames(attachments: { name: string }[]) {

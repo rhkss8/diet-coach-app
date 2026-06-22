@@ -155,6 +155,8 @@ function validateAiPlanItem(value: unknown, path: string, errors: string[]) {
   requireOneOf(planItem.slot, planItemSlots, `${path}.slot`, errors);
   requireString(planItem.title, `${path}.title`, errors);
   requireString(planItem.description, `${path}.description`, errors);
+  validateOptionalFoods(planItem.foods, `${path}.foods`, errors);
+  validateOptionalNutrition(planItem.nutrition, `${path}.nutrition`, errors);
 
   if (planItem.intensity !== undefined) {
     requireOneOf(planItem.intensity, planItemIntensities, `${path}.intensity`, errors);
@@ -163,6 +165,63 @@ function validateAiPlanItem(value: unknown, path: string, errors: string[]) {
   if (planItem.status !== undefined) {
     requireOneOf(planItem.status, planItemStatuses, `${path}.status`, errors);
   }
+}
+
+function validateOptionalFoods(value: unknown, path: string, errors: string[]) {
+  if (value === undefined) {
+    return;
+  }
+
+  if (!Array.isArray(value)) {
+    errors.push(`${path} must be an array when present`);
+    return;
+  }
+
+  value.forEach((food, index) => {
+    const foodRecord = asRecord(food, `${path}.${index}`, errors);
+
+    if (!foodRecord) {
+      return;
+    }
+
+    requireString(foodRecord.name, `${path}.${index}.name`, errors);
+    requireString(foodRecord.amount, `${path}.${index}.amount`, errors);
+    validateOptionalNumber(foodRecord.caloriesKcal, `${path}.${index}.caloriesKcal`, errors, {
+      max: 2000,
+      min: 0,
+    });
+    validateOptionalNumber(foodRecord.proteinG, `${path}.${index}.proteinG`, errors, {
+      max: 200,
+      min: 0,
+    });
+    validateOptionalNumber(foodRecord.carbsG, `${path}.${index}.carbsG`, errors, {
+      max: 300,
+      min: 0,
+    });
+    validateOptionalNumber(foodRecord.fatG, `${path}.${index}.fatG`, errors, {
+      max: 200,
+      min: 0,
+    });
+  });
+}
+
+function validateOptionalNutrition(value: unknown, path: string, errors: string[]) {
+  if (value === undefined) {
+    return;
+  }
+
+  const nutrition = asRecord(value, path, errors);
+
+  if (!nutrition) {
+    return;
+  }
+
+  requireNumber(nutrition.caloriesKcal, `${path}.caloriesKcal`, errors, { max: 3000, min: 0 });
+  requireNumber(nutrition.proteinG, `${path}.proteinG`, errors, { max: 300, min: 0 });
+  requireNumber(nutrition.carbsG, `${path}.carbsG`, errors, { max: 500, min: 0 });
+  requireNumber(nutrition.fatG, `${path}.fatG`, errors, { max: 250, min: 0 });
+  validateOptionalString(nutrition.source, `${path}.source`, errors);
+  validateOptionalString(nutrition.confidence, `${path}.confidence`, errors);
 }
 
 function asRecord(value: unknown, path: string, errors: string[]) {
@@ -187,6 +246,38 @@ function validateOptionalString(value: unknown, path: string, errors: string[]) 
   if (value !== undefined && typeof value !== "string") {
     errors.push(`${path} must be a string when present`);
   }
+}
+
+function requireNumber(
+  value: unknown,
+  path: string,
+  errors: string[],
+  range?: { max: number; min: number },
+) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    errors.push(`${path} must be a finite number`);
+    return false;
+  }
+
+  if (range && (value < range.min || value > range.max)) {
+    errors.push(`${path} must be between ${range.min} and ${range.max}`);
+    return false;
+  }
+
+  return true;
+}
+
+function validateOptionalNumber(
+  value: unknown,
+  path: string,
+  errors: string[],
+  range?: { max: number; min: number },
+) {
+  if (value === undefined) {
+    return;
+  }
+
+  requireNumber(value, path, errors, range);
 }
 
 function validateStringArray(

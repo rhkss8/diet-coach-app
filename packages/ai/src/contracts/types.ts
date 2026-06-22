@@ -15,7 +15,9 @@ import type {
 export type { LifestyleAnswers } from "@diet-coach/core";
 
 export type AiPlanItem = {
+  foods?: AiPlanFood[];
   id?: EntityId;
+  nutrition?: AiPlanNutrition;
   planId?: EntityId;
   date: ISODate;
   type: PlanItemType;
@@ -24,6 +26,24 @@ export type AiPlanItem = {
   description: string;
   intensity?: PlanItemIntensity;
   status?: PlanItemStatus;
+};
+
+export type AiPlanFood = {
+  amount: string;
+  name: string;
+  caloriesKcal?: number;
+  proteinG?: number;
+  carbsG?: number;
+  fatG?: number;
+};
+
+export type AiPlanNutrition = {
+  caloriesKcal: number;
+  proteinG: number;
+  carbsG: number;
+  fatG: number;
+  source?: "estimated" | "user_provided" | "database" | "attachment_inferred";
+  confidence?: "low" | "medium" | "high";
 };
 
 export type AiPlan = {

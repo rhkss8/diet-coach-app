@@ -528,8 +528,10 @@ export function PlannerProgress({
 
 type PlannerItemCardProps = {
   detail: string;
+  foodLines?: string[];
   isCompleted: boolean;
   isSkipped: boolean;
+  nutritionSummary?: string;
   onComplete: () => void;
   onSkip: () => void;
   title: string;
@@ -540,8 +542,10 @@ type PlannerItemCardProps = {
  */
 export function PlannerItemCard({
   detail,
+  foodLines = [],
   isCompleted,
   isSkipped,
+  nutritionSummary,
   onComplete,
   onSkip,
   title,
@@ -564,6 +568,16 @@ export function PlannerItemCard({
       </Pressable>
       <View style={styles.planItemCopy}>
         <Text style={[styles.planItemTitle, isSkipped && styles.skippedText]}>{title}</Text>
+        {nutritionSummary ? <Text style={styles.planItemNutrition}>{nutritionSummary}</Text> : null}
+        {foodLines.length > 0 ? (
+          <View style={styles.planFoodList}>
+            {foodLines.map((foodLine) => (
+              <Text key={foodLine} style={styles.planFoodLine}>
+                {foodLine}
+              </Text>
+            ))}
+          </View>
+        ) : null}
         <Text style={styles.planItemDetail}>{detail}</Text>
       </View>
       {!isCompleted && !isSkipped ? (
@@ -1113,6 +1127,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     lineHeight: 19,
+  },
+  planItemNutrition: {
+    color: theme.colors.primary,
+    fontSize: 12,
+    fontWeight: "700",
+    lineHeight: 17,
+  },
+  planFoodList: {
+    gap: 1,
+    paddingVertical: 2,
+  },
+  planFoodLine: {
+    color: theme.colors.inkSoft,
+    fontSize: 11,
+    lineHeight: 16,
   },
   skippedText: {
     color: theme.colors.muted,

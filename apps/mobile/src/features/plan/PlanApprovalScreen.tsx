@@ -8,6 +8,11 @@ import {
   SectionHeader,
 } from "../../shared/ui/planner-components";
 import { theme } from "../../shared/ui/design-system";
+import {
+  getPlanItemDetail,
+  getPlanItemFoodLines,
+  getPlanItemNutritionSummary,
+} from "./plan-item-display";
 import { countPlanItemsByType, getPlanItemsForFirstDay } from "./plan-approval";
 
 type PlanApprovalScreenProps = {
@@ -40,10 +45,12 @@ export function PlanApprovalScreen({ onApprove, output }: PlanApprovalScreenProp
           <View style={styles.itemList}>
             {firstDayItems.map((planItem) => (
               <PlannerItemCard
-                detail={planItem.description}
+                detail={getPlanItemDetail(planItem)}
+                foodLines={getPlanItemFoodLines(planItem)}
                 isCompleted={false}
                 isSkipped={false}
                 key={planItem.id ?? `${planItem.date}-${planItem.slot}`}
+                nutritionSummary={getPlanItemNutritionSummary(planItem)}
                 onComplete={() => undefined}
                 onSkip={() => undefined}
                 title={`${getSlotLabel(planItem.slot)} · ${planItem.title}`}
