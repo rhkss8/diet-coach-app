@@ -2,7 +2,6 @@ import type { AdjustmentReason } from "@diet-coach/core";
 import { useState } from "react";
 import {
   ArrowRight,
-  ChevronLeft,
   Coffee,
   Dumbbell,
   Heart,
@@ -14,7 +13,12 @@ import {
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { theme } from "../../shared/ui/design-system";
-import { type PlannerIcon, ReasonTile, ScreenTitleBlock } from "../../shared/ui/planner-components";
+import {
+  BackButton,
+  type PlannerIcon,
+  ReasonTile,
+  ScreenTitleBlock,
+} from "../../shared/ui/planner-components";
 
 type AdjustmentReasonSelectionScreenProps = {
   onBack: () => void;
@@ -100,10 +104,7 @@ export function AdjustmentReasonSelectionScreen({
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} style={styles.scroller}>
-        <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
-          <ChevronLeft color={theme.colors.primary} size={18} strokeWidth={2} />
-          <Text style={styles.backButtonText}>돌아가기</Text>
-        </Pressable>
+        <BackButton onPress={onBack} />
 
         <ScreenTitleBlock
           description={"괜찮아요. 지금 상황 기준으로\n오늘 플랜을 다시 맞춰볼게요."}
@@ -176,19 +177,6 @@ const styles = StyleSheet.create({
     paddingBottom: theme.space.xl,
     paddingHorizontal: theme.space.xl,
     paddingTop: theme.space.sm,
-  },
-  backButton: {
-    alignItems: "center",
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    gap: 2,
-    minHeight: 32,
-    justifyContent: "center",
-  },
-  backButtonText: {
-    color: theme.colors.primary,
-    fontSize: 13,
-    lineHeight: 18,
   },
   reasonGrid: {
     gap: theme.space.xs,

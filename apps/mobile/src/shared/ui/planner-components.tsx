@@ -16,6 +16,12 @@ type AppHeaderProps = {
   onBack?: () => void;
 };
 
+type BackButtonProps = {
+  label?: string;
+  onLongPress?: () => void;
+  onPress: () => void;
+};
+
 type BrandLeafProps = {
   backgroundColor?: string;
   color?: string;
@@ -23,6 +29,10 @@ type BrandLeafProps = {
 };
 
 type PlannerBrandRowProps = {
+  label?: string;
+};
+
+type CompactBrandMarkProps = {
   label?: string;
 };
 
@@ -68,19 +78,41 @@ export function PlannerBrandRow({ label = "TARS · Recovery Planner" }: PlannerB
 }
 
 /**
+ * Keeps page-level back affordances visually and semantically consistent.
+ */
+export function BackButton({ label = "돌아가기", onLongPress, onPress }: BackButtonProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onLongPress={onLongPress}
+      onPress={onPress}
+      style={styles.backButton}
+    >
+      <ChevronLeft color={theme.colors.primary} size={18} strokeWidth={2} />
+      <Text style={styles.backButtonText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+/**
+ * Shows the compact inline brand mark used by dense planner headers.
+ */
+export function CompactBrandMark({ label = "TARS" }: CompactBrandMarkProps) {
+  return (
+    <View style={styles.compactBrand}>
+      <Leaf color={theme.colors.primary} size={12} strokeWidth={2} />
+      <Text style={styles.compactBrandText}>{label}</Text>
+    </View>
+  );
+}
+
+/**
  * Provides the compact app chrome used by Figma Make screens.
  */
 export function AppHeader({ actions, kicker = "TARS", onBack }: AppHeaderProps) {
   return (
     <View style={styles.appHeader}>
-      <View style={styles.appHeaderSide}>
-        {onBack ? (
-          <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
-            <ChevronLeft color={theme.colors.primary} size={18} strokeWidth={2} />
-            <Text style={styles.backButtonText}>돌아가기</Text>
-          </Pressable>
-        ) : null}
-      </View>
+      <View style={styles.appHeaderSide}>{onBack ? <BackButton onPress={onBack} /> : null}</View>
       <View style={styles.brand}>
         <BrandLeaf />
         <Text style={styles.brandText}>{kicker}</Text>
@@ -460,6 +492,15 @@ const styles = StyleSheet.create({
     letterSpacing: 1.8,
     lineHeight: 15,
     textTransform: "uppercase",
+  },
+  compactBrand: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
+  },
+  compactBrandText: {
+    ...theme.type.eyebrow,
+    color: theme.colors.primary,
   },
   brandLeaf: {
     alignItems: "center",

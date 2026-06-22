@@ -1,8 +1,8 @@
 import type { AdjustTodayPlanOutput } from "@diet-coach/ai";
-import { ArrowRight, Check, ChevronLeft } from "lucide-react-native";
+import { ArrowRight, Check } from "lucide-react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import { ChatBubble } from "../../shared/ui/planner-components";
+import { BackButton, ChatBubble } from "../../shared/ui/planner-components";
 import { theme } from "../../shared/ui/design-system";
 import { getChangeBadgeLabel, getChangedTodayItems } from "./revised-plan-review";
 
@@ -27,10 +27,7 @@ export function RevisedPlanReviewScreen({
   return (
     <View style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content} style={styles.scroller}>
-        <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
-          <ChevronLeft color={theme.colors.primary} size={18} strokeWidth={2} />
-          <Text style={styles.backButtonText}>돌아가기</Text>
-        </Pressable>
+        <BackButton onPress={onBack} />
 
         <Text style={styles.title}>수정안이{"\n"}준비됐어요.</Text>
 
@@ -132,19 +129,6 @@ const styles = StyleSheet.create({
     paddingBottom: theme.space.xl,
     paddingHorizontal: theme.space.xl,
     paddingTop: theme.space.sm,
-  },
-  backButton: {
-    alignItems: "center",
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    gap: 2,
-    minHeight: 32,
-    justifyContent: "center",
-  },
-  backButtonText: {
-    color: theme.colors.primary,
-    fontSize: 13,
-    lineHeight: 18,
   },
   title: {
     color: theme.colors.ink,

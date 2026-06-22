@@ -1,6 +1,7 @@
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { commonStyles, theme } from "../../shared/ui/design-system";
+import { BackButton } from "../../shared/ui/planner-components";
 import { getBasicSettingsItems, getReleaseLinks } from "./settings-items";
 
 type SettingsScreenProps = {
@@ -14,10 +15,8 @@ export function SettingsScreen({ authMode, onClose }: SettingsScreenProps) {
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
       <View style={styles.topBar}>
+        <BackButton onPress={onClose} />
         <Text style={styles.eyebrow}>설정</Text>
-        <Pressable accessibilityRole="button" onPress={onClose} style={styles.closeButton}>
-          <Text style={styles.closeButtonLabel}>닫기</Text>
-        </Pressable>
       </View>
 
       <View style={styles.header}>
@@ -66,19 +65,6 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...theme.type.eyebrow,
-    color: theme.colors.primary,
-  },
-  closeButton: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.small,
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 38,
-    paddingHorizontal: theme.space.sm,
-  },
-  closeButtonLabel: {
-    ...theme.type.button,
     color: theme.colors.primary,
   },
   header: {
