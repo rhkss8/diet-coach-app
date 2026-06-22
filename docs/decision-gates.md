@@ -34,6 +34,8 @@ The agent should continue working by default, but must ask the user at important
 - Adding a major paid third-party service.
 - Introducing a complex state management library before the core loop works.
 - Replacing mock-first development with full backend-first development.
+- Adding a multi-agent worker system, external orchestrator, or new CLI runtime dependency.
+- Running code generation or scripts that modify broad parts of the repo.
 
 ### Cost and Accounts
 
@@ -42,12 +44,20 @@ The agent should continue working by default, but must ask the user at important
 - Installing paid services.
 - Running external deployment.
 - Sending tester invites or creating external tester distribution through TestFlight, Google Play, Expo EAS, or public community channels.
+- Calling external services that may consume quota or money.
 
 ### Data and Privacy
 
 - Collecting sensitive health data beyond MVP need.
 - Logging user-entered food notes or photos to analytics.
 - Changing retention or storage assumptions.
+
+### Destructive Or Broad Actions
+
+- Deleting files or directories not created in the current task.
+- Resetting, rebasing, force-pushing, or rewriting git history.
+- Changing generated starter files across many projects.
+- Applying automated fixes across unrelated modules.
 
 ## Do Not Ask Before
 

@@ -18,15 +18,16 @@ Use `docs/new-service-starter-protocol.md` as the reusable kickoff protocol for 
 6. Read `docs/lessons-and-rules.md`.
 7. Read `docs/decision-gates.md`.
 8. If doing maintenance, bug fixes, corrections, or refactors, read `.codex/skills/tars-maintenance/SKILL.md` and `docs/maintenance-workflow.md`.
-9. If resuming from another PC, read `docs/workstation-handoff.md`.
+9. If resuming after a context reset, break, or another PC, read `docs/reentry-protocol.md` and `docs/workstation-handoff.md`.
 10. If changing kickoff structure, read `docs/new-service-starter-protocol.md` and `docs/new-service-copy-pack.md`.
 11. If changing product definition, read `docs/service-definition.md`, `docs/g-stack.md`, and `docs/superpowers.md`.
-12. If touching UI or copy, read `docs/design-tone-and-manner.md`.
-13. If touching frontend code, read `docs/frontend-engineering-standards.md`.
-14. If touching AI behavior, read `docs/ai-contracts.md`.
-15. If touching metrics, read `docs/analytics-events.md`.
-16. If testing or preparing release, read `docs/qa-checklist.md`.
-17. If touching Expo run loops, builds, EAS/TestFlight, native device QA, SDK upgrades, or mobile networking, read `.codex/skills/expo-mvp-delivery/SKILL.md`.
+12. If product intent, research, UX, copy, positioning, or design evidence is unclear, read `docs/wiki/schema.md` and `docs/wiki/index.md`.
+13. If touching UI or copy, read `docs/design-tone-and-manner.md`.
+14. If touching frontend code, read `docs/frontend-engineering-standards.md`.
+15. If touching AI behavior, read `docs/ai-contracts.md`.
+16. If touching metrics, read `docs/analytics-events.md`.
+17. If testing or preparing release, read `docs/qa-checklist.md`.
+18. If touching Expo run loops, builds, EAS/TestFlight, native device QA, SDK upgrades, or mobile networking, read `.codex/skills/expo-mvp-delivery/SKILL.md`.
 
 ## Work Selection
 
@@ -72,6 +73,26 @@ Maintenance work must:
 - Add a regression check when practical.
 - Run `tars verify` before completion.
 
+## Knowledge Wiki Rule
+
+Use `docs/inbox/` and `docs/wiki/` as an optional Karpathy-style plain Markdown knowledge graph.
+
+- Humans put original source material in `docs/inbox/`.
+- Codex updates `docs/wiki/` with `[[Wiki Links]]` using `docs/wiki/schema.md`.
+- Do not read wiki for every task.
+- Read wiki only when product intent, research, UX, copy, positioning, or design evidence matters.
+- For narrow maintenance, current code, tests, and user request come first.
+- If wiki conflicts with source material, current code, tests, or user request, ask which source wins.
+
+## Re-Entry Rule
+
+When resuming after a context reset, machine switch, or long break:
+
+- Do not restart from scratch.
+- Follow `docs/reentry-protocol.md`.
+- Reconstruct state from git status, TARS status, open todo, and current diff.
+- Report branch, worktree state, next todo, applicable workflow, and blockers before editing.
+
 ## Quality Rule
 
 Frontend code must follow `docs/frontend-engineering-standards.md`.
@@ -88,6 +109,7 @@ Only stop when:
 - A product decision is impossible to infer safely.
 - The agent must guess because the docs, design source, code, and user request disagree or leave an important detail ambiguous.
 - A command needs user approval and cannot proceed.
+- The next step crosses an approval gate in `docs/decision-gates.md`.
 - The MVP definition of done is satisfied.
 
 Use `docs/decision-gates.md` to decide whether to ask the user or continue.

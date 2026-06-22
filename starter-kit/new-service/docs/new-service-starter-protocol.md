@@ -180,6 +180,10 @@ Every new service should maintain:
 
 - `docs/decision-log.md`
 - `docs/lessons-and-rules.md`
+- `docs/inbox/`
+- `docs/wiki/`
+- `docs/reentry-protocol.md`
+- `docs/starter-acceptance.md`
 
 Promotion path:
 
@@ -188,3 +192,25 @@ Promotion path:
 3. Harness rule.
 4. Checklist item.
 5. Reusable starter update.
+
+## Knowledge Wiki
+
+Use `docs/inbox/` for original material and `docs/wiki/` for Codex-generated synthesis.
+
+This wiki is optional and should not be loaded for every task. Use it when product intent, research, UX, copy, positioning, or design evidence matters.
+
+Rules:
+
+- Original material goes in `docs/inbox/`.
+- Wiki pages follow `docs/wiki/schema.md`.
+- Wiki pages use `[[Wiki Links]]`.
+- Humans edit inbox sources, not wiki synthesis.
+- Current code, tests, and direct user requests take priority during narrow maintenance.
+
+## Starter Acceptance And Re-Entry
+
+Use `docs/starter-acceptance.md` when changing TARS or copying the starter into a new project.
+
+Use `docs/reentry-protocol.md` when resuming after a context reset, machine switch, or long break.
+
+These files keep the harness deterministic without introducing a heavy report chain.

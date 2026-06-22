@@ -34,6 +34,7 @@ TARS가 준비하는 것:
 - QA 체크리스트
 - 의사결정 게이트
 - lesson-and-run 기록
+- inbox 원본 자료와 wiki 지식망
 - 집/회사 PC handoff 규칙
 
 ## 가장 먼저 할 일
@@ -115,6 +116,14 @@ Codex는 `docs/agent-runbook.md`를 기준으로 기획 정리, G-Stack, Superpo
 tars status
 tars next
 ```
+
+원본 리서치, 인터뷰, 기획 메모, 디자인 레퍼런스가 있으면 `docs/inbox/`에 넣고 wiki 정리를 요청할 수 있습니다.
+
+```bash
+tars wiki
+```
+
+`docs/wiki/`는 Codex가 `docs/inbox/` 원본을 읽고 만든 `[[링크]]` 기반 지식망입니다. 모든 작업에서 읽는 문서가 아니라, 제품 의도나 리서치 근거가 필요할 때만 참조합니다.
 
 그리고 Codex에게 말합니다.
 
@@ -227,6 +236,7 @@ TARS CLI:
 - 시작 프롬프트 생성
 - 다음 todo 확인
 - PC 간 handoff 체크
+- 재진입 프로토콜과 starter acceptance 확인
 
 Codex:
 

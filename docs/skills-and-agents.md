@@ -26,6 +26,7 @@ Primary references:
 
 - `docs/mvp-execution-harness.md`
 - `docs/mvp-todo.md`
+- `docs/wiki/index.md` only when product intent or source evidence is unclear
 
 ### 2. diet-design-system
 
@@ -41,6 +42,7 @@ Responsibilities:
 Primary reference:
 
 - `docs/design-tone-and-manner.md`
+- `docs/wiki/index.md` only when research, UX, copy, positioning, or design evidence matters
 
 ### 3. diet-frontend-senior
 

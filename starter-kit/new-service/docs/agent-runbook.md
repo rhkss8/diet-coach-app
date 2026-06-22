@@ -18,14 +18,15 @@ Use `docs/new-service-starter-protocol.md` as the reusable kickoff protocol.
 6. Read `docs/lessons-and-rules.md`.
 7. Read `docs/decision-gates.md`.
 8. If doing maintenance, bug fixes, corrections, or refactors, read `.codex/skills/tars-maintenance/SKILL.md` and `docs/maintenance-workflow.md`.
-9. If resuming from another PC, read `docs/workstation-handoff.md`.
+9. If resuming after a context reset, break, or another PC, read `docs/reentry-protocol.md` and `docs/workstation-handoff.md`.
 10. If changing kickoff structure, read `docs/new-service-starter-protocol.md` and `docs/new-service-copy-pack.md`.
 11. If changing product definition, read `docs/service-definition.md`, `docs/g-stack.md`, and `docs/superpowers.md`.
-12. If touching UI, UX, visual design, or copy, read `docs/design-production-pipeline.md`, `docs/design-reference-brief.md`, `docs/design-philosophy.md`, `docs/interaction-principles.md`, `docs/design-system-spec.md`, `docs/service-design-blueprint.md`, `docs/design-tone-and-manner.md`, `docs/design-review-rubric.md`, and `docs/design-qa-checklist.md`.
-13. If touching frontend code, read `docs/frontend-engineering-standards.md`.
-14. If touching AI behavior, read `docs/ai-contracts.md`.
-15. If touching metrics, read `docs/analytics-events.md`.
-16. If testing or preparing release, read `docs/qa-checklist.md` and `docs/design-qa-checklist.md`.
+12. If product intent, research, UX, copy, positioning, or design evidence is unclear, read `docs/wiki/schema.md` and `docs/wiki/index.md`.
+13. If touching UI, UX, visual design, or copy, read `docs/design-production-pipeline.md`, `docs/design-reference-brief.md`, `docs/design-philosophy.md`, `docs/interaction-principles.md`, `docs/design-system-spec.md`, `docs/service-design-blueprint.md`, `docs/design-tone-and-manner.md`, `docs/design-review-rubric.md`, and `docs/design-qa-checklist.md`.
+14. If touching frontend code, read `docs/frontend-engineering-standards.md`.
+15. If touching AI behavior, read `docs/ai-contracts.md`.
+16. If touching metrics, read `docs/analytics-events.md`.
+17. If testing or preparing release, read `docs/qa-checklist.md` and `docs/design-qa-checklist.md`.
 
 ## Work Selection
 
@@ -70,6 +71,26 @@ Maintenance work must:
 - Add a regression check when practical.
 - Run `tars verify` before completion.
 
+## Knowledge Wiki Rule
+
+Use `docs/inbox/` and `docs/wiki/` as an optional Karpathy-style plain Markdown knowledge graph.
+
+- Humans put original source material in `docs/inbox/`.
+- Codex updates `docs/wiki/` with `[[Wiki Links]]` using `docs/wiki/schema.md`.
+- Do not read wiki for every task.
+- Read wiki only when product intent, research, UX, copy, positioning, or design evidence matters.
+- For narrow maintenance, current code, tests, and user request come first.
+- If wiki conflicts with source material, current code, tests, or user request, ask which source wins.
+
+## Re-Entry Rule
+
+When resuming after a context reset, machine switch, or long break:
+
+- Do not restart from scratch.
+- Follow `docs/reentry-protocol.md`.
+- Reconstruct state from git status, TARS status, open todo, and current diff.
+- Report branch, worktree state, next todo, applicable workflow, and blockers before editing.
+
 Design rule:
 
 - Do not jump from abstract design philosophy directly into code.
@@ -93,6 +114,7 @@ Only stop when:
 - A todo requires user credentials or external account setup.
 - A product decision is impossible to infer safely.
 - A command needs user approval and cannot proceed.
+- The next step crosses an approval gate in `docs/decision-gates.md`.
 - The MVP definition of done is satisfied.
 
 Use `docs/decision-gates.md` to decide whether to ask the user or continue.

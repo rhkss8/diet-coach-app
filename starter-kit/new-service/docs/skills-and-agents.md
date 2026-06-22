@@ -26,6 +26,7 @@ Primary references:
 - `docs/g-stack.md`
 - `docs/superpowers.md`
 - `docs/mvp-todo.md`
+- `docs/wiki/index.md` only when product intent or source evidence is unclear
 
 ### 2. Design
 
@@ -53,6 +54,7 @@ Primary references:
 - `docs/design-tone-and-manner.md`
 - `docs/design-review-rubric.md`
 - `docs/design-qa-checklist.md`
+- `docs/wiki/index.md` only when research, UX, copy, positioning, or design evidence matters
 
 ### 3. Frontend
 
