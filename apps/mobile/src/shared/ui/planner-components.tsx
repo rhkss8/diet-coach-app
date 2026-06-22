@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from "react";
-import { ChevronLeft, Check, Leaf, RotateCcw, Send } from "lucide-react-native";
+import { ChevronLeft, Check, Leaf, Paperclip, RotateCcw, Send, X } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { theme } from "./design-system";
@@ -175,6 +175,7 @@ export function ScreenTitleBlock({ description, eyebrow, title }: ScreenTitleBlo
 }
 
 type ChatBubbleProps = {
+  attachments?: ChatInputAttachment[];
   children: string;
   role: "assistant" | "user";
 };
@@ -182,7 +183,7 @@ type ChatBubbleProps = {
 /**
  * Matches the Figma Make chat bubble layout with an assistant mark and asymmetric corners.
  */
-export function ChatBubble({ children, role }: ChatBubbleProps) {
+export function ChatBubble({ attachments = [], children, role }: ChatBubbleProps) {
   const isAssistant = role === "assistant";
 
   return (
@@ -200,14 +201,46 @@ export function ChatBubble({ children, role }: ChatBubbleProps) {
         <Text style={[styles.chatBubbleText, !isAssistant && styles.userBubbleText]}>
           {children}
         </Text>
+        {attachments.length > 0 ? (
+          <View style={styles.chatAttachmentList}>
+            {attachments.map((attachment) => (
+              <View
+                key={attachment.id}
+                style={[styles.chatAttachmentChip, !isAssistant && styles.userAttachmentChip]}
+              >
+                <Paperclip
+                  color={isAssistant ? theme.colors.primary : theme.colors.surface}
+                  size={11}
+                  strokeWidth={2}
+                />
+                <Text
+                  numberOfLines={1}
+                  style={[styles.chatAttachmentText, !isAssistant && styles.userAttachmentText]}
+                >
+                  {attachment.name}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
       </View>
     </View>
   );
 }
 
+type ChatInputAttachment = {
+  id: string;
+  name: string;
+  sizeBytes?: number;
+};
+
 type PlannerChatInputProps = {
+  attachments?: ChatInputAttachment[];
   disabled?: boolean;
+  maxAttachments?: number;
+  onAddAttachment?: () => void;
   onChangeText: (value: string) => void;
+  onRemoveAttachment?: (attachmentId: string) => void;
   onSubmit: () => void;
   placeholder: string;
   value: string;
@@ -217,30 +250,83 @@ type PlannerChatInputProps = {
  * Keeps chat entry as the bottom docked control from the Figma Make chat screens.
  */
 export function PlannerChatInput({
+  attachments = [],
   disabled = false,
+  maxAttachments = 3,
+  onAddAttachment,
   onChangeText,
+  onRemoveAttachment,
   onSubmit,
   placeholder,
   value,
 }: PlannerChatInputProps) {
+  const canAddAttachment = Boolean(onAddAttachment) && attachments.length < maxAttachments;
+
   return (
     <View style={styles.chatInputPanel}>
+      {attachments.length > 0 ? (
+        <View style={styles.chatInputAttachmentList}>
+          {attachments.map((attachment) => (
+            <Pressable
+              accessibilityLabel={`${attachment.name} 첨부 제거`}
+              accessibilityRole="button"
+              key={attachment.id}
+              onPress={() => onRemoveAttachment?.(attachment.id)}
+              style={styles.chatInputAttachmentChip}
+            >
+              <Paperclip color={theme.colors.primary} size={11} strokeWidth={2} />
+              <Text numberOfLines={1} style={styles.chatInputAttachmentText}>
+                {attachment.name}
+              </Text>
+              <X color={theme.colors.muted} size={12} strokeWidth={2} />
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
       <View style={styles.chatInputShell}>
+        {onAddAttachment ? (
+          <Pressable
+            accessibilityLabel="파일 첨부"
+            accessibilityRole="button"
+            disabled={!canAddAttachment}
+            onPress={onAddAttachment}
+            style={[styles.attachButton, !canAddAttachment && styles.disabledAttachButton]}
+          >
+            <Paperclip
+              color={canAddAttachment ? theme.colors.primary : theme.colors.muted}
+              size={16}
+              strokeWidth={2}
+            />
+          </Pressable>
+        ) : null}
         <TextInput
+          accessibilityLabel="상담 메시지 입력"
+          blurOnSubmit={false}
           multiline
           onChangeText={onChangeText}
+          onSubmitEditing={() => {
+            if (!disabled) {
+              onSubmit();
+            }
+          }}
           placeholder={placeholder}
           placeholderTextColor={theme.colors.muted}
+          returnKeyType="send"
           style={styles.chatInput}
           value={value}
         />
         <Pressable
+          accessibilityLabel={disabled ? "메시지 전송 불가" : "메시지 전송"}
           accessibilityRole="button"
           disabled={disabled}
           onPress={onSubmit}
           style={[styles.sendButton, disabled && styles.disabledSendButton]}
         >
-          <Send color={theme.colors.surface} size={13} strokeWidth={2} />
+          <Send
+            color={disabled ? theme.colors.muted : theme.colors.surface}
+            size={13}
+            strokeWidth={2}
+          />
         </Pressable>
       </View>
     </View>
@@ -601,6 +687,33 @@ const styles = StyleSheet.create({
   userBubbleText: {
     color: theme.colors.surface,
   },
+  chatAttachmentList: {
+    gap: theme.space.xs,
+    marginTop: theme.space.xs,
+  },
+  chatAttachmentChip: {
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: theme.colors.primarySoft,
+    borderRadius: theme.radius.small,
+    flexDirection: "row",
+    gap: 5,
+    maxWidth: 220,
+    minHeight: 24,
+    paddingHorizontal: theme.space.xs,
+  },
+  userAttachmentChip: {
+    backgroundColor: "rgba(254, 252, 248, 0.18)",
+  },
+  chatAttachmentText: {
+    color: theme.colors.primary,
+    flexShrink: 1,
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  userAttachmentText: {
+    color: theme.colors.surface,
+  },
   chatInputPanel: {
     backgroundColor: theme.colors.background,
     borderTopColor: "rgba(42, 61, 46, 0.07)",
@@ -608,6 +721,31 @@ const styles = StyleSheet.create({
     paddingBottom: 34,
     paddingHorizontal: theme.space.md,
     paddingTop: theme.space.sm,
+  },
+  chatInputAttachmentList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.space.xs,
+    paddingBottom: theme.space.xs,
+  },
+  chatInputAttachmentChip: {
+    alignItems: "center",
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: "rgba(61, 97, 66, 0.16)",
+    borderRadius: theme.radius.small,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 5,
+    maxWidth: "100%",
+    minHeight: 28,
+    paddingHorizontal: theme.space.xs,
+  },
+  chatInputAttachmentText: {
+    color: theme.colors.primary,
+    flexShrink: 1,
+    fontSize: 11,
+    fontWeight: "600",
+    lineHeight: 15,
   },
   chatInputShell: {
     alignItems: "center",
@@ -620,6 +758,18 @@ const styles = StyleSheet.create({
     minHeight: 50,
     paddingHorizontal: theme.space.md,
     paddingVertical: theme.space.xs,
+  },
+  attachButton: {
+    alignItems: "center",
+    borderColor: theme.colors.border,
+    borderRadius: 14,
+    borderWidth: 1,
+    height: 28,
+    justifyContent: "center",
+    width: 28,
+  },
+  disabledAttachButton: {
+    backgroundColor: theme.colors.backgroundAlt,
   },
   chatInput: {
     color: theme.colors.ink,

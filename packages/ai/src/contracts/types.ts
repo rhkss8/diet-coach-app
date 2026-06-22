@@ -49,9 +49,18 @@ export type GenerateInitialPlanOutput = {
 };
 
 export type ChatPlannerMessage = {
+  attachments?: ChatPlannerAttachment[];
   id: EntityId;
   role: "assistant" | "user";
   content: string;
+};
+
+export type ChatPlannerAttachment = {
+  id: EntityId;
+  name: string;
+  mimeType?: string;
+  sizeBytes?: number;
+  uri?: string;
 };
 
 export type ChatPlannerConfirmation =

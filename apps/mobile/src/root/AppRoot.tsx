@@ -5,6 +5,7 @@ import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import type {
   AdjustTodayPlanOutput,
   AiPlan,
+  ChatPlannerAttachment,
   ChatPlannerMessage,
   ChatPlannerResponse,
 } from "@diet-coach/ai";
@@ -252,8 +253,8 @@ export function AppRoot() {
               navigateTo("today");
             }
           }}
-          onSendMessage={(message) => {
-            const userMessage = createChatMessage("user", message);
+          onSendMessage={(message, attachments) => {
+            const userMessage = createChatMessage("user", message, attachments);
             const nextMessages = [...consultationMessages, userMessage];
             const response = generateMockChatPlannerResponse({
               currentPlan: approvedPlanSnapshot?.plan,
@@ -349,8 +350,13 @@ async function approveChatPlannerResponse(
   actions.navigateToToday();
 }
 
-function createChatMessage(role: ChatPlannerMessage["role"], content: string): ChatPlannerMessage {
+function createChatMessage(
+  role: ChatPlannerMessage["role"],
+  content: string,
+  attachments?: ChatPlannerAttachment[],
+): ChatPlannerMessage {
   return {
+    attachments: attachments?.length ? attachments : undefined,
     id: `${role}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     role,
     content,

@@ -7,7 +7,49 @@ import type {
 export function generateMockChatPlannerResponse(
   input: GenerateChatPlannerResponseInput,
 ): ChatPlannerResponse {
-  const latestMessage = input.messages.at(-1)?.content ?? "";
+  const latestChatMessage = input.messages.at(-1);
+  const latestMessage = latestChatMessage?.content ?? "";
+  const attachments = latestChatMessage?.attachments ?? [];
+
+  if (attachments.length > 0 && isRevisionIntent(latestMessage) && input.currentPlan) {
+    const dinnerItem = findDinnerItem(input.currentPlan.items);
+    const revisedDinnerItem = {
+      ...(dinnerItem ?? createAttachmentMealItem(input.todayDate, attachments)),
+      title: "첨부 분석 반영 저녁 플랜",
+      description: `${formatAttachmentNames(attachments)} 내용을 기준으로 오늘 식단 부담을 낮춰 조정해요.`,
+      status: "adjusted" as const,
+    };
+
+    return {
+      type: "plan_revision_suggestion",
+      message: `첨부한 ${formatAttachmentNames(attachments)} 기준으로 오늘 플랜을 다시 맞춰볼게요.`,
+      revision: {
+        planId: input.currentPlan.id ?? "chat-plan",
+        affectedDate: input.todayDate,
+        reason: "want_replan",
+        summary: "첨부 분석 기반 플랜 수정",
+        userMessage: "업로드한 자료를 참고해서 오늘 플랜을 조정했어요.",
+        changedItemIds: [revisedDinnerItem.id ?? `chat-${input.todayDate}-dinner`],
+        updatedTodayItems: [revisedDinnerItem],
+      },
+      confirmation: {
+        action: "revise_plan",
+        label: "플랜을 수정하시겠습니까?",
+      },
+    };
+  }
+
+  if (attachments.length > 0) {
+    return {
+      type: "meal_plan_suggestion",
+      message: `첨부한 ${formatAttachmentNames(attachments)} 기준으로 식단에 반영하기 쉬운 항목을 제안할게요.`,
+      suggestedItems: [createAttachmentMealItem(input.todayDate, attachments)],
+      confirmation: {
+        action: "add_to_meal_plan",
+        label: "식단에 추가하시겠습니까?",
+      },
+    };
+  }
 
   if (isExerciseIntent(latestMessage)) {
     return {
@@ -93,6 +135,19 @@ function createMealItem(date: string): AiPlanItem {
   };
 }
 
+function createAttachmentMealItem(date: string, attachments: { name: string }[]): AiPlanItem {
+  return {
+    id: `chat-${date}-attachment-meal`,
+    planId: "chat-plan",
+    date,
+    type: "meal",
+    slot: "dinner",
+    title: "첨부 분석 기반 식단",
+    description: `${formatAttachmentNames(attachments)} 내용을 참고해 오늘 실행 가능한 식단으로 반영해요.`,
+    status: "pending",
+  };
+}
+
 function createExerciseItem(date: string): AiPlanItem {
   return {
     id: `chat-${date}-workout`,
@@ -109,4 +164,14 @@ function createExerciseItem(date: string): AiPlanItem {
 
 function findDinnerItem(items: AiPlanItem[]) {
   return items.find((item) => item.type === "meal" && item.slot === "dinner");
+}
+
+function formatAttachmentNames(attachments: { name: string }[]) {
+  const names = attachments.map((attachment) => attachment.name);
+
+  if (names.length <= 2) {
+    return names.join(", ");
+  }
+
+  return `${names.slice(0, 2).join(", ")} 외 ${names.length - 2}개`;
 }

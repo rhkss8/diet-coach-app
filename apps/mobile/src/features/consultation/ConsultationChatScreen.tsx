@@ -1,4 +1,9 @@
-import type { ChatPlannerMessage, ChatPlannerResponse } from "@diet-coach/ai";
+import type {
+  ChatPlannerAttachment,
+  ChatPlannerMessage,
+  ChatPlannerResponse,
+} from "@diet-coach/ai";
+import * as DocumentPicker from "expo-document-picker";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -18,10 +23,12 @@ type ConsultationChatScreenProps = {
   onBack?: () => void;
   onDismissPendingResponse: () => void;
   onOpenPlan: () => void;
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, attachments?: ChatPlannerAttachment[]) => void;
   pendingResponse: ChatPlannerResponse | null;
   showPlanAction: boolean;
 };
+
+const MAX_CHAT_ATTACHMENTS = 3;
 
 /**
  * Maps the active consultation route to the Figma Make chat and chat-proposal source screens.
@@ -37,17 +44,45 @@ export function ConsultationChatScreen({
   showPlanAction,
 }: ConsultationChatScreenProps) {
   const [draftMessage, setDraftMessage] = useState("");
-  const canSendMessage = draftMessage.trim().length > 0;
+  const [draftAttachments, setDraftAttachments] = useState<ChatPlannerAttachment[]>([]);
+  const canSendMessage = draftMessage.trim().length > 0 || draftAttachments.length > 0;
 
   function submitMessage() {
-    const message = draftMessage.trim();
+    const message = draftMessage.trim() || "첨부 파일을 기준으로 식단을 분석해줘";
+    const attachments = draftAttachments;
 
-    if (!message) {
+    if (!draftMessage.trim() && attachments.length === 0) {
       return;
     }
 
     setDraftMessage("");
-    onSendMessage(message);
+    setDraftAttachments([]);
+    onSendMessage(message, attachments);
+  }
+
+  async function pickAttachment() {
+    const result = await DocumentPicker.getDocumentAsync({
+      copyToCacheDirectory: true,
+      multiple: true,
+      type: ["image/*", "application/pdf", "text/plain", "text/csv"],
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    setDraftAttachments((currentAttachments) => {
+      const remainingSlots = MAX_CHAT_ATTACHMENTS - currentAttachments.length;
+      const newAttachments = result.assets.slice(0, remainingSlots).map(createChatAttachment);
+
+      return [...currentAttachments, ...newAttachments];
+    });
+  }
+
+  function removeAttachment(attachmentId: string) {
+    setDraftAttachments((currentAttachments) =>
+      currentAttachments.filter((attachment) => attachment.id !== attachmentId),
+    );
   }
 
   return (
@@ -62,7 +97,11 @@ export function ConsultationChatScreen({
 
       <ScrollView contentContainerStyle={styles.messages} style={styles.messageList}>
         {messages.map((message) => (
-          <ChatBubble key={message.id} role={message.role === "assistant" ? "assistant" : "user"}>
+          <ChatBubble
+            attachments={message.attachments}
+            key={message.id}
+            role={message.role === "assistant" ? "assistant" : "user"}
+          >
             {message.content}
           </ChatBubble>
         ))}
@@ -88,14 +127,28 @@ export function ConsultationChatScreen({
       </ScrollView>
 
       <PlannerChatInput
+        attachments={draftAttachments}
         disabled={!canSendMessage}
+        maxAttachments={MAX_CHAT_ATTACHMENTS}
+        onAddAttachment={pickAttachment}
         onChangeText={setDraftMessage}
+        onRemoveAttachment={removeAttachment}
         onSubmit={submitMessage}
         placeholder="편하게 이야기해 주세요..."
         value={draftMessage}
       />
     </View>
   );
+}
+
+function createChatAttachment(asset: DocumentPicker.DocumentPickerAsset): ChatPlannerAttachment {
+  return {
+    id: `attachment-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    name: asset.name,
+    mimeType: asset.mimeType,
+    sizeBytes: asset.size,
+    uri: asset.uri,
+  };
 }
 
 function getProposalTitle(
