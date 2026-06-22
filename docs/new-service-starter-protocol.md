@@ -276,7 +276,8 @@ Rules:
 - Wiki pages follow `docs/wiki/schema.md`.
 - Wiki pages use `[[Wiki Links]]`.
 - Humans edit inbox sources, not wiki synthesis.
-- Current code, tests, and direct user requests take priority during narrow maintenance.
+- Current code, tests, and direct user requests take priority during `tars maintain` narrow maintenance.
+- Use `tars maintain --hard` when a correction is production-facing, release-facing, visual-parity related, or core-flow risky enough to need broader evidence.
 
 ## Starter Acceptance And Re-Entry
 

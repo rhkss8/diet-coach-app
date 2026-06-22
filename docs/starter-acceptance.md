@@ -28,7 +28,8 @@ It is a lightweight validation layer, not a report template.
 ### 3. Function
 
 - `tars start` produces a new-service prompt.
-- `tars maintain` points to the maintenance skill and workflow.
+- `tars maintain` points to the fast maintenance skill and workflow.
+- `tars maintain --hard` points to the operating/release-grade maintenance workflow.
 - `tars loop` briefs open todos and asks for confirmation.
 - `tars verify` runs the project checks.
 
@@ -36,6 +37,7 @@ It is a lightweight validation layer, not a report template.
 
 - `docs/decision-gates.md` requires user approval for account, cost, deployment, sensitive data, external distribution, destructive, or broad-scope decisions.
 - Narrow maintenance prioritizes current code, tests, and user request over wiki synthesis.
+- Hard maintenance requires broader evidence for production-facing, release, visual parity, or core-flow changes.
 - Wiki is optional and not read for every task.
 - Failed verification blocks completion claims.
 

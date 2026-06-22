@@ -9,6 +9,36 @@ Maintenance work is different from starter work:
 - Starter work creates or expands the MVP.
 - Maintenance work preserves existing behavior, changes only the requested surface, and proves the fix.
 
+## Modes
+
+### Default Mode: `tars maintain`
+
+Use this for narrow corrections where the requested behavior and source of truth are clear.
+
+Read only:
+
+- Current git diff/status.
+- Directly relevant code and tests.
+- Directly relevant source-of-truth material, if named by the user or required by the bug.
+
+Then follow the required flow below. Keep updates and final reporting concise.
+
+### Hard Mode: `tars maintain --hard`
+
+Use this for production-facing changes, release blockers, visual parity work, route/user-flow changes, and any correction that could affect tester distribution or core-loop trust.
+
+Read the full maintenance harness:
+
+- `.codex/skills/tars-maintenance/SKILL.md`
+- `docs/maintenance-workflow.md`
+- `docs/lessons-quick.md`
+- `docs/agent-runbook.md`
+- Relevant routing docs from `docs/skills-and-agents.md`
+- `docs/decision-gates.md`
+- Relevant design/product/QA docs for the changed surface
+
+Hard mode may include visual QA artifacts, parity-map updates, manual QA notes, `tars done`, and commit-hook verification.
+
 ## Required Flow
 
 1. Restate the requested outcome.

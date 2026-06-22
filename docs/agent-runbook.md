@@ -64,6 +64,10 @@ Bad:
 
 For existing behavior, use `.codex/skills/tars-maintenance/SKILL.md`.
 
+Use `tars maintain` for narrow bugs, small UI corrections, simple regressions, and low-risk refactors. In this mode, prioritize current git status, directly relevant code/tests, and direct source-of-truth material over broad project documents.
+
+Use `tars maintain --hard` for production-facing fixes, release gates, visual parity, user-flow changes, broad regressions, and anything likely to affect tester distribution. In this mode, read the full maintenance harness and relevant decision/design/QA docs before editing.
+
 Maintenance work must:
 
 - Restate the requested outcome.
