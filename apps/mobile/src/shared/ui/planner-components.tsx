@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 import { ChevronLeft, Check, Leaf, Paperclip, RotateCcw, Send, X } from "lucide-react-native";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { theme } from "./design-system";
 
@@ -204,21 +204,29 @@ export function ChatBubble({ attachments = [], children, role }: ChatBubbleProps
         {attachments.length > 0 ? (
           <View style={styles.chatAttachmentList}>
             {attachments.map((attachment) => (
-              <View
-                key={attachment.id}
-                style={[styles.chatAttachmentChip, !isAssistant && styles.userAttachmentChip]}
-              >
-                <Paperclip
-                  color={isAssistant ? theme.colors.primary : theme.colors.surface}
-                  size={11}
-                  strokeWidth={2}
-                />
-                <Text
-                  numberOfLines={1}
-                  style={[styles.chatAttachmentText, !isAssistant && styles.userAttachmentText]}
+              <View key={attachment.id}>
+                {isImageAttachment(attachment) ? (
+                  <Image
+                    accessibilityLabel={`${attachment.name} 이미지 미리보기`}
+                    source={{ uri: attachment.uri }}
+                    style={styles.chatImagePreview}
+                  />
+                ) : null}
+                <View
+                  style={[styles.chatAttachmentChip, !isAssistant && styles.userAttachmentChip]}
                 >
-                  {attachment.name}
-                </Text>
+                  <Paperclip
+                    color={isAssistant ? theme.colors.primary : theme.colors.surface}
+                    size={11}
+                    strokeWidth={2}
+                  />
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.chatAttachmentText, !isAssistant && styles.userAttachmentText]}
+                  >
+                    {attachment.name}
+                  </Text>
+                </View>
               </View>
             ))}
           </View>
@@ -230,13 +238,16 @@ export function ChatBubble({ attachments = [], children, role }: ChatBubbleProps
 
 type ChatInputAttachment = {
   id: string;
+  mimeType?: string;
   name: string;
   sizeBytes?: number;
+  uri?: string;
 };
 
 type PlannerChatInputProps = {
   attachments?: ChatInputAttachment[];
   disabled?: boolean;
+  inputDisabled?: boolean;
   maxAttachments?: number;
   onAddAttachment?: () => void;
   onChangeText: (value: string) => void;
@@ -252,6 +263,7 @@ type PlannerChatInputProps = {
 export function PlannerChatInput({
   attachments = [],
   disabled = false,
+  inputDisabled = false,
   maxAttachments = 3,
   onAddAttachment,
   onChangeText,
@@ -260,7 +272,9 @@ export function PlannerChatInput({
   placeholder,
   value,
 }: PlannerChatInputProps) {
-  const canAddAttachment = Boolean(onAddAttachment) && attachments.length < maxAttachments;
+  const submitDisabled = disabled || inputDisabled;
+  const canAddAttachment =
+    Boolean(onAddAttachment) && !inputDisabled && attachments.length < maxAttachments;
 
   return (
     <View style={styles.chatInputPanel}>
@@ -272,13 +286,28 @@ export function PlannerChatInput({
               accessibilityRole="button"
               key={attachment.id}
               onPress={() => onRemoveAttachment?.(attachment.id)}
-              style={styles.chatInputAttachmentChip}
+              style={styles.chatInputAttachmentCard}
             >
-              <Paperclip color={theme.colors.primary} size={11} strokeWidth={2} />
-              <Text numberOfLines={1} style={styles.chatInputAttachmentText}>
-                {attachment.name}
-              </Text>
-              <X color={theme.colors.muted} size={12} strokeWidth={2} />
+              {isImageAttachment(attachment) ? (
+                <Image
+                  accessibilityLabel={`${attachment.name} 이미지 미리보기`}
+                  source={{ uri: attachment.uri }}
+                  style={styles.chatInputImagePreview}
+                />
+              ) : (
+                <View style={styles.chatInputFileIcon}>
+                  <Paperclip color={theme.colors.primary} size={13} strokeWidth={2} />
+                </View>
+              )}
+              <View style={styles.chatInputAttachmentCopy}>
+                <Text numberOfLines={1} style={styles.chatInputAttachmentText}>
+                  {attachment.name}
+                </Text>
+                <Text style={styles.chatInputAttachmentMeta}>
+                  {formatAttachmentSize(attachment)}
+                </Text>
+              </View>
+              <X color={theme.colors.muted} size={14} strokeWidth={2} />
             </Pressable>
           ))}
         </View>
@@ -302,28 +331,33 @@ export function PlannerChatInput({
         <TextInput
           accessibilityLabel="상담 메시지 입력"
           blurOnSubmit={false}
+          editable={!inputDisabled}
           multiline
           onChangeText={onChangeText}
           onSubmitEditing={() => {
-            if (!disabled) {
+            if (!submitDisabled) {
               onSubmit();
             }
           }}
           placeholder={placeholder}
           placeholderTextColor={theme.colors.muted}
           returnKeyType="send"
-          style={styles.chatInput}
+          style={[styles.chatInput, webNoFocusOutline]}
           value={value}
         />
         <Pressable
-          accessibilityLabel={disabled ? "메시지 전송 불가" : "메시지 전송"}
+          accessibilityLabel={submitDisabled ? "메시지 전송 불가" : "메시지 전송"}
           accessibilityRole="button"
-          disabled={disabled}
+          disabled={submitDisabled}
           onPress={onSubmit}
-          style={[styles.sendButton, disabled && styles.disabledSendButton]}
+          style={[
+            styles.sendButton,
+            submitDisabled && styles.disabledSendButton,
+            webNoFocusOutline,
+          ]}
         >
           <Send
-            color={disabled ? theme.colors.muted : theme.colors.surface}
+            color={submitDisabled ? theme.colors.muted : theme.colors.surface}
             size={13}
             strokeWidth={2}
           />
@@ -332,6 +366,30 @@ export function PlannerChatInput({
     </View>
   );
 }
+
+function isImageAttachment(
+  attachment: ChatInputAttachment,
+): attachment is ChatInputAttachment & { mimeType: string; uri: string } {
+  return Boolean(attachment.uri && attachment.mimeType?.startsWith("image/"));
+}
+
+function formatAttachmentSize(attachment: ChatInputAttachment) {
+  if (!attachment.sizeBytes) {
+    return "첨부됨";
+  }
+
+  if (attachment.sizeBytes < 1024 * 1024) {
+    return `${Math.max(1, Math.round(attachment.sizeBytes / 1024))}KB`;
+  }
+
+  return `${(attachment.sizeBytes / 1024 / 1024).toFixed(1)}MB`;
+}
+
+const webNoFocusOutline = {
+  outlineColor: "transparent",
+  outlineStyle: "none",
+  outlineWidth: 0,
+} as object;
 
 export type PlanProposalItem = {
   detail: string;
@@ -702,6 +760,13 @@ const styles = StyleSheet.create({
     minHeight: 24,
     paddingHorizontal: theme.space.xs,
   },
+  chatImagePreview: {
+    backgroundColor: theme.colors.backgroundAlt,
+    borderRadius: theme.radius.medium,
+    height: 132,
+    marginBottom: theme.space.xs,
+    width: 176,
+  },
   userAttachmentChip: {
     backgroundColor: "rgba(254, 252, 248, 0.18)",
   },
@@ -728,24 +793,46 @@ const styles = StyleSheet.create({
     gap: theme.space.xs,
     paddingBottom: theme.space.xs,
   },
-  chatInputAttachmentChip: {
+  chatInputAttachmentCard: {
     alignItems: "center",
     backgroundColor: theme.colors.primarySoft,
     borderColor: "rgba(61, 97, 66, 0.16)",
     borderRadius: theme.radius.small,
     borderWidth: 1,
     flexDirection: "row",
-    gap: 5,
+    gap: theme.space.xs,
     maxWidth: "100%",
-    minHeight: 28,
-    paddingHorizontal: theme.space.xs,
+    minHeight: 48,
+    padding: 5,
+  },
+  chatInputImagePreview: {
+    backgroundColor: theme.colors.backgroundAlt,
+    borderRadius: 6,
+    height: 38,
+    width: 38,
+  },
+  chatInputFileIcon: {
+    alignItems: "center",
+    backgroundColor: theme.colors.surface,
+    borderRadius: 6,
+    height: 38,
+    justifyContent: "center",
+    width: 38,
+  },
+  chatInputAttachmentCopy: {
+    flexShrink: 1,
+    minWidth: 0,
   },
   chatInputAttachmentText: {
     color: theme.colors.primary,
-    flexShrink: 1,
     fontSize: 11,
     fontWeight: "600",
     lineHeight: 15,
+  },
+  chatInputAttachmentMeta: {
+    color: theme.colors.muted,
+    fontSize: 10,
+    lineHeight: 14,
   },
   chatInputShell: {
     alignItems: "center",

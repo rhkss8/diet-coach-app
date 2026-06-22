@@ -4,7 +4,7 @@ import type {
   ChatPlannerResponse,
 } from "@diet-coach/ai";
 import * as DocumentPicker from "expo-document-picker";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { theme } from "../../shared/ui/design-system";
@@ -45,7 +45,52 @@ export function ConsultationChatScreen({
 }: ConsultationChatScreenProps) {
   const [draftMessage, setDraftMessage] = useState("");
   const [draftAttachments, setDraftAttachments] = useState<ChatPlannerAttachment[]>([]);
-  const canSendMessage = draftMessage.trim().length > 0 || draftAttachments.length > 0;
+  const hasPendingConfirmation = pendingResponse ? "confirmation" in pendingResponse : false;
+  const canSendMessage =
+    !hasPendingConfirmation && (draftMessage.trim().length > 0 || draftAttachments.length > 0);
+
+  const appendDraftAttachments = useCallback((attachments: ChatPlannerAttachment[]) => {
+    setDraftAttachments((currentAttachments) => {
+      const existingAttachmentKeys = new Set(
+        currentAttachments.map((attachment) => `${attachment.name}-${attachment.sizeBytes ?? ""}`),
+      );
+      const remainingSlots = MAX_CHAT_ATTACHMENTS - currentAttachments.length;
+      const newAttachments = attachments
+        .filter(
+          (attachment) =>
+            !existingAttachmentKeys.has(`${attachment.name}-${attachment.sizeBytes ?? ""}`),
+        )
+        .slice(0, remainingSlots);
+
+      return [...currentAttachments, ...newAttachments];
+    });
+  }, []);
+
+  useEffect(() => {
+    if (hasPendingConfirmation || typeof window === "undefined") {
+      return;
+    }
+
+    function handlePaste(event: ClipboardEvent) {
+      const pastedFiles = Array.from(event.clipboardData?.files ?? []);
+      const pastedImages = pastedFiles
+        .filter((file) => file.type.startsWith("image/"))
+        .map(createClipboardImageAttachment);
+
+      if (pastedImages.length === 0) {
+        return;
+      }
+
+      event.preventDefault();
+      appendDraftAttachments(pastedImages);
+    }
+
+    window.addEventListener("paste", handlePaste);
+
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+    };
+  }, [appendDraftAttachments, hasPendingConfirmation]);
 
   function submitMessage() {
     const message = draftMessage.trim() || "첨부 파일을 기준으로 식단을 분석해줘";
@@ -61,6 +106,10 @@ export function ConsultationChatScreen({
   }
 
   async function pickAttachment() {
+    if (hasPendingConfirmation) {
+      return;
+    }
+
     const result = await DocumentPicker.getDocumentAsync({
       copyToCacheDirectory: true,
       multiple: true,
@@ -71,12 +120,7 @@ export function ConsultationChatScreen({
       return;
     }
 
-    setDraftAttachments((currentAttachments) => {
-      const remainingSlots = MAX_CHAT_ATTACHMENTS - currentAttachments.length;
-      const newAttachments = result.assets.slice(0, remainingSlots).map(createChatAttachment);
-
-      return [...currentAttachments, ...newAttachments];
-    });
+    appendDraftAttachments(result.assets.map(createChatAttachment));
   }
 
   function removeAttachment(attachmentId: string) {
@@ -129,12 +173,17 @@ export function ConsultationChatScreen({
       <PlannerChatInput
         attachments={draftAttachments}
         disabled={!canSendMessage}
+        inputDisabled={hasPendingConfirmation}
         maxAttachments={MAX_CHAT_ATTACHMENTS}
         onAddAttachment={pickAttachment}
         onChangeText={setDraftMessage}
         onRemoveAttachment={removeAttachment}
         onSubmit={submitMessage}
-        placeholder="편하게 이야기해 주세요..."
+        placeholder={
+          hasPendingConfirmation
+            ? "제안을 먼저 승인하거나 다시 제안받아 주세요."
+            : "편하게 이야기해 주세요..."
+        }
         value={draftMessage}
       />
     </View>
@@ -148,6 +197,18 @@ function createChatAttachment(asset: DocumentPicker.DocumentPickerAsset): ChatPl
     mimeType: asset.mimeType,
     sizeBytes: asset.size,
     uri: asset.uri,
+  };
+}
+
+function createClipboardImageAttachment(file: File): ChatPlannerAttachment {
+  const pastedAt = Date.now();
+
+  return {
+    id: `attachment-${pastedAt}-${Math.random().toString(36).slice(2)}`,
+    name: file.name || `clipboard-image-${pastedAt}.png`,
+    mimeType: file.type,
+    sizeBytes: file.size,
+    uri: URL.createObjectURL(file),
   };
 }
 
