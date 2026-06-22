@@ -232,7 +232,7 @@ Todos:
 - [ ] Run visual QA before marking this phase done.
   - [x] Export web build.
   - [x] Capture screenshots for login, chat, chat-proposal, today, recovery-reasons, and plan-approval.
-  - [ ] Decide whether RN should restore a routable onboarding screen or keep the chat-first guest entry before capturing onboarding.
+  - [x] Decide whether RN should restore a routable onboarding screen or keep the chat-first guest entry before capturing onboarding.
   - [x] Compare captured screenshots against `figma_make` state by state.
   - [x] Fix mismatches before committing.
 

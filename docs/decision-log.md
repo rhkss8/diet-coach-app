@@ -197,24 +197,26 @@ Review Trigger:
 
 ## 2026-06-19 - Decide Onboarding Route For Figma Make Parity
 
-Status: proposed
+Status: accepted
 Area: product
 
 Decision:
 
-- Choose whether the RN app should restore a routable onboarding screen matching Figma Make, or keep the current chat-first guest entry that skips onboarding.
+- Keep the current chat-first guest entry for the tester MVP.
+- Do not restore a routable onboarding screen only for Figma Make parity before tester recruitment.
+- Treat the non-routable onboarding screen as an intentional difference from the Figma Make source while the chat-first pivot is being tested.
 
 Reason:
 
-- Phase 9 visual QA can capture login, chat, chat-proposal, today, recovery-reasons, and plan-approval.
-- It cannot capture onboarding because `AppRoot` routes a guest directly from login to consultation.
-- Collapsing or restoring onboarding changes the MVP entry flow, so it should be an explicit product decision.
+- Phase 8 made AI consultation the primary first-run path.
+- Tester recruitment should validate the chat-first loop rather than reintroduce structured onboarding friction.
+- Restoring onboarding now would change the product entry flow, not just visual parity.
 
 Tradeoff:
 
-- Restoring onboarding improves Figma Make parity and preserves structured profile intake before chat.
-- Keeping chat-first entry reduces first-run friction but leaves the Figma Make onboarding screen out of the routable MVP.
+- Easier first-run entry and cleaner validation of the chat-first MVP.
+- Figma Make onboarding remains uncaptured in the routable RN app and must be documented as an intentional parity exception.
 
 Review Trigger:
 
-- Before marking Phase 9 complete or recruiting testers beyond close contacts.
+- After the first tester cohort reports whether chat-first entry lacks enough profile context.

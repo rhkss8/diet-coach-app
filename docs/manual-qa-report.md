@@ -82,3 +82,29 @@ Fixed during QA:
 Blocked:
 
 - Onboarding could not be captured because the current `AppRoot` guest flow routes from login directly to chat-first consultation. Decide whether to restore a routable onboarding screen for Figma Make parity or keep chat-first entry as the MVP flow.
+
+## 2026-06-22 - TARS Loop Publishing Parity Recheck
+
+Scope: Phase 9 Figma Make publishing parity follow-up after chat input and nutrition-detail changes.
+
+Environment:
+
+- Export command: `pnpm mobile:build:web`
+- Export result: passed, output in `dist/mobile-web-qa`
+- Browser automation target attempted: `http://127.0.0.1:4176`
+
+Decisions:
+
+- Keep the chat-first guest entry as the tester MVP route.
+- Do not restore routable onboarding only for Figma Make parity before recruiting testers.
+- Onboarding remains an intentional parity exception while the chat-first pivot is under test.
+
+Checked:
+
+- Local Expo web export completed successfully after the latest UI changes.
+- `docs/decision-log.md` now records the onboarding route decision as accepted.
+
+Blocked:
+
+- Fresh Playwright capture could not run in this environment because the wrapper attempted to fetch `@playwright/cli` from npm and network access was unavailable.
+- A fresh visual screenshot pass is still required before marking Phase 9 fully done.
