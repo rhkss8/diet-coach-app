@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { ArrowRight } from "lucide-react-native";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { FormTextField } from "../../shared/ui/FormTextField";
-import { PrimaryButton } from "../../shared/ui/PrimaryButton";
-import { commonStyles, theme } from "../../shared/ui/design-system";
+import { theme } from "../../shared/ui/design-system";
 import { PlannerBrandRow } from "../../shared/ui/planner-components";
 
 type AuthScreenProps = {
@@ -25,12 +23,13 @@ export function AuthScreen({
   onRequestMagicLink,
 }: AuthScreenProps) {
   const [email, setEmail] = useState("");
+  const canRequestLink = email.trim().length > 0 && !isSubmitting;
 
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
       <PlannerBrandRow />
 
-      <View style={styles.header}>
+      <View style={styles.heroCard}>
         <Text style={styles.eyebrow}>로그인</Text>
         <Text style={styles.title}>플랜을 이어갈{"\n"}계정을 준비할게요.</Text>
         <Text style={styles.description}>
@@ -39,37 +38,66 @@ export function AuthScreen({
         </Text>
       </View>
 
-      <View style={styles.form}>
-        <FormTextField
-          error={error ?? undefined}
-          inputMode="email"
-          label="이메일"
-          onChangeText={setEmail}
-          placeholder="you@example.com"
-          value={email}
-        />
-        {message ? <Text style={styles.message}>{message}</Text> : null}
-        {!isConfigured ? (
-          <Text style={styles.helperText}>
-            아직 Supabase 환경 변수가 없어 게스트로 진행할 수 있어요.
-          </Text>
-        ) : null}
+      <View style={styles.formCard}>
+        <Text style={styles.fieldLabel}>이메일</Text>
+        {message ? (
+          <View style={styles.sentCard}>
+            <Text style={styles.sentTitle}>링크를 보냈어요</Text>
+            <Text style={styles.sentDescription}>{email} 메일함을 확인해 주세요.</Text>
+          </View>
+        ) : (
+          <>
+            <TextInput
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+              inputMode="email"
+              onChangeText={setEmail}
+              placeholder="you@example.com"
+              placeholderTextColor={theme.colors.subtle}
+              style={[styles.emailInput, email.trim().length > 0 && styles.emailInputActive]}
+              value={email}
+            />
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {!isConfigured ? (
+              <Text style={styles.helperText}>
+                아직 Supabase 환경 변수가 없어 게스트로 진행할 수 있어요.
+              </Text>
+            ) : null}
+          </>
+        )}
       </View>
 
-      <View style={styles.footer}>
-        <PrimaryButton
-          disabled={isSubmitting}
-          iconRight={
-            !isSubmitting ? (
-              <ArrowRight color={theme.colors.surface} size={15} strokeWidth={2} />
-            ) : undefined
-          }
-          label={isSubmitting ? "링크 보내는 중" : "이메일 링크 받기"}
+      <View style={styles.actions}>
+        <Pressable
+          accessibilityRole="button"
+          disabled={!canRequestLink}
           onPress={() => onRequestMagicLink(email)}
-        />
-        <Pressable accessibilityRole="button" onPress={onContinueAsGuest} style={styles.secondary}>
-          <Text style={styles.secondaryLabel}>게스트로 시작</Text>
+          style={[styles.primaryAction, !canRequestLink && styles.disabledPrimaryAction]}
+        >
+          <Text style={[styles.primaryActionText, !canRequestLink && styles.disabledActionText]}>
+            {isSubmitting ? "링크 보내는 중" : "이메일 링크 받기"}
+          </Text>
+          {!isSubmitting ? (
+            <ArrowRight
+              color={canRequestLink ? theme.colors.surface : theme.colors.muted}
+              size={15}
+              strokeWidth={2}
+            />
+          ) : null}
         </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={onContinueAsGuest}
+          style={styles.guestAction}
+        >
+          <Text style={styles.guestActionText}>게스트로 시작</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.footerNote}>
+        <Text style={styles.footerNoteText}>"오늘 플랜은 아직 살아 있어요."</Text>
       </View>
     </ScrollView>
   );
@@ -80,53 +108,146 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   content: {
-    gap: theme.space.md,
-    padding: theme.space.xl,
+    flexGrow: 1,
+    paddingBottom: 40,
+    paddingHorizontal: theme.space.xl,
+    paddingTop: theme.space.xl,
   },
-  header: {
-    backgroundColor: theme.colors.ink,
-    borderRadius: theme.radius.large,
+  heroCard: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 14,
     gap: theme.space.sm,
-    padding: theme.space.lg,
-    marginTop: theme.space.xs,
+    marginTop: theme.space.xl,
+    paddingHorizontal: theme.space.lg,
+    paddingVertical: theme.space.xl,
   },
   eyebrow: {
     ...theme.type.eyebrow,
-    color: "#B8CFC2",
+    color: "rgba(230, 239, 230, 0.65)",
+    fontSize: 10,
+    lineHeight: 14,
   },
   title: {
-    ...theme.type.title,
-    color: theme.colors.white,
+    color: theme.colors.surface,
+    fontFamily: "serif",
+    fontSize: 22,
+    fontWeight: "400",
+    lineHeight: 34,
   },
   description: {
-    ...theme.type.body,
-    color: "#D8E0DA",
+    color: "rgba(230, 239, 230, 0.75)",
+    fontSize: 12,
+    lineHeight: 20,
   },
-  form: {
-    ...commonStyles.card,
-    gap: theme.space.sm,
-    padding: theme.space.md,
+  formCard: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginTop: theme.space.md,
+    paddingHorizontal: theme.space.lg,
+    paddingVertical: theme.space.lg,
+  },
+  fieldLabel: {
+    color: theme.colors.subtle,
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 0,
+    lineHeight: 14,
+    marginBottom: theme.space.xs,
+    textTransform: "uppercase",
+  },
+  emailInput: {
+    backgroundColor: theme.colors.background,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.medium,
+    borderWidth: 1,
+    color: theme.colors.ink,
+    fontSize: 13,
+    minHeight: 46,
+    paddingHorizontal: theme.space.md,
+  },
+  emailInputActive: {
+    borderColor: theme.colors.primary,
   },
   helperText: {
-    ...theme.type.caption,
     color: theme.colors.muted,
+    fontSize: 11,
+    lineHeight: 17,
+    marginTop: 10,
   },
-  message: {
-    ...theme.type.caption,
-    color: theme.colors.primary,
-    fontWeight: "800",
+  errorText: {
+    color: theme.colors.danger,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: theme.space.xs,
   },
-  footer: {
-    alignItems: "stretch",
-    gap: theme.space.sm,
-  },
-  secondary: {
+  sentCard: {
     alignItems: "center",
-    minHeight: 44,
+    backgroundColor: theme.colors.primarySoft,
+    borderRadius: theme.radius.medium,
+    paddingHorizontal: theme.space.md,
+    paddingVertical: theme.space.md,
+  },
+  sentTitle: {
+    color: theme.colors.primary,
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 18,
+    marginBottom: 2,
+  },
+  sentDescription: {
+    color: theme.colors.subtle,
+    fontSize: 12,
+    lineHeight: 17,
+    textAlign: "center",
+  },
+  actions: {
+    gap: theme.space.sm,
+    marginTop: theme.space.lg,
+  },
+  primaryAction: {
+    alignItems: "center",
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radius.large,
+    flexDirection: "row",
+    gap: theme.space.xs,
+    minHeight: 52,
     justifyContent: "center",
   },
-  secondaryLabel: {
-    ...theme.type.button,
+  disabledPrimaryAction: {
+    backgroundColor: theme.colors.backgroundAlt,
+  },
+  primaryActionText: {
+    color: theme.colors.surface,
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 18,
+  },
+  disabledActionText: {
+    color: theme.colors.muted,
+  },
+  guestAction: {
+    alignItems: "center",
+    minHeight: 42,
+    justifyContent: "center",
+  },
+  guestActionText: {
     color: theme.colors.primary,
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 18,
+  },
+  footerNote: {
+    flex: 1,
+    justifyContent: "flex-end",
+    minHeight: 120,
+  },
+  footerNoteText: {
+    color: theme.colors.muted,
+    fontSize: 11,
+    fontStyle: "italic",
+    lineHeight: 16,
+    textAlign: "center",
   },
 });
