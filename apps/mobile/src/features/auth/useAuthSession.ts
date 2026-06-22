@@ -83,6 +83,26 @@ export function useAuthSession(supabaseClient: SupabaseClient | null = getMobile
     setIsGuest(true);
   }
 
+  async function returnToLogin() {
+    setAuthError(null);
+    setAuthMessage(null);
+    setIsGuest(false);
+
+    if (!session || !supabaseClient) {
+      setSession(null);
+      return;
+    }
+
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+      setAuthError(error.message);
+      return;
+    }
+
+    setSession(null);
+  }
+
   return {
     authError,
     authGateState,
@@ -92,6 +112,7 @@ export function useAuthSession(supabaseClient: SupabaseClient | null = getMobile
     isHydratingAuth,
     isSubmittingAuth,
     requestMagicLink,
+    returnToLogin,
     session,
   };
 }

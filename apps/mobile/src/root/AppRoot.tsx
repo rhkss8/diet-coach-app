@@ -28,8 +28,13 @@ import { SettingsScreen } from "../features/settings";
 import { TodayScreen } from "../features/today";
 import { getTodayPlanDate, getTodayPlanItems } from "../features/today";
 import { trackAnalyticsEvent } from "../shared/lib/analytics";
-
-type AppRoute = "adjustment" | "consultation" | "settings" | "today";
+import {
+  canPopAppRoute,
+  type AppRoute,
+  initialAppRouteHistory,
+  popAppRoute,
+  pushAppRoute,
+} from "./app-route-history";
 
 export function AppRoot() {
   const {
@@ -41,8 +46,9 @@ export function AppRoot() {
     isHydratingAuth,
     isSubmittingAuth,
     requestMagicLink,
+    returnToLogin,
   } = useAuthSession();
-  const [routeHistory, setRouteHistory] = useState<AppRoute[]>(["consultation"]);
+  const [routeHistory, setRouteHistory] = useState<AppRoute[]>(initialAppRouteHistory);
   const currentRoute = routeHistory.at(-1) ?? "consultation";
   const [consultationMessages, setConsultationMessages] = useState<ChatPlannerMessage[]>(
     createInitialConsultationMessages,
@@ -64,7 +70,17 @@ export function AppRoot() {
   }, []);
 
   function navigateTo(route: AppRoute) {
-    setRouteHistory((history) => [...history, route]);
+    setRouteHistory((history) => pushAppRoute(history, route));
+  }
+
+  function goBack() {
+    if (canPopAppRoute(routeHistory)) {
+      navigateBack(setRouteHistory);
+      return;
+    }
+
+    setRouteHistory(initialAppRouteHistory);
+    void returnToLogin();
   }
 
   return (
@@ -88,7 +104,7 @@ export function AppRoot() {
       ) : currentRoute === "settings" ? (
         <SettingsScreen
           authMode={authGateState === "guest" ? "guest" : "authenticated"}
-          onClose={() => navigateBack(setRouteHistory)}
+          onClose={goBack}
         />
       ) : currentRoute === "adjustment" ? (
         isApprovingAdjustedPlan ? (
@@ -131,13 +147,13 @@ export function AppRoot() {
                 revisionId: createPlanRevisionId(revision),
                 reason: revision.reason,
               });
-              navigateBack(setRouteHistory);
+              goBack();
             }}
             output={adjustedPlanOutput}
           />
         ) : (
           <AdjustmentReasonSelectionScreen
-            onBack={() => navigateBack(setRouteHistory)}
+            onBack={goBack}
             onSelectReason={(reason) => {
               setSelectedAdjustmentReason(reason);
               trackAnalyticsEvent("ADJUSTMENT_REASON_SELECTED", {
@@ -201,7 +217,7 @@ export function AppRoot() {
           onAdjustToday={() => {
             navigateTo("adjustment");
           }}
-          onOpenConsultation={() => navigateTo("consultation")}
+          onOpenConsultation={goBack}
           onOpenSettings={() => navigateTo("settings")}
           plan={approvedPlanSnapshot.plan}
           revisionContext={
@@ -227,7 +243,7 @@ export function AppRoot() {
               navigateToToday: () => navigateTo("today"),
             });
           }}
-          onBack={routeHistory.length > 1 ? () => navigateBack(setRouteHistory) : undefined}
+          onBack={goBack}
           onDismissPendingResponse={() => {
             setPendingChatResponse(null);
           }}
@@ -342,7 +358,7 @@ function createChatMessage(role: ChatPlannerMessage["role"], content: string): C
 }
 
 function navigateBack(setRouteHistory: Dispatch<SetStateAction<AppRoute[]>>) {
-  setRouteHistory((history) => (history.length > 1 ? history.slice(0, -1) : history));
+  setRouteHistory((history) => popAppRoute(history));
 }
 
 function getTodayDate() {
