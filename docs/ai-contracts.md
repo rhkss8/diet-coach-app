@@ -4,6 +4,8 @@
 
 AI must produce structured, reviewable plan outputs. It must not behave like an unconstrained chatbot inside core product flows.
 
+Recommendation logic is defined in `docs/plan-recommendation-algorithm.md`. Prompt and schema changes should preserve that algorithm: user context first, structured plan action second, approval before mutation.
+
 ## AI Functions
 
 ### generateChatPlannerResponse

@@ -220,3 +220,30 @@ Tradeoff:
 Review Trigger:
 
 - After the first tester cohort reports whether chat-first entry lacks enough profile context.
+
+## 2026-06-23 - Require Guided Planning Context Before Tester Recruitment
+
+Status: accepted
+Area: product
+
+Decision:
+
+- Before recruiting testers, add guided planning context so first-run recommendations are based on the user's management intent, food preferences and constraints, and daily routine.
+- The first management-intent question should use choice chips plus optional free text.
+- Food and routine questions may stay more free-form, but should include helper prompts or chips when they reduce blank-page anxiety.
+- Keep counselor, nutrition, and PT as internal reasoning lenses for now instead of exposing separate visible agents.
+
+Reason:
+
+- The app's value is not generic AI chat; it is user-context-based meal, exercise, and recovery planning.
+- Without captured context, nutrition details can still feel like polished dummy data.
+- Guided choices help users answer faster while free text preserves nuance.
+
+Tradeoff:
+
+- Stronger first-run recommendation quality and clearer product differentiation.
+- Longer first-run setup and more contract work before tester recruitment.
+
+Review Trigger:
+
+- After guided planning context becomes the first-run path and Figma Make parity is rechecked.
