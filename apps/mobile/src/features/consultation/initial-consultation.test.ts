@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import { createInitialConsultationMessages } from "./initial-consultation";
 
 describe("createInitialConsultationMessages", () => {
-  it("keeps the initial published chat state to one onboarding-based welcome bubble", () => {
+  it("keeps the initial chat state to one guided welcome bubble", () => {
     const messages = createInitialConsultationMessages();
 
     expect(messages).toHaveLength(1);
     expect(messages[0]?.role).toBe("assistant");
-    expect(messages[0]?.content).toContain("온보딩");
+    expect(messages[0]?.content).toContain("세 가지만");
   });
 
   it("uses product language instead of visible AI wording in the first bubble", () => {

@@ -2,10 +2,11 @@ import type {
   ChatPlannerAttachment,
   ChatPlannerMessage,
   ChatPlannerResponse,
+  PlanningGoalType,
 } from "@diet-coach/ai";
 import * as DocumentPicker from "expo-document-picker";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { theme } from "../../shared/ui/design-system";
 import {
@@ -16,6 +17,14 @@ import {
   PlannerChatInput,
 } from "../../shared/ui/planner-components";
 import { getChatProposalPreviewItems } from "./chat-proposal-preview";
+import {
+  createEmptyPlanningContextDraft,
+  createPlanningContextFromDraft,
+  isPlanningContextDraftReady,
+  planningGoalOptions,
+  summarizePlanningContext,
+  type PlanningContextDraft,
+} from "./planning-context";
 
 type ConsultationChatScreenProps = {
   messages: ChatPlannerMessage[];
@@ -45,7 +54,10 @@ export function ConsultationChatScreen({
 }: ConsultationChatScreenProps) {
   const [draftMessage, setDraftMessage] = useState("");
   const [draftAttachments, setDraftAttachments] = useState<ChatPlannerAttachment[]>([]);
+  const [planningDraft, setPlanningDraft] = useState(createEmptyPlanningContextDraft);
+  const [hasSubmittedPlanningContext, setHasSubmittedPlanningContext] = useState(false);
   const hasPendingConfirmation = pendingResponse ? "confirmation" in pendingResponse : false;
+  const shouldShowPlanningGuide = !hasSubmittedPlanningContext;
   const canSendMessage =
     !hasPendingConfirmation && (draftMessage.trim().length > 0 || draftAttachments.length > 0);
 
@@ -129,6 +141,35 @@ export function ConsultationChatScreen({
     );
   }
 
+  function submitPlanningContext() {
+    if (!isPlanningContextDraftReady(planningDraft)) {
+      return;
+    }
+
+    setHasSubmittedPlanningContext(true);
+    onSendMessage(summarizePlanningContext(createPlanningContextFromDraft(planningDraft)));
+  }
+
+  function updatePlanningDraft(nextDraft: Partial<PlanningContextDraft>) {
+    setPlanningDraft((currentDraft) => ({
+      ...currentDraft,
+      ...nextDraft,
+    }));
+  }
+
+  function toggleGoalType(goalType: PlanningGoalType) {
+    setPlanningDraft((currentDraft) => {
+      const hasGoalType = currentDraft.goalTypes.includes(goalType);
+
+      return {
+        ...currentDraft,
+        goalTypes: hasGoalType
+          ? currentDraft.goalTypes.filter((currentGoalType) => currentGoalType !== goalType)
+          : [...currentDraft.goalTypes, goalType],
+      };
+    });
+  }
+
   return (
     <View style={styles.screen}>
       <View style={styles.topBar}>
@@ -149,6 +190,110 @@ export function ConsultationChatScreen({
             {message.content}
           </ChatBubble>
         ))}
+
+        {shouldShowPlanningGuide ? (
+          <View style={styles.planningGuide}>
+            <View style={styles.guideHeader}>
+              <Text style={styles.guideKicker}>첫 플랜 준비</Text>
+              <Text style={styles.guideTitle}>당신의 하루에 맞춰볼게요.</Text>
+            </View>
+
+            <View style={styles.guideField}>
+              <Text style={styles.guideLabel}>어떤 관리가 필요한가요?</Text>
+              <View style={styles.goalChips}>
+                {planningGoalOptions.map((option) => {
+                  const isSelected = planningDraft.goalTypes.includes(option.value);
+
+                  return (
+                    <Pressable
+                      accessibilityRole="button"
+                      key={option.value}
+                      onPress={() => toggleGoalType(option.value)}
+                      style={[styles.goalChip, isSelected && styles.goalChipSelected]}
+                    >
+                      <Text
+                        style={[styles.goalChipText, isSelected && styles.goalChipTextSelected]}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <TextInput
+                multiline
+                onChangeText={(reasonText) => updatePlanningDraft({ reasonText })}
+                placeholder="요즘 가장 어려운 점도 같이 알려주세요."
+                placeholderTextColor={theme.colors.muted}
+                style={styles.guideInput}
+                value={planningDraft.reasonText}
+              />
+            </View>
+
+            <View style={styles.guideField}>
+              <Text style={styles.guideLabel}>먹고 싶은 음식과 피해야 할 음식</Text>
+              <TextInput
+                onChangeText={(foodsToKeepText) => updatePlanningDraft({ foodsToKeepText })}
+                placeholder="관리하면서도 먹고 싶은 음식"
+                placeholderTextColor={theme.colors.muted}
+                style={styles.guideInput}
+                value={planningDraft.foodsToKeepText}
+              />
+              <TextInput
+                onChangeText={(preferredFoodsText) => updatePlanningDraft({ preferredFoodsText })}
+                placeholder="좋아하는 음식"
+                placeholderTextColor={theme.colors.muted}
+                style={styles.guideInput}
+                value={planningDraft.preferredFoodsText}
+              />
+              <TextInput
+                onChangeText={(avoidedFoodsText) => updatePlanningDraft({ avoidedFoodsText })}
+                placeholder="피하고 싶은 음식"
+                placeholderTextColor={theme.colors.muted}
+                style={styles.guideInput}
+                value={planningDraft.avoidedFoodsText}
+              />
+              <TextInput
+                onChangeText={(allergiesText) => updatePlanningDraft({ allergiesText })}
+                placeholder="알레르기나 소화가 불편한 음식"
+                placeholderTextColor={theme.colors.muted}
+                style={styles.guideInput}
+                value={planningDraft.allergiesText}
+              />
+            </View>
+
+            <View style={styles.guideField}>
+              <Text style={styles.guideLabel}>하루 루틴</Text>
+              <TextInput
+                multiline
+                onChangeText={(routineText) => updatePlanningDraft({ routineText })}
+                placeholder="예: 8시 기상, 11시 점심, 21시 퇴근"
+                placeholderTextColor={theme.colors.muted}
+                style={styles.guideInput}
+                value={planningDraft.routineText}
+              />
+              <TextInput
+                onChangeText={(exerciseWindowsText) => updatePlanningDraft({ exerciseWindowsText })}
+                placeholder="운동 가능한 시간"
+                placeholderTextColor={theme.colors.muted}
+                style={styles.guideInput}
+                value={planningDraft.exerciseWindowsText}
+              />
+            </View>
+
+            <Pressable
+              accessibilityRole="button"
+              disabled={!isPlanningContextDraftReady(planningDraft)}
+              onPress={submitPlanningContext}
+              style={[
+                styles.guideSubmitButton,
+                !isPlanningContextDraftReady(planningDraft) && styles.guideSubmitButtonDisabled,
+              ]}
+            >
+              <Text style={styles.guideSubmitButtonText}>이 기준으로 플랜 맞추기</Text>
+            </Pressable>
+          </View>
+        ) : null}
 
         {pendingResponse ? (
           "confirmation" in pendingResponse ? (
@@ -286,5 +431,93 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: 12,
     lineHeight: 18,
+  },
+  planningGuide: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.large,
+    borderWidth: 1,
+    gap: theme.space.md,
+    padding: theme.space.md,
+  },
+  guideHeader: {
+    gap: 4,
+  },
+  guideKicker: {
+    color: theme.colors.primary,
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 0,
+  },
+  guideTitle: {
+    color: theme.colors.ink,
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: 0,
+    lineHeight: 26,
+  },
+  guideField: {
+    gap: theme.space.xs,
+  },
+  guideLabel: {
+    color: theme.colors.ink,
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 0,
+  },
+  goalChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.space.xs,
+  },
+  goalChip: {
+    backgroundColor: theme.colors.background,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.small,
+    borderWidth: 1,
+    minHeight: 36,
+    justifyContent: "center",
+    paddingHorizontal: theme.space.sm,
+  },
+  goalChipSelected: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.primary,
+  },
+  goalChipText: {
+    color: theme.colors.muted,
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  goalChipTextSelected: {
+    color: theme.colors.primaryPressed,
+  },
+  guideInput: {
+    backgroundColor: theme.colors.background,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.small,
+    borderWidth: 1,
+    color: theme.colors.ink,
+    fontSize: 14,
+    lineHeight: 20,
+    minHeight: 42,
+    outlineStyle: "none" as never,
+    paddingHorizontal: theme.space.sm,
+    paddingVertical: theme.space.xs,
+  },
+  guideSubmitButton: {
+    alignItems: "center",
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radius.small,
+    minHeight: 48,
+    justifyContent: "center",
+    paddingHorizontal: theme.space.md,
+  },
+  guideSubmitButtonDisabled: {
+    backgroundColor: theme.colors.border,
+  },
+  guideSubmitButtonText: {
+    color: theme.colors.surface,
+    fontSize: 15,
+    fontWeight: "800",
   },
 });
