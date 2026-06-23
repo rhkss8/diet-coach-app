@@ -68,7 +68,7 @@ export type PlanningCoachingPreference = "gentle" | "practical" | "direct";
 export type PlanningContext = {
   managementIntent: {
     goalTypes: PlanningGoalType[];
-    reasonText: string;
+    reasonText?: string;
     coachingPreference?: PlanningCoachingPreference;
   };
   foodContext: {

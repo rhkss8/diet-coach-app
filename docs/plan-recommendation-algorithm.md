@@ -33,13 +33,13 @@ Recommended UX:
 
 - Show quick choices first: 체중 감량, 건강 관리, 식습관 개선, 운동 루틴 만들기, 일정 때문에 무너지는 플랜 조정, 기타.
 - Let the user tap one or multiple choices.
-- Keep a free-text field below the choices for "요즘 가장 어려운 점" or any context the choices do not cover.
+- Keep a free-text field below the choices for "요즘 가장 어려운 점" or any context the choices do not cover, but treat it as optional.
 - If the user selects "기타", make the free-text field feel primary, not like an error path.
 
 Extract:
 
 - selected management goals
-- user's own reason text
+- user's own reason text, if provided
 - emotional constraint, if present: frustration, low energy, lack of consistency, work stress
 - preferred coaching direction, if present: gentle, practical, direct
 
@@ -56,6 +56,8 @@ Goal: recommend food the user can actually eat and continue.
 Guided prompt:
 
 > 좋아하는 음식이나, 관리하면서도 계속 먹고 싶은 음식이 있나요? 반대로 피하고 싶은 음식, 알레르기, 소화가 불편한 음식도 알려주세요.
+
+This step is optional. The user can skip it, but any allergy or hard avoidance they do provide becomes a hard planning rule.
 
 Extract:
 
@@ -104,7 +106,7 @@ Why it matters:
 
 ### Step 1. Guided Context Capture
 
-The app asks the three onboarding questions in sequence.
+The app asks the three onboarding questions in sequence, revealing the next question only after the current step can continue. Do not show the whole form at once.
 
 The UI can feel conversational, but internally the answers must be parsed into structured context.
 
@@ -117,9 +119,9 @@ Use hybrid input where it reduces user effort:
 
 Recommended onboarding input model:
 
-- Management intent: choice chips plus optional text.
-- Food context: free text first, with optional helper chips such as 좋아하는 음식, 계속 먹고 싶은 음식, 피해야 할 음식, 알레르기.
-- Daily routine: free text first, with structured time examples and optional time chips if the user wants help.
+- Management intent: required choice chips plus optional text for "요즘 가장 어려운 점".
+- Food context: optional free text first, with helper fields such as 좋아하는 음식, 계속 먹고 싶은 음식, 피해야 할 음식, 알레르기.
+- Daily routine: required free text first, with structured time examples and optional time chips if the user wants help.
 
 Expected internal shape:
 
@@ -134,7 +136,7 @@ type PlanningContext = {
       | "schedule_recovery"
       | "other"
     >;
-    reasonText: string;
+    reasonText?: string;
     coachingPreference?: "gentle" | "practical" | "direct";
   };
   foodContext: {
@@ -168,9 +170,14 @@ If a critical field is missing, the AI asks one focused follow-up question inste
 
 Critical fields:
 
-- management intent or reason text,
-- at least one food preference, avoidance, or eating context,
-- at least one routine clue.
+- at least one selected management goal,
+- at least one routine clue or raw routine text.
+
+Optional fields:
+
+- reason text about what is difficult lately,
+- food preferences, foods to keep, avoided foods, allergies, and eating context,
+- exercise window.
 
 Do not block the user for perfect data. The goal is enough context, not a complete medical profile.
 

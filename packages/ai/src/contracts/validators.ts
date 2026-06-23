@@ -131,7 +131,7 @@ function validateManagementIntent(value: unknown, path: string, errors: string[]
   validateStringEnumArray(intent.goalTypes, `${path}.goalTypes`, planningGoalTypes, errors, {
     minLength: 1,
   });
-  requireString(intent.reasonText, `${path}.reasonText`, errors);
+  validateOptionalString(intent.reasonText, `${path}.reasonText`, errors);
 
   if (intent.coachingPreference !== undefined) {
     requireOneOf(

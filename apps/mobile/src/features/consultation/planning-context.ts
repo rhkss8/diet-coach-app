@@ -15,6 +15,8 @@ export type PlanningContextDraft = {
   workEndTimeText: string;
 };
 
+export type PlanningContextGuideStep = "intent" | "food" | "routine";
+
 export const planningGoalOptions = [
   { label: "체중 감량", value: "weight_loss" },
   { label: "건강 관리", value: "health_management" },
@@ -42,12 +44,22 @@ export function createEmptyPlanningContextDraft(): PlanningContextDraft {
 }
 
 export function isPlanningContextDraftReady(draft: PlanningContextDraft) {
-  return (
-    draft.goalTypes.length > 0 &&
-    draft.reasonText.trim().length > 0 &&
-    hasFoodContext(draft) &&
-    draft.routineText.trim().length > 0
-  );
+  return draft.goalTypes.length > 0 && draft.routineText.trim().length > 0;
+}
+
+export function canContinuePlanningContextStep(
+  draft: PlanningContextDraft,
+  step: PlanningContextGuideStep,
+) {
+  if (step === "intent") {
+    return draft.goalTypes.length > 0;
+  }
+
+  if (step === "food") {
+    return true;
+  }
+
+  return isPlanningContextDraftReady(draft);
 }
 
 export function createPlanningContextFromDraft(draft: PlanningContextDraft): PlanningContext {
@@ -61,7 +73,7 @@ export function createPlanningContextFromDraft(draft: PlanningContextDraft): Pla
     },
     managementIntent: {
       goalTypes: draft.goalTypes,
-      reasonText: draft.reasonText.trim(),
+      reasonText: optionalText(draft.reasonText),
     },
     routineContext: {
       exerciseWindows: splitListText(draft.exerciseWindowsText),
@@ -88,23 +100,15 @@ export function summarizePlanningContext(context: PlanningContext) {
 
   return [
     `관리 목적: ${goals || "직접 입력"}`,
-    `어려운 점: ${context.managementIntent.reasonText}`,
+    context.managementIntent.reasonText
+      ? `어려운 점: ${context.managementIntent.reasonText}`
+      : undefined,
     foods ? `먹고 싶은 음식: ${foods}` : undefined,
     avoided ? `피해야 할 음식: ${avoided}` : undefined,
     `하루 루틴: ${context.routineContext.rawRoutineText}`,
   ]
     .filter(Boolean)
     .join("\n");
-}
-
-function hasFoodContext(draft: PlanningContextDraft) {
-  return [
-    draft.preferredFoodsText,
-    draft.foodsToKeepText,
-    draft.avoidedFoodsText,
-    draft.allergiesText,
-    draft.eatingContextText,
-  ].some((value) => value.trim().length > 0);
 }
 
 function optionalText(value: string) {

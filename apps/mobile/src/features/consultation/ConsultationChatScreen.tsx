@@ -20,9 +20,11 @@ import { getChatProposalPreviewItems } from "./chat-proposal-preview";
 import {
   createEmptyPlanningContextDraft,
   createPlanningContextFromDraft,
+  canContinuePlanningContextStep,
   isPlanningContextDraftReady,
   planningGoalOptions,
   summarizePlanningContext,
+  type PlanningContextGuideStep,
   type PlanningContextDraft,
 } from "./planning-context";
 
@@ -56,6 +58,7 @@ export function ConsultationChatScreen({
   const [draftAttachments, setDraftAttachments] = useState<ChatPlannerAttachment[]>([]);
   const [planningDraft, setPlanningDraft] = useState(createEmptyPlanningContextDraft);
   const [hasSubmittedPlanningContext, setHasSubmittedPlanningContext] = useState(false);
+  const [planningStep, setPlanningStep] = useState<PlanningContextGuideStep>("intent");
   const hasPendingConfirmation = pendingResponse ? "confirmation" in pendingResponse : false;
   const shouldShowPlanningGuide = !hasSubmittedPlanningContext;
   const canSendMessage =
@@ -170,6 +173,21 @@ export function ConsultationChatScreen({
     });
   }
 
+  function continuePlanningGuide() {
+    if (!canContinuePlanningContextStep(planningDraft, planningStep)) {
+      return;
+    }
+
+    if (planningStep === "intent") {
+      setPlanningStep("food");
+      return;
+    }
+
+    if (planningStep === "food") {
+      setPlanningStep("routine");
+    }
+  }
+
   return (
     <View style={styles.screen}>
       <View style={styles.topBar}>
@@ -198,100 +216,135 @@ export function ConsultationChatScreen({
               <Text style={styles.guideTitle}>당신의 하루에 맞춰볼게요.</Text>
             </View>
 
-            <View style={styles.guideField}>
-              <Text style={styles.guideLabel}>어떤 관리가 필요한가요?</Text>
-              <View style={styles.goalChips}>
-                {planningGoalOptions.map((option) => {
-                  const isSelected = planningDraft.goalTypes.includes(option.value);
+            {planningStep === "intent" ? (
+              <View style={styles.guideField}>
+                <View style={styles.guideQuestionHeader}>
+                  <Text style={styles.guideLabel}>어떤 관리가 필요한가요?</Text>
+                  <Text style={styles.requiredBadge}>필수</Text>
+                </View>
+                <View style={styles.goalChips}>
+                  {planningGoalOptions.map((option) => {
+                    const isSelected = planningDraft.goalTypes.includes(option.value);
 
-                  return (
-                    <Pressable
-                      accessibilityRole="button"
-                      key={option.value}
-                      onPress={() => toggleGoalType(option.value)}
-                      style={[styles.goalChip, isSelected && styles.goalChipSelected]}
-                    >
-                      <Text
-                        style={[styles.goalChipText, isSelected && styles.goalChipTextSelected]}
+                    return (
+                      <Pressable
+                        accessibilityRole="button"
+                        key={option.value}
+                        onPress={() => toggleGoalType(option.value)}
+                        style={[styles.goalChip, isSelected && styles.goalChipSelected]}
                       >
-                        {option.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+                        <Text
+                          style={[styles.goalChipText, isSelected && styles.goalChipTextSelected]}
+                        >
+                          {option.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <TextInput
+                  multiline
+                  onChangeText={(reasonText) => updatePlanningDraft({ reasonText })}
+                  placeholder="요즘 가장 어려운 점은 선택으로 적어주세요."
+                  placeholderTextColor={theme.colors.muted}
+                  style={styles.guideInput}
+                  value={planningDraft.reasonText}
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={!canContinuePlanningContextStep(planningDraft, planningStep)}
+                  onPress={continuePlanningGuide}
+                  style={[
+                    styles.guideSubmitButton,
+                    !canContinuePlanningContextStep(planningDraft, planningStep) &&
+                      styles.guideSubmitButtonDisabled,
+                  ]}
+                >
+                  <Text style={styles.guideSubmitButtonText}>다음</Text>
+                </Pressable>
               </View>
-              <TextInput
-                multiline
-                onChangeText={(reasonText) => updatePlanningDraft({ reasonText })}
-                placeholder="요즘 가장 어려운 점도 같이 알려주세요."
-                placeholderTextColor={theme.colors.muted}
-                style={styles.guideInput}
-                value={planningDraft.reasonText}
-              />
-            </View>
+            ) : null}
 
-            <View style={styles.guideField}>
-              <Text style={styles.guideLabel}>먹고 싶은 음식과 피해야 할 음식</Text>
-              <TextInput
-                onChangeText={(foodsToKeepText) => updatePlanningDraft({ foodsToKeepText })}
-                placeholder="관리하면서도 먹고 싶은 음식"
-                placeholderTextColor={theme.colors.muted}
-                style={styles.guideInput}
-                value={planningDraft.foodsToKeepText}
-              />
-              <TextInput
-                onChangeText={(preferredFoodsText) => updatePlanningDraft({ preferredFoodsText })}
-                placeholder="좋아하는 음식"
-                placeholderTextColor={theme.colors.muted}
-                style={styles.guideInput}
-                value={planningDraft.preferredFoodsText}
-              />
-              <TextInput
-                onChangeText={(avoidedFoodsText) => updatePlanningDraft({ avoidedFoodsText })}
-                placeholder="피하고 싶은 음식"
-                placeholderTextColor={theme.colors.muted}
-                style={styles.guideInput}
-                value={planningDraft.avoidedFoodsText}
-              />
-              <TextInput
-                onChangeText={(allergiesText) => updatePlanningDraft({ allergiesText })}
-                placeholder="알레르기나 소화가 불편한 음식"
-                placeholderTextColor={theme.colors.muted}
-                style={styles.guideInput}
-                value={planningDraft.allergiesText}
-              />
-            </View>
+            {planningStep === "food" ? (
+              <View style={styles.guideField}>
+                <View style={styles.guideQuestionHeader}>
+                  <Text style={styles.guideLabel}>먹고 싶은 음식과 피해야 할 음식</Text>
+                  <Text style={styles.optionalBadge}>선택</Text>
+                </View>
+                <TextInput
+                  onChangeText={(foodsToKeepText) => updatePlanningDraft({ foodsToKeepText })}
+                  placeholder="관리하면서도 먹고 싶은 음식"
+                  placeholderTextColor={theme.colors.muted}
+                  style={styles.guideInput}
+                  value={planningDraft.foodsToKeepText}
+                />
+                <TextInput
+                  onChangeText={(preferredFoodsText) => updatePlanningDraft({ preferredFoodsText })}
+                  placeholder="좋아하는 음식"
+                  placeholderTextColor={theme.colors.muted}
+                  style={styles.guideInput}
+                  value={planningDraft.preferredFoodsText}
+                />
+                <TextInput
+                  onChangeText={(avoidedFoodsText) => updatePlanningDraft({ avoidedFoodsText })}
+                  placeholder="피하고 싶은 음식"
+                  placeholderTextColor={theme.colors.muted}
+                  style={styles.guideInput}
+                  value={planningDraft.avoidedFoodsText}
+                />
+                <TextInput
+                  onChangeText={(allergiesText) => updatePlanningDraft({ allergiesText })}
+                  placeholder="알레르기나 소화가 불편한 음식"
+                  placeholderTextColor={theme.colors.muted}
+                  style={styles.guideInput}
+                  value={planningDraft.allergiesText}
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={continuePlanningGuide}
+                  style={styles.guideSubmitButton}
+                >
+                  <Text style={styles.guideSubmitButtonText}>다음</Text>
+                </Pressable>
+              </View>
+            ) : null}
 
-            <View style={styles.guideField}>
-              <Text style={styles.guideLabel}>하루 루틴</Text>
-              <TextInput
-                multiline
-                onChangeText={(routineText) => updatePlanningDraft({ routineText })}
-                placeholder="예: 8시 기상, 11시 점심, 21시 퇴근"
-                placeholderTextColor={theme.colors.muted}
-                style={styles.guideInput}
-                value={planningDraft.routineText}
-              />
-              <TextInput
-                onChangeText={(exerciseWindowsText) => updatePlanningDraft({ exerciseWindowsText })}
-                placeholder="운동 가능한 시간"
-                placeholderTextColor={theme.colors.muted}
-                style={styles.guideInput}
-                value={planningDraft.exerciseWindowsText}
-              />
-            </View>
-
-            <Pressable
-              accessibilityRole="button"
-              disabled={!isPlanningContextDraftReady(planningDraft)}
-              onPress={submitPlanningContext}
-              style={[
-                styles.guideSubmitButton,
-                !isPlanningContextDraftReady(planningDraft) && styles.guideSubmitButtonDisabled,
-              ]}
-            >
-              <Text style={styles.guideSubmitButtonText}>이 기준으로 플랜 맞추기</Text>
-            </Pressable>
+            {planningStep === "routine" ? (
+              <View style={styles.guideField}>
+                <View style={styles.guideQuestionHeader}>
+                  <Text style={styles.guideLabel}>하루 루틴</Text>
+                  <Text style={styles.requiredBadge}>필수</Text>
+                </View>
+                <TextInput
+                  multiline
+                  onChangeText={(routineText) => updatePlanningDraft({ routineText })}
+                  placeholder="예: 8시 기상, 11시 점심, 21시 퇴근"
+                  placeholderTextColor={theme.colors.muted}
+                  style={styles.guideInput}
+                  value={planningDraft.routineText}
+                />
+                <TextInput
+                  onChangeText={(exerciseWindowsText) =>
+                    updatePlanningDraft({ exerciseWindowsText })
+                  }
+                  placeholder="운동 가능한 시간은 선택으로 적어주세요."
+                  placeholderTextColor={theme.colors.muted}
+                  style={styles.guideInput}
+                  value={planningDraft.exerciseWindowsText}
+                />
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={!isPlanningContextDraftReady(planningDraft)}
+                  onPress={submitPlanningContext}
+                  style={[
+                    styles.guideSubmitButton,
+                    !isPlanningContextDraftReady(planningDraft) && styles.guideSubmitButtonDisabled,
+                  ]}
+                >
+                  <Text style={styles.guideSubmitButtonText}>이 기준으로 플랜 맞추기</Text>
+                </Pressable>
+              </View>
+            ) : null}
           </View>
         ) : null}
 
@@ -459,11 +512,42 @@ const styles = StyleSheet.create({
   guideField: {
     gap: theme.space.xs,
   },
+  guideQuestionHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: theme.space.xs,
+    justifyContent: "space-between",
+  },
   guideLabel: {
     color: theme.colors.ink,
+    flex: 1,
     fontSize: 14,
     fontWeight: "800",
     letterSpacing: 0,
+  },
+  requiredBadge: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radius.small,
+    color: theme.colors.surface,
+    fontSize: 11,
+    fontWeight: "800",
+    lineHeight: 16,
+    overflow: "hidden",
+    paddingHorizontal: theme.space.xs,
+    paddingVertical: 2,
+  },
+  optionalBadge: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: "rgba(61, 97, 66, 0.15)",
+    borderRadius: theme.radius.small,
+    borderWidth: 1,
+    color: theme.colors.primary,
+    fontSize: 11,
+    fontWeight: "800",
+    lineHeight: 16,
+    overflow: "hidden",
+    paddingHorizontal: theme.space.xs,
+    paddingVertical: 2,
   },
   goalChips: {
     flexDirection: "row",

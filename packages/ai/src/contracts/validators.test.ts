@@ -70,6 +70,24 @@ describe("AI contract validators", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("accepts planning context with optional reason and food answers omitted", () => {
+    const result = validatePlanningContext({
+      ...planningContext,
+      managementIntent: {
+        goalTypes: ["health_management"],
+      },
+      foodContext: {
+        preferredFoods: [],
+        foodsToKeep: [],
+        avoidedFoods: [],
+        allergies: [],
+        eatingContext: [],
+      },
+    });
+
+    expect(result.ok).toBe(true);
+  });
+
   it("rejects planning context without a selected goal or routine text", () => {
     const result = validatePlanningContext({
       ...planningContext,

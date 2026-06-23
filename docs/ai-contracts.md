@@ -129,7 +129,7 @@ type PlanningContext = {
       | "schedule_recovery"
       | "other"
     >;
-    reasonText: string;
+    reasonText?: string;
     coachingPreference?: "gentle" | "practical" | "direct";
   };
   foodContext: {
