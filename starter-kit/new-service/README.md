@@ -150,7 +150,7 @@ tars 기준으로 다음 todo 진행해줘.
 ```bash
 tars done
 git add .
-git commit -m "Complete current TARS slice"
+git commit -m "fix: 변경 내용 한글 요약"
 tars next
 ```
 
@@ -169,7 +169,7 @@ tars handoff
 ```bash
 git status
 git add .
-git commit -m "Complete current slice"
+git commit -m "fix: 변경 내용 한글 요약"
 git push
 ```
 

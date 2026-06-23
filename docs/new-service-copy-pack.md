@@ -52,7 +52,7 @@ To continue work between office and home PCs:
 ```bash
 tars handoff
 git add .
-git commit -m "Complete current slice"
+git commit -m "fix: 변경 내용 한글 요약"
 git push
 ```
 

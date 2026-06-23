@@ -679,7 +679,7 @@ def command_done() -> int:
         return verify_result
     print("\nCommit this slice:")
     print("git add .")
-    print('git commit -m "Complete current TARS slice"')
+    print('git commit -m "fix: 변경 내용 한글 요약"')
     print("\nThen continue:")
     print("tars next")
     return 0

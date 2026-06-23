@@ -230,7 +230,7 @@ pnpm test
 pnpm format:check
 git status
 git add .
-git commit -m "Describe completed slice"
+git commit -m "fix: 변경 내용 한글 요약"
 git push
 ```
 
