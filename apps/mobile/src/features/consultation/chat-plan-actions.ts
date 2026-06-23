@@ -17,20 +17,25 @@ export function applyChatPlannerResponseToPlan(
   }
 
   const basePlan = currentPlan ?? createEmptyChatPlan(todayDate);
-  const existingItemIds = new Set(basePlan.items.map((item) => item.id));
-  const newItems = response.suggestedItems
-    .map((item, index) => ({
-      ...item,
-      id: item.id ?? `chat-${todayDate}-${response.type}-${index}`,
-      planId: basePlan.id ?? "chat-plan",
-      status: item.status ?? "pending",
-    }))
-    .filter((item) => !existingItemIds.has(item.id));
+  const suggestedItems = response.suggestedItems.map((item, index) => ({
+    ...item,
+    id: item.id ?? `chat-${todayDate}-${response.type}-${index}`,
+    planId: basePlan.id ?? "chat-plan",
+    status: item.status ?? "pending",
+  }));
+  const replacedItemKeys = new Set(suggestedItems.map(getPlanItemReplacementKey));
+  const suggestedItemIds = new Set(suggestedItems.map((item) => item.id));
+  const remainingItems = basePlan.items.filter((item) => {
+    const hasSameId = item.id ? suggestedItemIds.has(item.id) : false;
+
+    return !hasSameId && !replacedItemKeys.has(getPlanItemReplacementKey(item));
+  });
+  const nextItems = [...remainingItems, ...suggestedItems];
 
   return {
     ...basePlan,
-    endDate: getLatestPlanDate([...basePlan.items, ...newItems], basePlan.endDate),
-    items: [...basePlan.items, ...newItems],
+    endDate: getLatestPlanDate(nextItems, basePlan.endDate),
+    items: nextItems,
     summary: getPlanSummaryAfterAction(response.type),
   };
 }
@@ -152,6 +157,10 @@ function getLatestPlanDate(items: AiPlan["items"], fallbackDate: string) {
     (latestDate, item) => (item.date > latestDate ? item.date : latestDate),
     fallbackDate,
   );
+}
+
+function getPlanItemReplacementKey(item: AiPlan["items"][number]) {
+  return `${item.date}:${item.type}:${item.slot}`;
 }
 
 function getPlanSummaryAfterAction(responseType: ChatPlannerResponse["type"]) {

@@ -28,9 +28,10 @@ describe("applyChatPlannerResponseToPlan", () => {
       todayDate,
     );
 
-    expect(plan?.items).toHaveLength(7);
+    expect(plan?.items).toHaveLength(6);
     expect(plan?.items.filter((item) => item.status === "completed")).toHaveLength(2);
     expect(plan?.items.some((item) => item.title === "단백질 저녁")).toBe(true);
+    expect(plan?.items.filter((item) => item.slot === "dinner")).toHaveLength(1);
   });
 
   it("adds exercise items to an existing plan", () => {

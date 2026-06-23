@@ -19,6 +19,18 @@ describe("getChatProposalPreviewItems", () => {
           slot: "dinner",
           title: "상담 기반 저녁 식단",
           description: "대화에서 나온 생활 패턴을 반영해요.",
+          foods: [
+            { name: "삶은 계란", amount: "2개" },
+            { name: "샐러드 채소", amount: "150g" },
+          ],
+          nutrition: {
+            caloriesKcal: 311,
+            proteinG: 23,
+            carbsG: 16,
+            fatG: 15,
+            source: "estimated",
+            confidence: "medium",
+          },
         },
       ],
       confirmation: {
@@ -30,6 +42,8 @@ describe("getChatProposalPreviewItems", () => {
     expect(rows).toEqual([
       {
         title: "저녁 · 상담 기반 저녁 식단",
+        nutritionSummary: "311kcal · 단백질 23g · 탄수화물 16g · 지방 15g",
+        foodLines: ["삶은 계란 2개", "샐러드 채소 150g"],
         detail: "대화에서 나온 생활 패턴을 반영해요.",
       },
     ]);

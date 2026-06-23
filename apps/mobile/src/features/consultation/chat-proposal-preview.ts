@@ -1,6 +1,7 @@
 import type { AiPlanItem, ChatPlannerResponse } from "@diet-coach/ai";
 
 import type { PlanProposalItem } from "../../shared/ui/planner-components";
+import { getPlanItemFoodLines, getPlanItemNutritionSummary } from "../plan/plan-item-display";
 
 type ConfirmableChatPlannerResponse = Exclude<
   ChatPlannerResponse,
@@ -23,6 +24,8 @@ export function getChatProposalPreviewItems(
 function createProposalItem(item: AiPlanItem): PlanProposalItem {
   return {
     detail: item.description,
+    foodLines: getPlanItemFoodLines(item),
+    nutritionSummary: getPlanItemNutritionSummary(item),
     title: `${getSlotLabel(item.slot)} · ${item.title}`,
   };
 }

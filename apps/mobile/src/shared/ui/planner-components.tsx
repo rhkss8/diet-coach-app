@@ -393,6 +393,8 @@ const webNoFocusOutline = {
 
 export type PlanProposalItem = {
   detail: string;
+  foodLines?: string[];
+  nutritionSummary?: string;
   title: string;
 };
 
@@ -434,6 +436,18 @@ export function PlanProposalCard({
               <View style={styles.proposalRail} />
               <View style={styles.proposalItemCopy}>
                 <Text style={styles.proposalItemTitle}>{item.title}</Text>
+                {item.nutritionSummary ? (
+                  <Text style={styles.proposalItemNutrition}>{item.nutritionSummary}</Text>
+                ) : null}
+                {item.foodLines?.length ? (
+                  <View style={styles.proposalFoodList}>
+                    {item.foodLines.map((foodLine) => (
+                      <Text key={foodLine} style={styles.proposalFoodLine}>
+                        {foodLine}
+                      </Text>
+                    ))}
+                  </View>
+                ) : null}
                 <Text style={styles.proposalItemDetail}>{item.detail}</Text>
               </View>
             </View>
@@ -960,6 +974,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500",
     lineHeight: 17,
+  },
+  proposalItemNutrition: {
+    color: theme.colors.primary,
+    fontSize: 11,
+    fontWeight: "700",
+    lineHeight: 16,
+  },
+  proposalFoodList: {
+    gap: 1,
+  },
+  proposalFoodLine: {
+    color: theme.colors.inkSoft,
+    fontSize: 10,
+    lineHeight: 15,
   },
   proposalItemDetail: {
     color: theme.colors.muted,

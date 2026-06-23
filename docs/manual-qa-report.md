@@ -108,3 +108,30 @@ Blocked:
 
 - Fresh Playwright capture could not run in this environment because the wrapper attempted to fetch `@playwright/cli` from npm and network access was unavailable.
 - A fresh visual screenshot pass is still required before marking Phase 9 fully done.
+
+## 2026-06-23 - Chat Proposal Nutrition Detail Recheck
+
+Scope: follow-up for Figma Make parity after meal nutrition details were added to Today and chat proposal cards.
+
+Environment:
+
+- Export command: `pnpm mobile:build:web`
+- Export result: passed, output in `dist/mobile-web-qa`
+- Static server: `python3 -m http.server 4176 --bind 127.0.0.1`
+- Browser target: `http://127.0.0.1:4176`
+- Existing captures inspected: `.playwright-cli/page-2026-06-23T06-34-38-454Z.png`, `.playwright-cli/page-2026-06-23T06-55-38-357Z.yml`
+
+Checked:
+
+- Chat proposal now shows the suggested meal's nutrition summary and food lines before approval.
+- Today plan cards show estimated calories, protein, carbs, fat, and food line details for meal items.
+- Approved chat meal suggestions now replace the same date/type/slot item instead of being dropped when the suggested id matches the starter item id.
+
+Regression checks:
+
+- `pnpm test apps/mobile/src/features/consultation/chat-plan-actions.test.ts apps/mobile/src/features/consultation/chat-proposal-preview.test.ts` passed.
+
+Blocked:
+
+- Fresh post-fix Playwright screenshot capture could not be completed because the wrapper depends on `npx --package @playwright/cli`, and `@playwright/cli` is not present in the local npm cache. Offline execution fails with `ENOTCACHED`, while online wrapper execution hangs in this restricted environment.
+- Keep Phase 9 visual QA open until a fresh browser capture confirms the approved suggestion appears in Today after this fix.

@@ -21,14 +21,14 @@ The build artifact is intentionally ignored by Git because it is machine-generat
 ## Output Summary
 
 - Bundled entry: `apps/mobile/index.ts`
-- Web bundle: `_expo/static/js/web/index-a7b2d4276cdb2474b48056be0919a747.js`
+- Web bundle: `_expo/static/js/web/index-3513fa1a9d0b81d011fa67f94da610a8.js`
 - Bundle size: 2.7MB
 - Generated files: `index.html`, `metadata.json`, `favicon.ico`, and static JS assets.
 
 ## Notes
 
 - This build is suitable for local browser QA and product walkthroughs.
-- This build includes the chat-first consultation pivot, attachment input updates, and nutrition-detail plan cards.
-- Fresh Playwright screenshot capture was not completed in this environment because the CLI wrapper attempted a network fetch for `@playwright/cli`.
+- This build includes the chat-first consultation pivot, attachment input updates, nutrition-detail plan cards, chat proposal nutrition details, and slot-safe approval of chat meal suggestions.
+- Fresh post-fix Playwright screenshot capture was not completed in this environment because the CLI wrapper depends on `@playwright/cli`, which is not available in the local npm cache and cannot be fetched reliably in the restricted environment.
 - Native iOS or Android tester distribution still requires an external Expo EAS setup, Apple Developer or Google Play account decisions, and release credentials.
 - Do not mark external tester distribution as ready until a native fresh-install path has passed on a real device.
