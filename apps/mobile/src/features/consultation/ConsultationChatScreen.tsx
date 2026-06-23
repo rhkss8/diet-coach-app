@@ -155,10 +155,16 @@ export function ConsultationChatScreen({
   }
 
   function toggleGoalType(goalType: PlanningGoalType) {
-    setPlanningDraft((currentDraft) => ({
-      ...currentDraft,
-      goalTypes: [goalType],
-    }));
+    setPlanningDraft((currentDraft) => {
+      const hasGoalType = currentDraft.goalTypes.includes(goalType);
+
+      return {
+        ...currentDraft,
+        goalTypes: hasGoalType
+          ? currentDraft.goalTypes.filter((currentGoalType) => currentGoalType !== goalType)
+          : [...currentDraft.goalTypes, goalType],
+      };
+    });
   }
 
   function skipFoodContext() {
@@ -172,7 +178,9 @@ export function ConsultationChatScreen({
       return;
     }
 
-    setDraftMessage(handleFoodQuickReplyText(reply));
+    setDraftMessage((currentMessage) =>
+      appendFoodQuickReplyText(currentMessage, handleFoodQuickReplyText(reply)),
+    );
   }
 
   function editPlanningStep(step: PlanningContextGuideStep) {
@@ -339,18 +347,21 @@ export function ConsultationChatScreen({
                       선택 입력이에요. 없으면 건너뛰어도 됩니다.
                     </Text>
                     <View style={styles.quickReplyGrid}>
-                      {["좋아하는 음식이 있어요", "피해야 할 음식이 있어요", "특별히 없어요"].map(
-                        (reply) => (
-                          <Pressable
-                            accessibilityRole="button"
-                            key={reply}
-                            onPress={() => handleFoodQuickReply(reply)}
-                            style={styles.quickReplyChip}
-                          >
-                            <Text style={styles.quickReplyText}>{reply}</Text>
-                          </Pressable>
-                        ),
-                      )}
+                      {[
+                        "좋아하는 음식이 있어요",
+                        "계속 먹고 싶은 음식이 있어요",
+                        "피해야 할 음식이 있어요",
+                        "특별히 없어요",
+                      ].map((reply) => (
+                        <Pressable
+                          accessibilityRole="button"
+                          key={reply}
+                          onPress={() => handleFoodQuickReply(reply)}
+                          style={styles.quickReplyChip}
+                        >
+                          <Text style={styles.quickReplyText}>{reply}</Text>
+                        </Pressable>
+                      ))}
                     </View>
                     <TextInput
                       multiline
@@ -463,11 +474,25 @@ function handleFoodQuickReplyText(reply: string) {
     return "좋아하는 음식: ";
   }
 
+  if (reply === "계속 먹고 싶은 음식이 있어요") {
+    return "계속 먹고 싶은 음식: ";
+  }
+
   if (reply === "피해야 할 음식이 있어요") {
     return "피해야 할 음식: ";
   }
 
   return "";
+}
+
+function appendFoodQuickReplyText(currentMessage: string, quickReplyText: string) {
+  if (quickReplyText.length === 0 || currentMessage.includes(quickReplyText.trim())) {
+    return currentMessage;
+  }
+
+  const separator = currentMessage.trim().length > 0 ? "\n" : "";
+
+  return `${currentMessage}${separator}${quickReplyText}`;
 }
 
 function getPlanningGuideQuestion(step: PlanningContextGuideStep) {
@@ -488,15 +513,23 @@ function getDraftTextForPlanningStep(draft: PlanningContextDraft, step: Planning
   }
 
   if (step === "food") {
-    if (draft.preferredFoodsText.trim().length > 0) {
-      return `좋아하는 음식: ${draft.preferredFoodsText}`;
+    const foodLines = [
+      draft.preferredFoodsText.trim().length > 0
+        ? `좋아하는 음식: ${draft.preferredFoodsText}`
+        : undefined,
+      draft.foodsToKeepText.trim().length > 0
+        ? `계속 먹고 싶은 음식: ${draft.foodsToKeepText}`
+        : undefined,
+      draft.avoidedFoodsText.trim().length > 0
+        ? `피해야 할 음식: ${draft.avoidedFoodsText}`
+        : undefined,
+    ].filter(Boolean);
+
+    if (foodLines.length > 0) {
+      return foodLines.join("\n");
     }
 
-    if (draft.avoidedFoodsText.trim().length > 0) {
-      return `피해야 할 음식: ${draft.avoidedFoodsText}`;
-    }
-
-    return draft.foodsToKeepText;
+    return "";
   }
 
   return draft.routineText;
@@ -534,17 +567,16 @@ function getPlanningContextStepSummary(
 }
 
 function applyFoodContextAnswer(draft: PlanningContextDraft, answer: string): PlanningContextDraft {
-  if (answer.startsWith("좋아하는 음식:")) {
-    return {
-      ...draft,
-      preferredFoodsText: answer.replace("좋아하는 음식:", "").trim(),
-    };
-  }
+  const preferredFoodsText = extractLabeledAnswer(answer, "좋아하는 음식");
+  const foodsToKeepText = extractLabeledAnswer(answer, "계속 먹고 싶은 음식");
+  const avoidedFoodsText = extractLabeledAnswer(answer, "피해야 할 음식");
 
-  if (answer.startsWith("피해야 할 음식:")) {
+  if (preferredFoodsText || foodsToKeepText || avoidedFoodsText) {
     return {
       ...draft,
-      avoidedFoodsText: answer.replace("피해야 할 음식:", "").trim(),
+      avoidedFoodsText: avoidedFoodsText ?? draft.avoidedFoodsText,
+      foodsToKeepText: foodsToKeepText ?? draft.foodsToKeepText,
+      preferredFoodsText: preferredFoodsText ?? draft.preferredFoodsText,
     };
   }
 
@@ -552,6 +584,16 @@ function applyFoodContextAnswer(draft: PlanningContextDraft, answer: string): Pl
     ...draft,
     foodsToKeepText: answer,
   };
+}
+
+function extractLabeledAnswer(answer: string, label: string) {
+  const line = answer
+    .split("\n")
+    .map((answerLine) => answerLine.trim())
+    .find((answerLine) => answerLine.startsWith(`${label}:`));
+  const value = line?.replace(`${label}:`, "").trim();
+
+  return value && value.length > 0 ? value : undefined;
 }
 
 function hasFoodContext(draft: PlanningContextDraft) {
