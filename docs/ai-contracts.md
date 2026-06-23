@@ -129,6 +129,7 @@ type PlanningContext = {
       | "schedule_recovery"
       | "other"
     >;
+    preferredMethods?: string[];
     reasonText?: string;
     coachingPreference?: "gentle" | "practical" | "direct";
   };

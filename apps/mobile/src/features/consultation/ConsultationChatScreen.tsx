@@ -5,13 +5,13 @@ import type {
   PlanningGoalType,
 } from "@diet-coach/ai";
 import * as DocumentPicker from "expo-document-picker";
+import { Check } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { theme } from "../../shared/ui/design-system";
 import {
   AppHeader,
-  BrandLeaf,
   ChatBubble,
   HeaderAction,
   PlanProposalCard,
@@ -172,6 +172,10 @@ export function ConsultationChatScreen({
     setPlanningStep("routine");
   }
 
+  function skipPreferredMethods() {
+    finishPlanningContext(planningDraft);
+  }
+
   function handleFoodQuickReply(reply: string) {
     if (reply === "특별히 없어요") {
       skipFoodContext();
@@ -181,6 +185,10 @@ export function ConsultationChatScreen({
     setDraftMessage((currentMessage) =>
       appendFoodQuickReplyText(currentMessage, handleFoodQuickReplyText(reply)),
     );
+  }
+
+  function appendPreferredMethod(method: string) {
+    setDraftMessage((currentMessage) => appendDelimitedText(currentMessage, method));
   }
 
   function editPlanningStep(step: PlanningContextGuideStep) {
@@ -213,11 +221,29 @@ export function ConsultationChatScreen({
       return;
     }
 
-    const nextDraft = {
-      ...planningDraft,
-      routineText: answer,
-    };
+    if (planningStep === "routine") {
+      const nextDraft = {
+        ...planningDraft,
+        routineText: answer,
+      };
 
+      if (!isPlanningContextDraftReady(nextDraft)) {
+        return;
+      }
+
+      setPlanningDraft(nextDraft);
+      setDraftMessage("");
+      setPlanningStep("method");
+      return;
+    }
+
+    finishPlanningContext({
+      ...planningDraft,
+      preferredMethodsText: answer,
+    });
+  }
+
+  function finishPlanningContext(nextDraft: PlanningContextDraft) {
     if (!isPlanningContextDraftReady(nextDraft)) {
       return;
     }
@@ -239,11 +265,14 @@ export function ConsultationChatScreen({
       </View>
 
       <ScrollView contentContainerStyle={styles.messages} style={styles.messageList}>
-        {messages.map((message) => (
+        {messages.map((message, messageIndex) => (
           <ChatBubble
             attachments={message.attachments}
             key={message.id}
             role={message.role === "assistant" ? "assistant" : "user"}
+            showAvatar={
+              message.role !== "assistant" || messages[messageIndex - 1]?.role !== "assistant"
+            }
           >
             {message.content}
           </ChatBubble>
@@ -251,15 +280,14 @@ export function ConsultationChatScreen({
 
         {shouldShowPlanningGuide ? (
           <>
-            <ChatBubble role="assistant">{getPlanningGuideQuestion(planningStep)}</ChatBubble>
+            <ChatBubble
+              role="assistant"
+              showAvatar={messages[messages.length - 1]?.role !== "assistant"}
+            >
+              {getPlanningGuideQuestion(planningStep)}
+            </ChatBubble>
             <View style={styles.contextRow}>
-              <View style={styles.contextAvatar}>
-                <BrandLeaf
-                  backgroundColor={theme.colors.primarySoft}
-                  color={theme.colors.primary}
-                  size={24}
-                />
-              </View>
+              <View style={styles.contextAvatar} />
               <View style={styles.contextDock}>
                 <View style={styles.contextDockHeader}>
                   <Text style={styles.contextDockKicker}>첫 플랜 준비</Text>
@@ -269,21 +297,34 @@ export function ConsultationChatScreen({
                 </View>
 
                 <View style={styles.memoryStrip}>
-                  {(["intent", "food", "routine"] as const).map((step) => (
+                  {(["intent", "food", "routine", "method"] as const).map((step) => (
                     <Pressable
                       accessibilityRole="button"
                       key={step}
                       onPress={() => editPlanningStep(step)}
                       style={[styles.memoryChip, planningStep === step && styles.memoryChipActive]}
                     >
-                      <Text
-                        style={[
-                          styles.memoryChipText,
-                          planningStep === step && styles.memoryChipTextActive,
-                        ]}
-                      >
-                        {getPlanningContextStepSummary(planningDraft, step)}
-                      </Text>
+                      <View style={[styles.memoryChipContent]}>
+                        {isPlanningContextStepComplete(planningDraft, step) ? (
+                          <Check
+                            color={
+                              planningStep === step
+                                ? theme.colors.primaryPressed
+                                : theme.colors.success
+                            }
+                            size={12}
+                            strokeWidth={3}
+                          />
+                        ) : null}
+                        <Text
+                          style={[
+                            styles.memoryChipText,
+                            planningStep === step && styles.memoryChipTextActive,
+                          ]}
+                        >
+                          {getPlanningContextStepSummary(step)}
+                        </Text>
+                      </View>
                     </Pressable>
                   ))}
                 </View>
@@ -416,8 +457,58 @@ export function ConsultationChatScreen({
                         draftMessage.trim() === "" && styles.contextActionDisabled,
                       ]}
                     >
-                      <Text style={styles.contextActionText}>이 기준으로 플랜 맞추기</Text>
+                      <Text style={styles.contextActionText}>원하는 방식으로 넘어가기</Text>
                     </Pressable>
+                  </View>
+                ) : null}
+
+                {planningStep === "method" ? (
+                  <View style={styles.contextPanel}>
+                    <Text style={styles.contextPrompt}>
+                      해보고 싶은 다이어트법이나 운동이 있으면 알려주세요.
+                    </Text>
+                    <View style={styles.quickReplyGrid}>
+                      {["간헐적 단식", "저탄고지", "고단백 식단", "걷기", "홈트", "헬스"].map(
+                        (method) => (
+                          <Pressable
+                            accessibilityRole="button"
+                            key={method}
+                            onPress={() => appendPreferredMethod(method)}
+                            style={styles.quickReplyChip}
+                          >
+                            <Text style={styles.quickReplyText}>{method}</Text>
+                          </Pressable>
+                        ),
+                      )}
+                    </View>
+                    <TextInput
+                      multiline
+                      onChangeText={setDraftMessage}
+                      placeholder="예: 간헐적 단식, 걷기 위주로 해보고 싶어요."
+                      placeholderTextColor={theme.colors.muted}
+                      style={styles.contextInput}
+                      value={draftMessage}
+                    />
+                    <View style={styles.contextActions}>
+                      <Pressable
+                        accessibilityRole="button"
+                        onPress={skipPreferredMethods}
+                        style={styles.contextSecondaryAction}
+                      >
+                        <Text style={styles.contextSecondaryActionText}>건너뛰기</Text>
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={draftMessage.trim() === ""}
+                        onPress={submitPlanningGuideAnswer}
+                        style={[
+                          styles.contextAction,
+                          draftMessage.trim() === "" && styles.contextActionDisabled,
+                        ]}
+                      >
+                        <Text style={styles.contextActionText}>이 기준으로 플랜 맞추기</Text>
+                      </Pressable>
+                    </View>
                   </View>
                 ) : null}
               </View>
@@ -495,6 +586,19 @@ function appendFoodQuickReplyText(currentMessage: string, quickReplyText: string
   return `${currentMessage}${separator}${quickReplyText}`;
 }
 
+function appendDelimitedText(currentMessage: string, nextValue: string) {
+  const values = currentMessage
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (values.includes(nextValue)) {
+    return currentMessage;
+  }
+
+  return [...values, nextValue].join(", ");
+}
+
 function getPlanningGuideQuestion(step: PlanningContextGuideStep) {
   if (step === "intent") {
     return "처음엔 방향만 잡을게요. 어떤 관리가 필요해서 오셨나요?";
@@ -504,7 +608,11 @@ function getPlanningGuideQuestion(step: PlanningContextGuideStep) {
     return "좋아하는 음식, 계속 먹고 싶은 음식, 피해야 할 음식이 있으면 한 번에 편하게 적어주세요. 없으면 건너뛰어도 괜찮아요.";
   }
 
-  return "좋아요. 이제 하루 흐름만 알려주세요. 기상, 식사, 퇴근 시간처럼 플랜을 끼워 넣을 단서가 필요해요.";
+  if (step === "routine") {
+    return "좋아요. 이제 하루 흐름만 알려주세요. 기상, 식사, 퇴근 시간처럼 플랜을 끼워 넣을 단서가 필요해요.";
+  }
+
+  return "마지막으로, 목표에 맞춰 해보고 싶은 방식이 있나요? 없으면 바로 넘어가도 괜찮아요.";
 }
 
 function getDraftTextForPlanningStep(draft: PlanningContextDraft, step: PlanningContextGuideStep) {
@@ -532,6 +640,10 @@ function getDraftTextForPlanningStep(draft: PlanningContextDraft, step: Planning
     return "";
   }
 
+  if (step === "method") {
+    return draft.preferredMethodsText;
+  }
+
   return draft.routineText;
 }
 
@@ -544,26 +656,46 @@ function getPlanningGuideStepLabel(step: PlanningContextGuideStep) {
     return "음식 · 선택";
   }
 
-  return "루틴 · 필수";
+  if (step === "routine") {
+    return "루틴 · 필수";
+  }
+
+  return "방식 · 선택";
 }
 
-function getPlanningContextStepSummary(
+function getPlanningContextStepSummary(step: PlanningContextGuideStep) {
+  if (step === "intent") {
+    return "목적";
+  }
+
+  if (step === "food") {
+    return "음식";
+  }
+
+  if (step === "routine") {
+    return "루틴";
+  }
+
+  return "방식";
+}
+
+function isPlanningContextStepComplete(
   draft: PlanningContextDraft,
   step: PlanningContextGuideStep,
 ) {
   if (step === "intent") {
-    const goals = draft.goalTypes
-      .map((goalType) => planningGoalOptions.find((option) => option.value === goalType)?.label)
-      .filter(Boolean);
-
-    return goals.length > 0 ? `목적 ${goals.join(", ")}` : "목적 입력";
+    return draft.goalTypes.length > 0;
   }
 
   if (step === "food") {
-    return hasFoodContext(draft) ? "음식 입력됨" : "음식 선택";
+    return hasFoodContext(draft);
   }
 
-  return draft.routineText.trim().length > 0 ? "루틴 입력됨" : "루틴 입력";
+  if (step === "routine") {
+    return draft.routineText.trim().length > 0;
+  }
+
+  return draft.preferredMethodsText.trim().length > 0;
 }
 
 function applyFoodContextAnswer(draft: PlanningContextDraft, answer: string): PlanningContextDraft {
@@ -754,6 +886,11 @@ const styles = StyleSheet.create({
   memoryChipActive: {
     backgroundColor: theme.colors.primarySoft,
     borderColor: theme.colors.primary,
+  },
+  memoryChipContent: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
   },
   memoryChipText: {
     color: theme.colors.muted,

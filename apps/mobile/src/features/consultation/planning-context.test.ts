@@ -49,6 +49,7 @@ describe("planning context onboarding", () => {
       foodsToKeepText: "삼각김밥",
       goalTypes: ["weight_loss", "schedule_recovery"],
       preferredFoodsText: "계란, 두부",
+      preferredMethodsText: "간헐적 단식, 걷기",
       reasonText: "야근 때문에 저녁이 자주 무너져요.",
       riskMomentsText: "야근, 늦은 저녁",
       routineText: "8시 기상, 11시 30분 점심, 21시 퇴근",
@@ -57,6 +58,7 @@ describe("planning context onboarding", () => {
     });
 
     expect(context.managementIntent.goalTypes).toEqual(["weight_loss", "schedule_recovery"]);
+    expect(context.managementIntent.preferredMethods).toEqual(["간헐적 단식", "걷기"]);
     expect(context.foodContext.preferredFoods).toEqual(["계란", "두부"]);
     expect(context.foodContext.allergies).toEqual(["새우"]);
     expect(context.routineContext.rawRoutineText).toContain("21시 퇴근");

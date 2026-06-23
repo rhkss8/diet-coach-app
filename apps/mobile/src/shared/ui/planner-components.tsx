@@ -178,17 +178,23 @@ type ChatBubbleProps = {
   attachments?: ChatInputAttachment[];
   children: string;
   role: "assistant" | "user";
+  showAvatar?: boolean;
 };
 
 /**
  * Matches the Figma Make chat bubble layout with an assistant mark and asymmetric corners.
  */
-export function ChatBubble({ attachments = [], children, role }: ChatBubbleProps) {
+export function ChatBubble({
+  attachments = [],
+  children,
+  role,
+  showAvatar = true,
+}: ChatBubbleProps) {
   const isAssistant = role === "assistant";
 
   return (
     <View style={[styles.chatRow, isAssistant ? styles.assistantRow : styles.userRow]}>
-      {isAssistant ? (
+      {isAssistant && showAvatar ? (
         <View style={styles.chatAvatar}>
           <BrandLeaf
             backgroundColor={theme.colors.primarySoft}
@@ -196,6 +202,8 @@ export function ChatBubble({ attachments = [], children, role }: ChatBubbleProps
             size={24}
           />
         </View>
+      ) : isAssistant ? (
+        <View style={styles.chatAvatarSpacer} />
       ) : null}
       <View style={[styles.chatBubble, isAssistant ? styles.assistantBubble : styles.userBubble]}>
         <Text style={[styles.chatBubbleText, !isAssistant && styles.userBubbleText]}>
@@ -746,6 +754,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: theme.space.xs,
     marginTop: 2,
+    width: 24,
+  },
+  chatAvatarSpacer: {
+    height: 24,
+    marginRight: theme.space.xs,
     width: 24,
   },
   chatBubble: {

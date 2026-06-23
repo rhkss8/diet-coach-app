@@ -131,6 +131,9 @@ function validateManagementIntent(value: unknown, path: string, errors: string[]
   validateStringEnumArray(intent.goalTypes, `${path}.goalTypes`, planningGoalTypes, errors, {
     minLength: 1,
   });
+  if (intent.preferredMethods !== undefined) {
+    validateStringArray(intent.preferredMethods, `${path}.preferredMethods`, errors);
+  }
   validateOptionalString(intent.reasonText, `${path}.reasonText`, errors);
 
   if (intent.coachingPreference !== undefined) {

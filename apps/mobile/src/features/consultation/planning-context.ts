@@ -8,6 +8,7 @@ export type PlanningContextDraft = {
   foodsToKeepText: string;
   goalTypes: PlanningGoalType[];
   preferredFoodsText: string;
+  preferredMethodsText: string;
   reasonText: string;
   riskMomentsText: string;
   routineText: string;
@@ -15,7 +16,7 @@ export type PlanningContextDraft = {
   workEndTimeText: string;
 };
 
-export type PlanningContextGuideStep = "intent" | "food" | "routine";
+export type PlanningContextGuideStep = "intent" | "food" | "routine" | "method";
 
 export const planningGoalOptions = [
   { label: "체중 감량", value: "weight_loss" },
@@ -35,6 +36,7 @@ export function createEmptyPlanningContextDraft(): PlanningContextDraft {
     foodsToKeepText: "",
     goalTypes: [],
     preferredFoodsText: "",
+    preferredMethodsText: "",
     reasonText: "",
     riskMomentsText: "",
     routineText: "",
@@ -59,7 +61,11 @@ export function canContinuePlanningContextStep(
     return true;
   }
 
-  return isPlanningContextDraftReady(draft);
+  if (step === "routine") {
+    return isPlanningContextDraftReady(draft);
+  }
+
+  return true;
 }
 
 export function createPlanningContextFromDraft(draft: PlanningContextDraft): PlanningContext {
@@ -73,6 +79,7 @@ export function createPlanningContextFromDraft(draft: PlanningContextDraft): Pla
     },
     managementIntent: {
       goalTypes: draft.goalTypes,
+      preferredMethods: splitListText(draft.preferredMethodsText),
       reasonText: optionalText(draft.reasonText),
     },
     routineContext: {
@@ -102,6 +109,10 @@ export function summarizePlanningContext(context: PlanningContext) {
     `관리 목적: ${goals || "직접 입력"}`,
     context.managementIntent.reasonText
       ? `어려운 점: ${context.managementIntent.reasonText}`
+      : undefined,
+    context.managementIntent.preferredMethods &&
+    context.managementIntent.preferredMethods.length > 0
+      ? `원하는 방식: ${context.managementIntent.preferredMethods.join(", ")}`
       : undefined,
     foods ? `먹고 싶은 음식: ${foods}` : undefined,
     avoided ? `피해야 할 음식: ${avoided}` : undefined,

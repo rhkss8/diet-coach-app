@@ -39,6 +39,7 @@ const planItem = {
 const planningContext = {
   managementIntent: {
     goalTypes: ["weight_loss", "schedule_recovery"],
+    preferredMethods: ["간헐적 단식", "걷기"],
     reasonText: "야근이 많아서 저녁 식단이 자주 무너져요.",
     coachingPreference: "practical",
   },
