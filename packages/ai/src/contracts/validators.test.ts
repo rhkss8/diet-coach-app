@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   validateAdjustTodayPlanOutput,
   validateGenerateInitialPlanOutput,
+  validatePlanningContext,
   validateSummarizeProgressOutput,
 } from "./validators";
 
@@ -35,7 +36,83 @@ const planItem = {
   status: "pending",
 };
 
+const planningContext = {
+  managementIntent: {
+    goalTypes: ["weight_loss", "schedule_recovery"],
+    reasonText: "야근이 많아서 저녁 식단이 자주 무너져요.",
+    coachingPreference: "practical",
+  },
+  foodContext: {
+    preferredFoods: ["계란", "두부"],
+    foodsToKeep: ["삼각김밥"],
+    avoidedFoods: ["크림소스"],
+    allergies: ["새우"],
+    eatingContext: ["편의점", "회사 식당"],
+  },
+  routineContext: {
+    wakeTime: "08:00",
+    mealWindows: {
+      breakfast: "08:30",
+      lunch: "11:30",
+      dinner: "21:30",
+    },
+    workEndTime: "21:00",
+    exerciseWindows: ["퇴근 후 10분"],
+    riskMoments: ["야근", "늦은 저녁"],
+    rawRoutineText: "8시 기상, 11시 30분 점심, 21시 퇴근이 많아요.",
+  },
+};
+
 describe("AI contract validators", () => {
+  it("accepts guided planning context from onboarding", () => {
+    const result = validatePlanningContext(planningContext);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects planning context without a selected goal or routine text", () => {
+    const result = validatePlanningContext({
+      ...planningContext,
+      managementIntent: {
+        goalTypes: [],
+        reasonText: "관리하고 싶어요.",
+      },
+      routineContext: {
+        ...planningContext.routineContext,
+        rawRoutineText: "",
+      },
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) {
+      throw new Error("Expected invalid planning context");
+    }
+    expect(result.errors).toEqual(
+      expect.arrayContaining([
+        "managementIntent.goalTypes must include at least 1 item(s)",
+        "routineContext.rawRoutineText must be a non-empty string",
+      ]),
+    );
+  });
+
+  it("rejects unknown planning goal chips", () => {
+    const result = validatePlanningContext({
+      ...planningContext,
+      managementIntent: {
+        goalTypes: ["bulk_up"],
+        reasonText: "운동 루틴을 만들고 싶어요.",
+      },
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) {
+      throw new Error("Expected invalid planning context");
+    }
+    expect(result.errors).toContain(
+      "managementIntent.goalTypes.0 must be one of: weight_loss, health_management, habit_improvement, routine_recovery, schedule_recovery, other",
+    );
+  });
+
   it("accepts a renderable initial plan output", () => {
     const result = validateGenerateInitialPlanOutput({
       plan: {

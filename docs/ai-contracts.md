@@ -116,6 +116,47 @@ type PlanItem = {
 };
 ```
 
+### PlanningContext
+
+```ts
+type PlanningContext = {
+  managementIntent: {
+    goalTypes: Array<
+      | "weight_loss"
+      | "health_management"
+      | "habit_improvement"
+      | "routine_recovery"
+      | "schedule_recovery"
+      | "other"
+    >;
+    reasonText: string;
+    coachingPreference?: "gentle" | "practical" | "direct";
+  };
+  foodContext: {
+    preferredFoods: string[];
+    foodsToKeep: string[];
+    avoidedFoods: string[];
+    allergies: string[];
+    eatingContext?: string[];
+  };
+  routineContext: {
+    wakeTime?: string;
+    mealWindows: {
+      breakfast?: string;
+      lunch?: string;
+      dinner?: string;
+      snack?: string;
+    };
+    workEndTime?: string;
+    exerciseWindows: string[];
+    riskMoments: string[];
+    rawRoutineText: string;
+  };
+};
+```
+
+`PlanningContext` is optional for legacy flows, but guided onboarding and chat-first recommendation should pass it whenever available.
+
 ### AdjustmentRequest
 
 ```ts

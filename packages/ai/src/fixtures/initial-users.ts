@@ -40,6 +40,32 @@ export const initialFixtureUsers = [
         targetWeightKg: 66,
       },
       lifestyleAnswers: consistencyFirstMealFocused,
+      planningContext: {
+        managementIntent: {
+          goalTypes: ["weight_loss", "schedule_recovery"],
+          reasonText: "야근이 많아서 저녁 식단이 자주 무너져요.",
+          coachingPreference: "practical",
+        },
+        foodContext: {
+          preferredFoods: ["계란", "두부"],
+          foodsToKeep: ["삼각김밥"],
+          avoidedFoods: ["크림소스"],
+          allergies: ["새우"],
+          eatingContext: ["편의점", "회사 식당"],
+        },
+        routineContext: {
+          wakeTime: "08:00",
+          mealWindows: {
+            breakfast: "08:30",
+            lunch: "11:30",
+            dinner: "21:30",
+          },
+          workEndTime: "21:00",
+          exerciseWindows: ["퇴근 후 10분"],
+          riskMoments: ["야근", "늦은 저녁"],
+          rawRoutineText: "8시 기상, 11시 30분 점심, 21시 퇴근이 많아요.",
+        },
+      },
     },
   },
   {

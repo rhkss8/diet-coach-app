@@ -55,10 +55,49 @@ export type AiPlan = {
   items: AiPlanItem[];
 };
 
+export type PlanningGoalType =
+  | "weight_loss"
+  | "health_management"
+  | "habit_improvement"
+  | "routine_recovery"
+  | "schedule_recovery"
+  | "other";
+
+export type PlanningCoachingPreference = "gentle" | "practical" | "direct";
+
+export type PlanningContext = {
+  managementIntent: {
+    goalTypes: PlanningGoalType[];
+    reasonText: string;
+    coachingPreference?: PlanningCoachingPreference;
+  };
+  foodContext: {
+    preferredFoods: string[];
+    foodsToKeep: string[];
+    avoidedFoods: string[];
+    allergies: string[];
+    eatingContext?: string[];
+  };
+  routineContext: {
+    wakeTime?: string;
+    mealWindows: {
+      breakfast?: string;
+      lunch?: string;
+      dinner?: string;
+      snack?: string;
+    };
+    workEndTime?: string;
+    exerciseWindows: string[];
+    riskMoments: string[];
+    rawRoutineText: string;
+  };
+};
+
 export type GenerateInitialPlanInput = {
   profile: UserProfileInput;
   goal: GoalInput;
   lifestyleAnswers: LifestyleAnswers;
+  planningContext?: PlanningContext;
 };
 
 export type GenerateInitialPlanOutput = {
@@ -125,6 +164,7 @@ export type ChatPlannerResponse =
 export type GenerateChatPlannerResponseInput = {
   currentPlan?: AiPlan;
   messages: ChatPlannerMessage[];
+  planningContext?: PlanningContext;
   todayDate: ISODate;
 };
 
@@ -138,6 +178,7 @@ export type AdjustTodayPlanInput = {
     interpretedFoodName?: string;
     interpretedPortion?: string;
   };
+  planningContext?: PlanningContext;
 };
 
 export type AdjustTodayPlanOutput = {

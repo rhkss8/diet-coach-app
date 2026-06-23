@@ -17,7 +17,7 @@ describe("buildGenerateInitialPlanPrompt", () => {
   });
 
   it("includes input and renderable output contract terms", () => {
-    const fixtureUser = initialFixtureUsers[1];
+    const fixtureUser = initialFixtureUsers[0];
     const prompt = buildGenerateInitialPlanPrompt(fixtureUser.input);
     const userMessage = prompt.messages[1]?.content ?? "";
 
@@ -26,6 +26,7 @@ describe("buildGenerateInitialPlanPrompt", () => {
     expect(userMessage).toContain('"items"');
     expect(userMessage).toContain('"nutrition"');
     expect(userMessage).toContain('"foods"');
+    expect(userMessage).toContain('"planningContext"');
     expect(userMessage).toContain("breakfast | lunch | dinner | snack | workout");
     expect(userMessage).toContain("Return at least 7 dates of plan items.");
   });
@@ -39,5 +40,7 @@ describe("buildGenerateInitialPlanPrompt", () => {
     expect(promptText).toContain("not a precise calorie tracker");
     expect(promptText).toContain("app-level estimates");
     expect(promptText).toContain("easy to adjust later");
+    expect(promptText).toContain("primary personalization source");
+    expect(promptText).toContain("Never include foods listed in planningContext");
   });
 });

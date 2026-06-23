@@ -151,7 +151,7 @@ Todos:
 - [x] Create build.
 - [ ] Add guided planning context before tester recruitment.
   - [x] Define recommendation algorithm and context requirements.
-  - [ ] Define `PlanningContext` domain and AI contract shape.
+  - [x] Define `PlanningContext` domain and AI contract shape.
   - [ ] Replace blank first-run chat with guided onboarding questions.
   - [ ] Use choice chips plus free text for management intent.
   - [ ] Capture food preferences, foods to keep, avoided foods, allergies, and routine context.

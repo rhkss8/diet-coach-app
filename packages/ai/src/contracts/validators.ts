@@ -10,6 +10,9 @@ import type {
   AdjustTodayPlanOutput,
   AiValidationResult,
   GenerateInitialPlanOutput,
+  PlanningContext,
+  PlanningCoachingPreference,
+  PlanningGoalType,
   SummarizeProgressOutput,
 } from "./types";
 
@@ -17,6 +20,19 @@ const planItemTypes = ["meal", "exercise"] satisfies PlanItemType[];
 const planItemSlots = ["breakfast", "lunch", "dinner", "snack", "workout"] satisfies PlanItemSlot[];
 const planItemIntensities = ["light", "moderate", "challenging"] satisfies PlanItemIntensity[];
 const planItemStatuses = ["pending", "completed", "skipped", "adjusted"] satisfies PlanItemStatus[];
+const planningGoalTypes = [
+  "weight_loss",
+  "health_management",
+  "habit_improvement",
+  "routine_recovery",
+  "schedule_recovery",
+  "other",
+] satisfies PlanningGoalType[];
+const planningCoachingPreferences = [
+  "gentle",
+  "practical",
+  "direct",
+] satisfies PlanningCoachingPreference[];
 const adjustmentReasons = [
   "meal_changed",
   "missed_exercise",
@@ -90,6 +106,86 @@ export function validateSummarizeProgressOutput(
   }
 
   return toValidationResult(value, errors);
+}
+
+export function validatePlanningContext(value: unknown): AiValidationResult<PlanningContext> {
+  const errors: string[] = [];
+  const context = asRecord(value, "planningContext", errors);
+
+  if (context) {
+    validateManagementIntent(context.managementIntent, "managementIntent", errors);
+    validateFoodContext(context.foodContext, "foodContext", errors);
+    validateRoutineContext(context.routineContext, "routineContext", errors);
+  }
+
+  return toValidationResult(value, errors);
+}
+
+function validateManagementIntent(value: unknown, path: string, errors: string[]) {
+  const intent = asRecord(value, path, errors);
+
+  if (!intent) {
+    return;
+  }
+
+  validateStringEnumArray(intent.goalTypes, `${path}.goalTypes`, planningGoalTypes, errors, {
+    minLength: 1,
+  });
+  requireString(intent.reasonText, `${path}.reasonText`, errors);
+
+  if (intent.coachingPreference !== undefined) {
+    requireOneOf(
+      intent.coachingPreference,
+      planningCoachingPreferences,
+      `${path}.coachingPreference`,
+      errors,
+    );
+  }
+}
+
+function validateFoodContext(value: unknown, path: string, errors: string[]) {
+  const foodContext = asRecord(value, path, errors);
+
+  if (!foodContext) {
+    return;
+  }
+
+  validateStringArray(foodContext.preferredFoods, `${path}.preferredFoods`, errors);
+  validateStringArray(foodContext.foodsToKeep, `${path}.foodsToKeep`, errors);
+  validateStringArray(foodContext.avoidedFoods, `${path}.avoidedFoods`, errors);
+  validateStringArray(foodContext.allergies, `${path}.allergies`, errors);
+
+  if (foodContext.eatingContext !== undefined) {
+    validateStringArray(foodContext.eatingContext, `${path}.eatingContext`, errors);
+  }
+}
+
+function validateRoutineContext(value: unknown, path: string, errors: string[]) {
+  const routineContext = asRecord(value, path, errors);
+
+  if (!routineContext) {
+    return;
+  }
+
+  validateOptionalString(routineContext.wakeTime, `${path}.wakeTime`, errors);
+  validateMealWindows(routineContext.mealWindows, `${path}.mealWindows`, errors);
+  validateOptionalString(routineContext.workEndTime, `${path}.workEndTime`, errors);
+  validateStringArray(routineContext.exerciseWindows, `${path}.exerciseWindows`, errors);
+  validateStringArray(routineContext.riskMoments, `${path}.riskMoments`, errors);
+  requireString(routineContext.rawRoutineText, `${path}.rawRoutineText`, errors);
+}
+
+function validateMealWindows(value: unknown, path: string, errors: string[]) {
+  const mealWindows = asRecord(value, path, errors);
+
+  if (!mealWindows) {
+    return;
+  }
+
+  validateOptionalString(mealWindows.breakfast, `${path}.breakfast`, errors);
+  validateOptionalString(mealWindows.lunch, `${path}.lunch`, errors);
+  validateOptionalString(mealWindows.dinner, `${path}.dinner`, errors);
+  validateOptionalString(mealWindows.snack, `${path}.snack`, errors);
 }
 
 export function validateUserFacingCopy(value: unknown, path: string, errors: string[]) {
@@ -297,6 +393,27 @@ function validateStringArray(
 
   value.forEach((item, index) => {
     requireString(item, `${path}.${index}`, errors);
+  });
+}
+
+function validateStringEnumArray<T extends string>(
+  value: unknown,
+  path: string,
+  values: readonly T[],
+  errors: string[],
+  options: { minLength?: number } = {},
+) {
+  if (!Array.isArray(value)) {
+    errors.push(`${path} must be an array`);
+    return;
+  }
+
+  if (options.minLength !== undefined && value.length < options.minLength) {
+    errors.push(`${path} must include at least ${options.minLength} item(s)`);
+  }
+
+  value.forEach((item, index) => {
+    requireOneOf(item, values, `${path}.${index}`, errors);
   });
 }
 
