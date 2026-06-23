@@ -18,16 +18,17 @@ Use `docs/new-service-starter-protocol.md` as the reusable kickoff protocol for 
 6. Read `docs/lessons-and-rules.md`.
 7. Read `docs/decision-gates.md`.
 8. If doing maintenance, bug fixes, corrections, or refactors, read `.codex/skills/tars-maintenance/SKILL.md` and `docs/maintenance-workflow.md`.
-9. If resuming after a context reset, break, or another PC, read `docs/reentry-protocol.md` and `docs/workstation-handoff.md`.
-10. If changing kickoff structure, read `docs/new-service-starter-protocol.md` and `docs/new-service-copy-pack.md`.
-11. If changing product definition, read `docs/service-definition.md`, `docs/g-stack.md`, and `docs/superpowers.md`.
-12. If product intent, research, UX, copy, positioning, or design evidence is unclear, read `docs/wiki/schema.md` and `docs/wiki/index.md`.
-13. If touching UI or copy, read `docs/design-tone-and-manner.md`.
-14. If touching frontend code, read `docs/frontend-engineering-standards.md`.
-15. If touching AI behavior, read `docs/ai-contracts.md`.
-16. If touching metrics, read `docs/analytics-events.md`.
-17. If testing or preparing release, read `docs/qa-checklist.md`.
-18. If touching Expo run loops, builds, EAS/TestFlight, native device QA, SDK upgrades, or mobile networking, read `.codex/skills/expo-mvp-delivery/SKILL.md`.
+9. If doing product planning, system design, UX direction, large implementation, or ambiguous todo work, read `.codex/skills/tars-deep-thinking/SKILL.md` and `docs/deep-thinking-workflow.md`.
+10. If resuming after a context reset, break, or another PC, read `docs/reentry-protocol.md` and `docs/workstation-handoff.md`.
+11. If changing kickoff structure, read `docs/new-service-starter-protocol.md` and `docs/new-service-copy-pack.md`.
+12. If changing product definition, read `docs/service-definition.md`, `docs/g-stack.md`, and `docs/superpowers.md`.
+13. If product intent, research, UX, copy, positioning, or design evidence is unclear, read `docs/wiki/schema.md` and `docs/wiki/index.md`.
+14. If touching UI or copy, read `docs/design-tone-and-manner.md`.
+15. If touching frontend code, read `docs/frontend-engineering-standards.md`.
+16. If touching AI behavior, read `docs/ai-contracts.md`.
+17. If touching metrics, read `docs/analytics-events.md`.
+18. If testing or preparing release, read `docs/qa-checklist.md`.
+19. If touching Expo run loops, builds, EAS/TestFlight, native device QA, SDK upgrades, or mobile networking, read `.codex/skills/expo-mvp-delivery/SKILL.md`.
 
 ## Work Selection
 
@@ -76,6 +77,22 @@ Maintenance work must:
 - Preserve unrelated behavior.
 - Add a regression check when practical.
 - Run `tars verify` before completion.
+
+## Deep Thinking Rule
+
+For planning, design, architecture, large implementation, or ambiguous todo work, use `.codex/skills/tars-deep-thinking/SKILL.md`.
+
+Use `tars think` when the task needs exploration before execution. This mode must:
+
+- Restate the problem and success criteria.
+- Follow a short question cascade.
+- Map user state, product goal, current behavior, desired behavior, system surface, risk, and verification.
+- Compare at least two options.
+- Name excluded work so the agent does not drift.
+- Stop for user approval when a decision gate is crossed.
+- End with the smallest implementation slice.
+
+Do not use deep thinking as a report generator. Use it to choose better work before editing.
 
 ## Knowledge Wiki Rule
 

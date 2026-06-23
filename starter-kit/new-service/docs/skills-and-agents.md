@@ -119,6 +119,25 @@ Primary references:
 - `docs/maintenance-workflow.md`
 - `docs/lessons-quick.md`
 
+### 7. Deep Thinking
+
+Trigger before product planning, system design, UX direction, large implementation, or ambiguous todo work.
+
+Responsibilities:
+
+- Expand the problem space before code changes.
+- Follow a short question cascade instead of solving only the surface request.
+- Map user state, product goal, current behavior, desired behavior, system surface, risk, and verification.
+- Compare options before recommending one.
+- Exclude tempting but wrong expansions.
+- Convert the chosen direction into the smallest executable slice.
+
+Primary references:
+
+- `.codex/skills/tars-deep-thinking/SKILL.md`
+- `docs/deep-thinking-workflow.md`
+- `docs/decision-gates.md`
+
 ## Agent Operating Model
 
 Use one lead agent and focused subagents only when the work can be split safely.

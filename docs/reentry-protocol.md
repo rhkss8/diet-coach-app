@@ -17,6 +17,7 @@ Do not restart from scratch. Reconstruct state from files.
 7. Read the task-relevant workflow:
    - New MVP or feature expansion: `docs/mvp-execution-harness.md`
    - Maintenance or correction: `.codex/skills/tars-maintenance/SKILL.md` and `docs/maintenance-workflow.md`
+   - Planning, design, architecture, large implementation, or ambiguous todo: `.codex/skills/tars-deep-thinking/SKILL.md` and `docs/deep-thinking-workflow.md`
    - Research or product intent: `docs/wiki/schema.md` and `docs/wiki/index.md`
 8. Inspect current git diff before editing.
 9. Continue the current todo or ask the user if the next action is ambiguous.

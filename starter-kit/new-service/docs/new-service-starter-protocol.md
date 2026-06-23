@@ -180,6 +180,7 @@ Every new service should maintain:
 
 - `docs/decision-log.md`
 - `docs/lessons-and-rules.md`
+- `docs/deep-thinking-workflow.md`
 - `docs/inbox/`
 - `docs/wiki/`
 - `docs/reentry-protocol.md`
@@ -206,6 +207,17 @@ Rules:
 - Wiki pages use `[[Wiki Links]]`.
 - Humans edit inbox sources, not wiki synthesis.
 - Current code, tests, and direct user requests take priority during narrow maintenance.
+
+## Deep Thinking
+
+Use `tars think` before product planning, system design, UX direction, large implementation, or ambiguous todo work.
+
+This is the planning counterpart to `tars maintain`:
+
+- `tars maintain` keeps existing behavior stable while making a small correction.
+- `tars think` expands the problem space before execution, compares options, excludes off-scope work, and then shrinks the plan into one small vertical slice.
+
+Do not use `tars think` as a report generator. It should improve the next implementation step, not create extra artifacts.
 
 ## Starter Acceptance And Re-Entry
 

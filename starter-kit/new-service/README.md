@@ -33,6 +33,7 @@ TARS가 준비하는 것:
 - analytics 이벤트
 - QA 체크리스트
 - 의사결정 게이트
+- 깊은 사고 워크플로우
 - lesson-and-run 기록
 - inbox 원본 자료와 wiki 지식망
 - 집/회사 PC handoff 규칙
@@ -124,6 +125,14 @@ tars wiki
 ```
 
 `docs/wiki/`는 Codex가 `docs/inbox/` 원본을 읽고 만든 `[[링크]]` 기반 지식망입니다. 모든 작업에서 읽는 문서가 아니라, 제품 의도나 리서치 근거가 필요할 때만 참조합니다.
+
+기획, 설계, UX 방향, 큰 구현, 모호한 todo처럼 딴길로 새기 쉬운 작업은 먼저 생각 모드를 실행합니다.
+
+```bash
+tars think
+```
+
+`tars think`는 바로 코딩하지 않고 문제 재정의, 꼬리 질문, 마인드맵, 선택지 비교, 제외할 범위, 실행 계획을 만들도록 Codex를 세팅합니다.
 
 그리고 Codex에게 말합니다.
 
@@ -263,9 +272,14 @@ tars init         서비스 정의 질문 시작
 tars init --force 서비스 정의 다시 입력
 tars start        Codex 시작 프롬프트 출력
 tars prompt       시작 프롬프트만 출력
+tars think        기획/설계/큰 구현 전 깊은 사고 프롬프트 출력
+tars maintain     빠른 유지보수/수정 작업 프롬프트 출력
+tars maintain --hard 운영/릴리즈급 유지보수 프롬프트 출력
 tars status       스타터 문서 준비 상태 확인
 tars next         다음 MVP todo 확인
 tars doctor       필수 파일 검증
+tars wiki         inbox 원본을 wiki 지식망으로 정리
+tars acceptance   starter acceptance 불변식 검사
 tars done         작업 완료 체크와 커밋 가이드 출력
 tars handoff      집/회사 PC 전환 체크리스트 출력
 ```

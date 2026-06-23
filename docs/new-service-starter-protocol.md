@@ -188,6 +188,7 @@ docs/
   qa-checklist.md
   skills-and-agents.md
   agent-runbook.md
+  deep-thinking-workflow.md
   mvp-todo.md
   decision-log.md
   lessons-and-rules.md
@@ -248,6 +249,7 @@ Every new service should maintain:
 
 - `docs/decision-log.md`
 - `docs/lessons-and-rules.md`
+- `docs/deep-thinking-workflow.md`
 - `docs/inbox/`
 - `docs/wiki/`
 - `docs/reentry-protocol.md`
@@ -278,6 +280,17 @@ Rules:
 - Humans edit inbox sources, not wiki synthesis.
 - Current code, tests, and direct user requests take priority during `tars maintain` narrow maintenance.
 - Use `tars maintain --hard` when a correction is production-facing, release-facing, visual-parity related, or core-flow risky enough to need broader evidence.
+
+## Deep Thinking
+
+Use `tars think` before product planning, system design, UX direction, large implementation, or ambiguous todo work.
+
+This is the planning counterpart to `tars maintain`:
+
+- `tars maintain` keeps existing behavior stable while making a small correction.
+- `tars think` expands the problem space before execution, compares options, excludes off-scope work, and then shrinks the plan into one small vertical slice.
+
+Do not use `tars think` as a report generator. It should improve the next implementation step, not create extra artifacts.
 
 ## Starter Acceptance And Re-Entry
 
