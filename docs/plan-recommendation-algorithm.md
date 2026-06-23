@@ -106,7 +106,7 @@ Why it matters:
 
 ### Step 1. Guided Context Capture
 
-The app asks the three onboarding questions in sequence, revealing the next question only after the current step can continue. Do not show the whole form at once.
+The app asks the three onboarding questions in sequence inside the chat surface, revealing the next question only after the current answer is captured. Do not show the whole form at once, and do not turn the flow into a legacy multi-step form with "next" buttons.
 
 The UI can feel conversational, but internally the answers must be parsed into structured context.
 
@@ -120,8 +120,8 @@ Use hybrid input where it reduces user effort:
 Recommended onboarding input model:
 
 - Management intent: required choice chips plus optional text for "요즘 가장 어려운 점".
-- Food context: optional free text first, with helper fields such as 좋아하는 음식, 계속 먹고 싶은 음식, 피해야 할 음식, 알레르기.
-- Daily routine: required free text first, with structured time examples and optional time chips if the user wants help.
+- Food context: optional chat answer, with quick replies such as 좋아하는 음식, 피해야 할 음식, 특별히 없음.
+- Daily routine: required chat answer, with structured time examples and optional time chips if the user wants help.
 
 Expected internal shape:
 
