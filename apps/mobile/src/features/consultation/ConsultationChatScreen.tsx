@@ -6,11 +6,12 @@ import type {
 } from "@diet-coach/ai";
 import * as DocumentPicker from "expo-document-picker";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { theme } from "../../shared/ui/design-system";
 import {
   AppHeader,
+  BrandLeaf,
   ChatBubble,
   HeaderAction,
   PlanProposalCard,
@@ -65,9 +66,8 @@ export function ConsultationChatScreen({
   const canSendMessage =
     !hasPendingConfirmation &&
     !isGeneratingResponse &&
-    (shouldShowPlanningGuide
-      ? canSubmitPlanningGuideMessage(planningStep, draftMessage)
-      : draftMessage.trim().length > 0 || draftAttachments.length > 0);
+    !shouldShowPlanningGuide &&
+    (draftMessage.trim().length > 0 || draftAttachments.length > 0);
 
   const appendDraftAttachments = useCallback((attachments: ChatPlannerAttachment[]) => {
     setDraftAttachments((currentAttachments) => {
@@ -159,8 +159,6 @@ export function ConsultationChatScreen({
       ...currentDraft,
       goalTypes: [goalType],
     }));
-    setDraftMessage("");
-    setPlanningStep("food");
   }
 
   function skipFoodContext() {
@@ -177,10 +175,15 @@ export function ConsultationChatScreen({
     setDraftMessage(handleFoodQuickReplyText(reply));
   }
 
+  function editPlanningStep(step: PlanningContextGuideStep) {
+    setDraftMessage(getDraftTextForPlanningStep(planningDraft, step));
+    setPlanningStep(step);
+  }
+
   function submitPlanningGuideAnswer() {
     const answer = draftMessage.trim();
 
-    if (answer.length === 0) {
+    if (answer.length === 0 && planningStep !== "intent") {
       return;
     }
 
@@ -196,10 +199,7 @@ export function ConsultationChatScreen({
     }
 
     if (planningStep === "food") {
-      setPlanningDraft((currentDraft) => ({
-        ...currentDraft,
-        foodsToKeepText: answer,
-      }));
+      setPlanningDraft((currentDraft) => applyFoodContextAnswer(currentDraft, answer));
       setDraftMessage("");
       setPlanningStep("routine");
       return;
@@ -244,55 +244,172 @@ export function ConsultationChatScreen({
         {shouldShowPlanningGuide ? (
           <>
             <ChatBubble role="assistant">{getPlanningGuideQuestion(planningStep)}</ChatBubble>
-            <View style={styles.contextDock}>
-              <View style={styles.contextDockHeader}>
-                <Text style={styles.contextDockKicker}>첫 플랜 준비</Text>
-                <Text style={styles.contextDockStep}>
-                  {getPlanningGuideStepLabel(planningStep)}
-                </Text>
+            <View style={styles.contextRow}>
+              <View style={styles.contextAvatar}>
+                <BrandLeaf
+                  backgroundColor={theme.colors.primarySoft}
+                  color={theme.colors.primary}
+                  size={24}
+                />
               </View>
-
-              {getPlanningContextClues(planningDraft).length > 0 ? (
-                <View style={styles.memoryStrip}>
-                  {getPlanningContextClues(planningDraft).map((clue) => (
-                    <View key={clue} style={styles.memoryChip}>
-                      <Text style={styles.memoryChipText}>{clue}</Text>
-                    </View>
-                  ))}
+              <View style={styles.contextDock}>
+                <View style={styles.contextDockHeader}>
+                  <Text style={styles.contextDockKicker}>첫 플랜 준비</Text>
+                  <Text style={styles.contextDockStep}>
+                    {getPlanningGuideStepLabel(planningStep)}
+                  </Text>
                 </View>
-              ) : null}
 
-              {planningStep === "intent" ? (
-                <View style={styles.quickReplyGrid}>
-                  {planningGoalOptions.map((option) => (
+                <View style={styles.memoryStrip}>
+                  {(["intent", "food", "routine"] as const).map((step) => (
                     <Pressable
                       accessibilityRole="button"
-                      key={option.value}
-                      onPress={() => toggleGoalType(option.value)}
-                      style={styles.quickReplyChip}
+                      key={step}
+                      onPress={() => editPlanningStep(step)}
+                      style={[styles.memoryChip, planningStep === step && styles.memoryChipActive]}
                     >
-                      <Text style={styles.quickReplyText}>{option.label}</Text>
+                      <Text
+                        style={[
+                          styles.memoryChipText,
+                          planningStep === step && styles.memoryChipTextActive,
+                        ]}
+                      >
+                        {getPlanningContextStepSummary(planningDraft, step)}
+                      </Text>
                     </Pressable>
                   ))}
                 </View>
-              ) : null}
 
-              {planningStep === "food" ? (
-                <View style={styles.quickReplyGrid}>
-                  {["좋아하는 건 살리고 싶어요", "피해야 할 음식이 있어요", "특별히 없어요"].map(
-                    (reply) => (
+                {planningStep === "intent" ? (
+                  <View style={styles.contextPanel}>
+                    <Text style={styles.contextPrompt}>관리 목적을 골라주세요.</Text>
+                    <View style={styles.quickReplyGrid}>
+                      {planningGoalOptions.map((option) => {
+                        const isSelected = planningDraft.goalTypes.includes(option.value);
+
+                        return (
+                          <Pressable
+                            accessibilityRole="button"
+                            key={option.value}
+                            onPress={() => toggleGoalType(option.value)}
+                            style={[
+                              styles.quickReplyChip,
+                              isSelected && styles.quickReplyChipActive,
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.quickReplyText,
+                                isSelected && styles.quickReplyTextActive,
+                              ]}
+                            >
+                              {option.label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                    <TextInput
+                      multiline
+                      onChangeText={setDraftMessage}
+                      placeholder="요즘 가장 어려운 점은 선택으로 적어주세요."
+                      placeholderTextColor={theme.colors.muted}
+                      style={styles.contextInput}
+                      value={draftMessage}
+                    />
+                    <Pressable
+                      accessibilityRole="button"
+                      disabled={planningDraft.goalTypes.length === 0 && draftMessage.trim() === ""}
+                      onPress={submitPlanningGuideAnswer}
+                      style={[
+                        styles.contextAction,
+                        planningDraft.goalTypes.length === 0 &&
+                          draftMessage.trim() === "" &&
+                          styles.contextActionDisabled,
+                      ]}
+                    >
+                      <Text style={styles.contextActionText}>음식 취향으로 넘어가기</Text>
+                    </Pressable>
+                  </View>
+                ) : null}
+
+                {planningStep === "food" ? (
+                  <View style={styles.contextPanel}>
+                    <Text style={styles.contextPrompt}>
+                      선택 입력이에요. 없으면 건너뛰어도 됩니다.
+                    </Text>
+                    <View style={styles.quickReplyGrid}>
+                      {["좋아하는 음식이 있어요", "피해야 할 음식이 있어요", "특별히 없어요"].map(
+                        (reply) => (
+                          <Pressable
+                            accessibilityRole="button"
+                            key={reply}
+                            onPress={() => handleFoodQuickReply(reply)}
+                            style={styles.quickReplyChip}
+                          >
+                            <Text style={styles.quickReplyText}>{reply}</Text>
+                          </Pressable>
+                        ),
+                      )}
+                    </View>
+                    <TextInput
+                      multiline
+                      onChangeText={setDraftMessage}
+                      placeholder="예: 라면은 가끔 먹고 싶고, 크림소스는 피하고 싶어요."
+                      placeholderTextColor={theme.colors.muted}
+                      style={styles.contextInput}
+                      value={draftMessage}
+                    />
+                    <View style={styles.contextActions}>
                       <Pressable
                         accessibilityRole="button"
-                        key={reply}
-                        onPress={() => handleFoodQuickReply(reply)}
-                        style={styles.quickReplyChip}
+                        onPress={skipFoodContext}
+                        style={styles.contextSecondaryAction}
                       >
-                        <Text style={styles.quickReplyText}>{reply}</Text>
+                        <Text style={styles.contextSecondaryActionText}>건너뛰기</Text>
                       </Pressable>
-                    ),
-                  )}
-                </View>
-              ) : null}
+                      <Pressable
+                        accessibilityRole="button"
+                        disabled={draftMessage.trim() === ""}
+                        onPress={submitPlanningGuideAnswer}
+                        style={[
+                          styles.contextAction,
+                          draftMessage.trim() === "" && styles.contextActionDisabled,
+                        ]}
+                      >
+                        <Text style={styles.contextActionText}>루틴으로 넘어가기</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                ) : null}
+
+                {planningStep === "routine" ? (
+                  <View style={styles.contextPanel}>
+                    <Text style={styles.contextPrompt}>
+                      기상, 식사, 퇴근 시간처럼 하루 흐름을 적어주세요.
+                    </Text>
+                    <TextInput
+                      multiline
+                      onChangeText={setDraftMessage}
+                      placeholder="예: 8시 기상, 11시 점심, 21시 퇴근"
+                      placeholderTextColor={theme.colors.muted}
+                      style={styles.contextInput}
+                      value={draftMessage}
+                    />
+                    <Pressable
+                      accessibilityRole="button"
+                      disabled={draftMessage.trim() === ""}
+                      onPress={submitPlanningGuideAnswer}
+                      style={[
+                        styles.contextAction,
+                        draftMessage.trim() === "" && styles.contextActionDisabled,
+                      ]}
+                    >
+                      <Text style={styles.contextActionText}>이 기준으로 플랜 맞추기</Text>
+                    </Pressable>
+                  </View>
+                ) : null}
+              </View>
             </View>
           </>
         ) : null}
@@ -317,32 +434,32 @@ export function ConsultationChatScreen({
         ) : null}
       </ScrollView>
 
-      <PlannerChatInput
-        attachments={draftAttachments}
-        disabled={!canSendMessage}
-        inputDisabled={hasPendingConfirmation || isGeneratingResponse}
-        maxAttachments={MAX_CHAT_ATTACHMENTS}
-        onAddAttachment={pickAttachment}
-        onChangeText={setDraftMessage}
-        onRemoveAttachment={removeAttachment}
-        onSubmit={submitMessage}
-        placeholder={
-          shouldShowPlanningGuide
-            ? getPlanningGuidePlaceholder(planningStep)
-            : hasPendingConfirmation
+      {!shouldShowPlanningGuide ? (
+        <PlannerChatInput
+          attachments={draftAttachments}
+          disabled={!canSendMessage}
+          inputDisabled={hasPendingConfirmation || isGeneratingResponse}
+          maxAttachments={MAX_CHAT_ATTACHMENTS}
+          onAddAttachment={pickAttachment}
+          onChangeText={setDraftMessage}
+          onRemoveAttachment={removeAttachment}
+          onSubmit={submitMessage}
+          placeholder={
+            hasPendingConfirmation
               ? "제안을 먼저 승인하거나 다시 제안받아 주세요."
               : isGeneratingResponse
                 ? "플랜 제안을 만드는 중이에요..."
                 : "편하게 이야기해 주세요..."
-        }
-        value={draftMessage}
-      />
+          }
+          value={draftMessage}
+        />
+      ) : null}
     </View>
   );
 }
 
 function handleFoodQuickReplyText(reply: string) {
-  if (reply === "좋아하는 건 살리고 싶어요") {
+  if (reply === "좋아하는 음식이 있어요") {
     return "좋아하는 음식: ";
   }
 
@@ -351,10 +468,6 @@ function handleFoodQuickReplyText(reply: string) {
   }
 
   return "";
-}
-
-function canSubmitPlanningGuideMessage(_step: PlanningContextGuideStep, message: string) {
-  return message.trim().length > 0;
 }
 
 function getPlanningGuideQuestion(step: PlanningContextGuideStep) {
@@ -369,16 +482,24 @@ function getPlanningGuideQuestion(step: PlanningContextGuideStep) {
   return "좋아요. 이제 하루 흐름만 알려주세요. 기상, 식사, 퇴근 시간처럼 플랜을 끼워 넣을 단서가 필요해요.";
 }
 
-function getPlanningGuidePlaceholder(step: PlanningContextGuideStep) {
+function getDraftTextForPlanningStep(draft: PlanningContextDraft, step: PlanningContextGuideStep) {
   if (step === "intent") {
-    return "선택지에 없으면 직접 적어주세요";
+    return draft.reasonText;
   }
 
   if (step === "food") {
-    return "예: 라면은 가끔 먹고 싶고, 크림소스는 피하고 싶어요";
+    if (draft.preferredFoodsText.trim().length > 0) {
+      return `좋아하는 음식: ${draft.preferredFoodsText}`;
+    }
+
+    if (draft.avoidedFoodsText.trim().length > 0) {
+      return `피해야 할 음식: ${draft.avoidedFoodsText}`;
+    }
+
+    return draft.foodsToKeepText;
   }
 
-  return "예: 8시 기상, 11시 점심, 21시 퇴근";
+  return draft.routineText;
 }
 
 function getPlanningGuideStepLabel(step: PlanningContextGuideStep) {
@@ -393,17 +514,54 @@ function getPlanningGuideStepLabel(step: PlanningContextGuideStep) {
   return "루틴 · 필수";
 }
 
-function getPlanningContextClues(draft: PlanningContextDraft) {
-  const goals = draft.goalTypes
-    .map((goalType) => planningGoalOptions.find((option) => option.value === goalType)?.label)
-    .filter(Boolean);
-  const clues = goals.map((goal) => `목적 ${goal}`);
+function getPlanningContextStepSummary(
+  draft: PlanningContextDraft,
+  step: PlanningContextGuideStep,
+) {
+  if (step === "intent") {
+    const goals = draft.goalTypes
+      .map((goalType) => planningGoalOptions.find((option) => option.value === goalType)?.label)
+      .filter(Boolean);
 
-  if (draft.foodsToKeepText.trim().length > 0) {
-    clues.push("음식 취향 반영");
+    return goals.length > 0 ? `목적 ${goals.join(", ")}` : "목적 입력";
   }
 
-  return clues;
+  if (step === "food") {
+    return hasFoodContext(draft) ? "음식 입력됨" : "음식 선택";
+  }
+
+  return draft.routineText.trim().length > 0 ? "루틴 입력됨" : "루틴 입력";
+}
+
+function applyFoodContextAnswer(draft: PlanningContextDraft, answer: string): PlanningContextDraft {
+  if (answer.startsWith("좋아하는 음식:")) {
+    return {
+      ...draft,
+      preferredFoodsText: answer.replace("좋아하는 음식:", "").trim(),
+    };
+  }
+
+  if (answer.startsWith("피해야 할 음식:")) {
+    return {
+      ...draft,
+      avoidedFoodsText: answer.replace("피해야 할 음식:", "").trim(),
+    };
+  }
+
+  return {
+    ...draft,
+    foodsToKeepText: answer,
+  };
+}
+
+function hasFoodContext(draft: PlanningContextDraft) {
+  return [
+    draft.preferredFoodsText,
+    draft.foodsToKeepText,
+    draft.avoidedFoodsText,
+    draft.allergiesText,
+    draft.eatingContextText,
+  ].some((value) => value.trim().length > 0);
 }
 
 function createChatAttachment(asset: DocumentPicker.DocumentPickerAsset): ChatPlannerAttachment {
@@ -503,16 +661,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
   },
+  contextRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: theme.space.sm,
+    maxWidth: 640,
+    width: "100%",
+  },
+  contextAvatar: {
+    width: 24,
+  },
   contextDock: {
-    alignSelf: "flex-start",
     backgroundColor: "rgba(254, 252, 248, 0.78)",
     borderColor: theme.colors.border,
     borderRadius: theme.radius.medium,
     borderWidth: 1,
+    flex: 1,
     gap: theme.space.sm,
-    maxWidth: 560,
     padding: theme.space.sm,
-    width: "100%",
   },
   contextDockHeader: {
     alignItems: "center",
@@ -536,15 +702,33 @@ const styles = StyleSheet.create({
     gap: theme.space.xs,
   },
   memoryChip: {
-    backgroundColor: theme.colors.primarySoft,
+    backgroundColor: theme.colors.background,
+    borderColor: theme.colors.border,
     borderRadius: theme.radius.small,
+    borderWidth: 1,
     paddingHorizontal: theme.space.xs,
     paddingVertical: 5,
   },
+  memoryChipActive: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.primary,
+  },
   memoryChipText: {
-    color: theme.colors.primaryPressed,
+    color: theme.colors.muted,
     fontSize: 12,
     fontWeight: "800",
+  },
+  memoryChipTextActive: {
+    color: theme.colors.primaryPressed,
+  },
+  contextPanel: {
+    gap: theme.space.xs,
+  },
+  contextPrompt: {
+    color: theme.colors.inkSoft,
+    fontSize: 13,
+    fontWeight: "800",
+    lineHeight: 18,
   },
   quickReplyGrid: {
     flexDirection: "row",
@@ -560,9 +744,63 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: theme.space.sm,
   },
+  quickReplyChipActive: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.primary,
+  },
   quickReplyText: {
     color: theme.colors.inkSoft,
     fontSize: 13,
+    fontWeight: "800",
+  },
+  quickReplyTextActive: {
+    color: theme.colors.primaryPressed,
+  },
+  contextInput: {
+    backgroundColor: theme.colors.background,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.small,
+    borderWidth: 1,
+    color: theme.colors.ink,
+    fontSize: 14,
+    lineHeight: 20,
+    minHeight: 48,
+    outlineStyle: "none" as never,
+    paddingHorizontal: theme.space.sm,
+    paddingVertical: theme.space.xs,
+  },
+  contextActions: {
+    flexDirection: "row",
+    gap: theme.space.xs,
+  },
+  contextAction: {
+    alignItems: "center",
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radius.small,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 42,
+    paddingHorizontal: theme.space.sm,
+  },
+  contextActionDisabled: {
+    backgroundColor: theme.colors.border,
+  },
+  contextActionText: {
+    color: theme.colors.surface,
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  contextSecondaryAction: {
+    alignItems: "center",
+    backgroundColor: theme.colors.surfaceMuted,
+    borderRadius: theme.radius.small,
+    justifyContent: "center",
+    minHeight: 42,
+    paddingHorizontal: theme.space.sm,
+  },
+  contextSecondaryActionText: {
+    color: theme.colors.muted,
+    fontSize: 14,
     fontWeight: "800",
   },
 });
