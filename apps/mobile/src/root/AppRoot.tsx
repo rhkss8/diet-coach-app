@@ -8,11 +8,9 @@ import type {
   ChatPlannerAttachment,
   ChatPlannerMessage,
   ChatPlannerResponse,
-  OpenAiRuntimeConfig,
 } from "@diet-coach/ai";
 import type { AdjustmentReason } from "@diet-coach/core";
 
-import { adjustTodayPlanWithOpenAi, generateChatPlannerResponseWithOpenAi } from "@diet-coach/ai";
 import {
   AdjustmentReasonSelectionScreen,
   createPlanRevisionId,
@@ -29,6 +27,10 @@ import { useApprovedPlanPersistence } from "../features/plan";
 import { SettingsScreen } from "../features/settings";
 import { TodayScreen } from "../features/today";
 import { getTodayPlanDate, getTodayPlanItems } from "../features/today";
+import {
+  adjustTodayPlanWithAiFunction,
+  generateChatPlannerResponseWithAiFunction,
+} from "../shared/lib/ai-plan-function";
 import { trackAnalyticsEvent } from "../shared/lib/analytics";
 import {
   canPopAppRoute,
@@ -302,19 +304,16 @@ async function generateAdjustedPlan(
   actions.setAdjustmentGenerationError(undefined);
   actions.setIsGeneratingAdjustedPlan(true);
 
-  const result = await adjustTodayPlanWithOpenAi(
-    {
-      completedItemIds: [],
-      currentPlan: approvedPlan,
-      request: {
-        affectedDate: getTodayPlanDate(approvedPlan),
-        planId: approvedPlan.id ?? "local-plan",
-        reason,
-      },
-      todayItems: getTodayPlanItems(approvedPlan),
+  const result = await adjustTodayPlanWithAiFunction({
+    completedItemIds: [],
+    currentPlan: approvedPlan,
+    request: {
+      affectedDate: getTodayPlanDate(approvedPlan),
+      planId: approvedPlan.id ?? "local-plan",
+      reason,
     },
-    getOpenAiRuntimeConfig(),
-  );
+    todayItems: getTodayPlanItems(approvedPlan),
+  });
 
   actions.setIsGeneratingAdjustedPlan(false);
 
@@ -357,14 +356,11 @@ async function generateChatResponse(actions: GenerateChatResponseActions) {
   actions.setIsGeneratingChatResponse(true);
   actions.setPendingChatResponse(null);
 
-  const result = await generateChatPlannerResponseWithOpenAi(
-    {
-      currentPlan: actions.currentPlan,
-      messages: actions.messages,
-      todayDate: actions.todayDate,
-    },
-    getOpenAiRuntimeConfig(),
-  );
+  const result = await generateChatPlannerResponseWithAiFunction({
+    currentPlan: actions.currentPlan,
+    messages: actions.messages,
+    todayDate: actions.todayDate,
+  });
 
   actions.setIsGeneratingChatResponse(false);
 
@@ -481,25 +477,6 @@ function getTodayDate() {
 function getActivePlanDate(plan: AiPlan | undefined) {
   return plan ? getTodayPlanDate(plan) : getTodayDate();
 }
-
-function getOpenAiRuntimeConfig(): OpenAiRuntimeConfig {
-  const env = getRuntimeEnv();
-
-  return {
-    apiKey: env.OPENAI_API_KEY,
-    model: env.EXPO_PUBLIC_OPENAI_MODEL ?? env.OPENAI_MODEL,
-  };
-}
-
-function getRuntimeEnv(): Record<string, string | undefined> {
-  return globalThisWithProcess.process?.env ?? {};
-}
-
-const globalThisWithProcess = globalThis as typeof globalThis & {
-  process?: {
-    env?: Record<string, string | undefined>;
-  };
-};
 
 function getAiFailureMessage(errorCode: string) {
   if (errorCode === "ai_not_configured") {

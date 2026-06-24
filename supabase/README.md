@@ -38,3 +38,19 @@ login. Keep email enabled as the fallback path for QA and users who cannot compl
 Store `OPENAI_API_KEY` as a server-side secret only. Do not add it to `EXPO_PUBLIC_*` variables or
 commit it to `.env.example`; mobile builds should call a server boundary such as a Supabase Edge
 Function instead of calling OpenAI directly with a bundled key.
+
+The app calls the `ai-plan` Edge Function for chat planning and adjustment generation. Configure the
+function with:
+
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL` (optional)
+
+Local example:
+
+```sh
+supabase secrets set OPENAI_API_KEY=... OPENAI_MODEL=gpt-4.1-mini
+```
+
+The current local function config allows unauthenticated calls so the guest MVP flow can still ask
+for a plan. Before public testing, add an abuse guard such as authenticated-only access, rate
+limiting, or a server-side usage budget.
