@@ -151,8 +151,9 @@ export function AppRoot() {
           onApprove={() => {
             void approveInitialPlan(initialPlanOutput, {
               approvePlan,
-              setInitialPlanOutput,
               navigateToToday: () => navigateTo("today"),
+              planBasis,
+              setInitialPlanOutput,
             });
           }}
           output={initialPlanOutput}
@@ -544,8 +545,9 @@ type ApproveAdjustedPlanActions = {
 };
 
 type ApproveInitialPlanActions = {
-  approvePlan: (plan: AiPlan) => Promise<void>;
+  approvePlan: (plan: AiPlan, planBasis?: PlanBasis) => Promise<void>;
   navigateToToday: () => void;
+  planBasis: PlanBasis | null;
   setInitialPlanOutput: (output: GenerateInitialPlanOutput | null) => void;
 };
 
@@ -553,7 +555,7 @@ async function approveInitialPlan(
   output: GenerateInitialPlanOutput,
   actions: ApproveInitialPlanActions,
 ) {
-  await actions.approvePlan(output.plan);
+  await actions.approvePlan(output.plan, actions.planBasis ?? undefined);
   actions.setInitialPlanOutput(null);
   actions.navigateToToday();
 }

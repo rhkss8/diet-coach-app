@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getMobileSupabaseClient } from "../../shared/lib/supabase";
 import { trackAnalyticsEvent } from "../../shared/lib/analytics";
+import type { PlanBasis } from "../settings/plan-basis";
 import { applyPlanRevisionToPlan } from "./apply-plan-revision";
 import { type ApprovedPlanSnapshot, createApprovedPlanSnapshot } from "./approved-plan-snapshot";
 import {
@@ -47,8 +48,8 @@ export function useApprovedPlanPersistence({
     };
   }, [supabaseClient, userId]);
 
-  async function approvePlan(plan: AiPlan) {
-    await saveApprovedPlan(plan);
+  async function approvePlan(plan: AiPlan, planBasis?: PlanBasis) {
+    await saveApprovedPlan(plan, planBasis);
 
     trackAnalyticsEvent("PLAN_APPROVED", {
       userId: "local-user",
@@ -57,8 +58,8 @@ export function useApprovedPlanPersistence({
     });
   }
 
-  async function saveApprovedPlan(plan: AiPlan) {
-    const snapshot = createApprovedPlanSnapshot(plan);
+  async function saveApprovedPlan(plan: AiPlan, planBasis = approvedPlanSnapshot?.planBasis) {
+    const snapshot = createApprovedPlanSnapshot(plan, new Date().toISOString(), planBasis);
 
     await persistApprovedPlanSnapshot(snapshot);
   }
@@ -69,7 +70,11 @@ export function useApprovedPlanPersistence({
     }
 
     const revisedPlan = applyPlanRevisionToPlan(approvedPlanSnapshot.plan, revision);
-    const snapshot = createApprovedPlanSnapshot(revisedPlan, approvedPlanSnapshot.approvedAt);
+    const snapshot = createApprovedPlanSnapshot(
+      revisedPlan,
+      approvedPlanSnapshot.approvedAt,
+      approvedPlanSnapshot.planBasis,
+    );
 
     await persistApprovedPlanSnapshot(snapshot);
 
