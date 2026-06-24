@@ -2,6 +2,7 @@ import type {
   ChatPlannerAttachment,
   ChatPlannerMessage,
   ChatPlannerResponse,
+  PlanningContext,
   PlanningGoalType,
 } from "@diet-coach/ai";
 import * as DocumentPicker from "expo-document-picker";
@@ -34,7 +35,11 @@ type ConsultationChatScreenProps = {
   onBack?: () => void;
   onDismissPendingResponse: () => void;
   onOpenPlan: () => void;
-  onSendMessage: (message: string, attachments?: ChatPlannerAttachment[]) => void;
+  onSendMessage: (
+    message: string,
+    attachments?: ChatPlannerAttachment[],
+    planningContext?: PlanningContext,
+  ) => void;
   pendingResponse: ChatPlannerResponse | null;
   isGeneratingResponse?: boolean;
   showPlanAction: boolean;
@@ -251,7 +256,9 @@ export function ConsultationChatScreen({
     setPlanningDraft(nextDraft);
     setDraftMessage("");
     setHasSubmittedPlanningContext(true);
-    onSendMessage(summarizePlanningContext(createPlanningContextFromDraft(nextDraft)));
+    const planningContext = createPlanningContextFromDraft(nextDraft);
+
+    onSendMessage(summarizePlanningContext(planningContext), undefined, planningContext);
   }
 
   return (

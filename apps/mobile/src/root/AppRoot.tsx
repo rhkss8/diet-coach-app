@@ -8,6 +8,7 @@ import type {
   ChatPlannerAttachment,
   ChatPlannerMessage,
   ChatPlannerResponse,
+  PlanningContext,
 } from "@diet-coach/ai";
 import type { AdjustmentReason } from "@diet-coach/core";
 
@@ -23,6 +24,7 @@ import {
   ConsultationChatScreen,
   createInitialConsultationMessages,
   saveChatMessage,
+  savePlanningContext,
 } from "../features/consultation";
 import { useApprovedPlanPersistence } from "../features/plan";
 import { SettingsScreen } from "../features/settings";
@@ -61,6 +63,7 @@ export function AppRoot() {
   const [consultationMessages, setConsultationMessages] = useState<ChatPlannerMessage[]>(
     createInitialConsultationMessages,
   );
+  const [planningContext, setPlanningContext] = useState<PlanningContext | undefined>();
   const [pendingChatResponse, setPendingChatResponse] = useState<ChatPlannerResponse | null>(null);
   const [selectedAdjustmentReason, setSelectedAdjustmentReason] = useState<
     AdjustmentReason | undefined
@@ -253,14 +256,25 @@ export function AppRoot() {
               navigateTo("today");
             }
           }}
-          onSendMessage={(message, attachments) => {
+          onSendMessage={(message, attachments, submittedPlanningContext) => {
             const userMessage = createChatMessage("user", message, attachments);
             const nextMessages = [...consultationMessages, userMessage];
+            const nextPlanningContext = submittedPlanningContext ?? planningContext;
+
+            if (submittedPlanningContext) {
+              setPlanningContext(submittedPlanningContext);
+              void savePlanningContext({
+                context: submittedPlanningContext,
+                userId: session?.user.id,
+              });
+            }
+
             setConsultationMessages(nextMessages);
             void saveChatMessage({ message: userMessage, userId: session?.user.id });
             void generateChatResponse({
               currentPlan: approvedPlanSnapshot?.plan,
               messages: nextMessages,
+              planningContext: nextPlanningContext,
               saveChatMessage: (chatMessage) =>
                 saveChatMessage({ message: chatMessage, userId: session?.user.id }),
               setConsultationMessages,
@@ -351,6 +365,7 @@ async function generateAdjustedPlan(
 type GenerateChatResponseActions = {
   currentPlan?: AiPlan;
   messages: ChatPlannerMessage[];
+  planningContext?: PlanningContext;
   saveChatMessage: (message: ChatPlannerMessage) => Promise<boolean>;
   setConsultationMessages: Dispatch<SetStateAction<ChatPlannerMessage[]>>;
   setIsGeneratingChatResponse: (isGenerating: boolean) => void;
@@ -365,6 +380,7 @@ async function generateChatResponse(actions: GenerateChatResponseActions) {
   const result = await generateChatPlannerResponseWithAiFunction({
     currentPlan: actions.currentPlan,
     messages: actions.messages,
+    planningContext: actions.planningContext,
     todayDate: actions.todayDate,
   });
 
