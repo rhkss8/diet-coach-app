@@ -4,12 +4,18 @@ import type { AiPlan } from "@diet-coach/ai";
 
 import {
   countPendingTodayItems,
+  getInitialSelectedPlanDate,
+  getPlanDateCursor,
+  getPlanDateRelationLabel,
+  getPlanDates,
+  getPlanItemsForDate,
   getTodayPlanDate,
   getTodayPlanItems,
   getDailyProgressSummary,
   getPlanItemStatusEventName,
   groupTodayPlanItemsByType,
   shouldTrackPlanItemCompletedAfterRevision,
+  updatePlanItemStatus,
   updateTodayPlanItemStatus,
 } from "./today-plan";
 
@@ -58,6 +64,39 @@ describe("today plan helpers", () => {
     expect(getTodayPlanItems(plan)).toHaveLength(2);
   });
 
+  it("returns plan items for a selected date", () => {
+    expect(getPlanItemsForDate(plan, "2026-06-17")).toEqual([
+      expect.objectContaining({ id: "breakfast-2" }),
+    ]);
+  });
+
+  it("lists plan dates in order", () => {
+    expect(getPlanDates(plan)).toEqual(["2026-06-16", "2026-06-17"]);
+  });
+
+  it("starts from the real today when the plan contains that date", () => {
+    expect(getInitialSelectedPlanDate(plan, "2026-06-17")).toBe("2026-06-17");
+  });
+
+  it("falls back to the first plan date when the real today is outside the plan", () => {
+    expect(getInitialSelectedPlanDate(plan, "2026-06-24")).toBe("2026-06-16");
+  });
+
+  it("returns previous and next date cursors", () => {
+    expect(getPlanDateCursor(plan, "2026-06-16")).toEqual({
+      nextDate: "2026-06-17",
+      previousDate: undefined,
+      selectedIndex: 0,
+      totalCount: 2,
+    });
+  });
+
+  it("labels date relation against the real today", () => {
+    expect(getPlanDateRelationLabel("2026-06-16", "2026-06-17")).toBe("지난 플랜");
+    expect(getPlanDateRelationLabel("2026-06-17", "2026-06-17")).toBe("오늘");
+    expect(getPlanDateRelationLabel("2026-06-18", "2026-06-17")).toBe("예정 플랜");
+  });
+
   it("counts pending today items", () => {
     expect(countPendingTodayItems(getTodayPlanItems(plan))).toBe(1);
   });
@@ -75,6 +114,17 @@ describe("today plan helpers", () => {
         expect.objectContaining({
           id: "workout-1",
           status: "skipped",
+        }),
+      ]),
+    );
+  });
+
+  it("updates a plan item status across the full plan", () => {
+    expect(updatePlanItemStatus(plan, "breakfast-2", "completed").items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "breakfast-2",
+          status: "completed",
         }),
       ]),
     );

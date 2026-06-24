@@ -5,10 +5,75 @@ export function getTodayPlanDate(plan: AiPlan) {
   return plan.items[0]?.date ?? plan.startDate;
 }
 
+export function getPlanDates(plan: AiPlan) {
+  const dates = plan.items.map((planItem) => planItem.date);
+  const uniqueDates = Array.from(new Set(dates.length > 0 ? dates : [plan.startDate]));
+
+  return uniqueDates.sort();
+}
+
+export function getInitialSelectedPlanDate(plan: AiPlan, todayDate = getSystemTodayDate()) {
+  const planDates = getPlanDates(plan);
+
+  return planDates.includes(todayDate) ? todayDate : getTodayPlanDate(plan);
+}
+
+export function getPlanItemsForDate(plan: AiPlan, date: string) {
+  return plan.items.filter((planItem) => planItem.date === date);
+}
+
 export function getTodayPlanItems(plan: AiPlan) {
   const todayPlanDate = getTodayPlanDate(plan);
 
-  return plan.items.filter((planItem) => planItem.date === todayPlanDate);
+  return getPlanItemsForDate(plan, todayPlanDate);
+}
+
+export function updatePlanItemStatus(
+  plan: AiPlan,
+  planItemId: string,
+  status: PlanItemStatus,
+): AiPlan {
+  return {
+    ...plan,
+    items: plan.items.map((planItem) =>
+      planItem.id === planItemId
+        ? {
+            ...planItem,
+            status,
+          }
+        : planItem,
+    ),
+  };
+}
+
+export function getPlanDateCursor(plan: AiPlan, selectedDate: string) {
+  const planDates = getPlanDates(plan);
+  const selectedIndex = Math.max(0, planDates.indexOf(selectedDate));
+
+  return {
+    nextDate: planDates[selectedIndex + 1],
+    previousDate: planDates[selectedIndex - 1],
+    selectedIndex,
+    totalCount: planDates.length,
+  };
+}
+
+export function getPlanDateRelation(date: string, todayDate = getSystemTodayDate()) {
+  if (date === todayDate) {
+    return "today";
+  }
+
+  return date < todayDate ? "past" : "future";
+}
+
+export function getPlanDateRelationLabel(date: string, todayDate = getSystemTodayDate()) {
+  const relation = getPlanDateRelation(date, todayDate);
+
+  if (relation === "today") {
+    return "오늘";
+  }
+
+  return relation === "past" ? "지난 플랜" : "예정 플랜";
 }
 
 export function countPendingTodayItems(planItems: AiPlanItem[]) {
@@ -70,4 +135,8 @@ export function shouldTrackPlanItemCompletedAfterRevision(
   revisedPlanItemIds: string[] | undefined,
 ) {
   return status === "completed" && Boolean(revisedPlanItemIds?.includes(planItemId));
+}
+
+function getSystemTodayDate() {
+  return new Date().toISOString().slice(0, 10);
 }

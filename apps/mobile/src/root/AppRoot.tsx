@@ -93,6 +93,7 @@ export function AppRoot() {
     approvedPlanSnapshot,
     isHydratingApprovedPlan,
     saveApprovedPlan,
+    updateApprovedPlan,
   } = useApprovedPlanPersistence({ userId: session?.user.id });
 
   useEffect(() => {
@@ -256,6 +257,7 @@ export function AppRoot() {
           }}
           onOpenConsultation={goBack}
           onOpenSettings={() => navigateTo("settings")}
+          onPlanChange={updateApprovedPlan}
           plan={approvedPlanSnapshot.plan}
           revisionContext={
             latestRevisionSnapshot

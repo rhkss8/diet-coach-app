@@ -64,6 +64,16 @@ export function useApprovedPlanPersistence({
     await persistApprovedPlanSnapshot(snapshot);
   }
 
+  async function updateApprovedPlan(plan: AiPlan) {
+    const snapshot = createApprovedPlanSnapshot(
+      plan,
+      approvedPlanSnapshot?.approvedAt,
+      approvedPlanSnapshot?.planBasis,
+    );
+
+    await persistApprovedPlanSnapshot(snapshot);
+  }
+
   async function applyApprovedRevision(revision: AdjustTodayPlanOutput["revision"]) {
     if (!approvedPlanSnapshot) {
       return null;
@@ -91,6 +101,7 @@ export function useApprovedPlanPersistence({
     approvedPlanSnapshot,
     approvePlan,
     saveApprovedPlan,
+    updateApprovedPlan,
     isHydratingApprovedPlan,
   };
 }
