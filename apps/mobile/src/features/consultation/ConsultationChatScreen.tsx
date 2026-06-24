@@ -48,6 +48,31 @@ type ConsultationChatScreenProps = {
 };
 
 const MAX_CHAT_ATTACHMENTS = 3;
+type ChatQuickAction = {
+  label: string;
+  message: string;
+  shouldOpenAttachmentPicker?: boolean;
+};
+
+const chatQuickActions: ChatQuickAction[] = [
+  {
+    label: "식단 추천",
+    message: "오늘 먹기 쉬운 식단 추천해줘",
+  },
+  {
+    label: "운동 추천",
+    message: "오늘 할 수 있는 가벼운 운동 추천해줘",
+  },
+  {
+    label: "오늘 조정",
+    message: "오늘 플랜을 지금 상황에 맞게 조정해줘",
+  },
+  {
+    label: "음식으로 조정",
+    message: "첨부한 음식 기준으로 오늘 플랜 조정해줘",
+    shouldOpenAttachmentPicker: true,
+  },
+];
 
 /**
  * Maps the active consultation route to the Figma Make chat and chat-proposal source screens.
@@ -163,6 +188,18 @@ export function ConsultationChatScreen({
     setDraftAttachments((currentAttachments) =>
       currentAttachments.filter((attachment) => attachment.id !== attachmentId),
     );
+  }
+
+  async function selectChatQuickAction(action: ChatQuickAction) {
+    if (hasPendingConfirmation || isGeneratingResponse) {
+      return;
+    }
+
+    setDraftMessage(action.message);
+
+    if (action.shouldOpenAttachmentPicker) {
+      await pickAttachment();
+    }
   }
 
   function toggleGoalType(goalType: PlanningGoalType) {
@@ -582,24 +619,53 @@ export function ConsultationChatScreen({
       </ScrollView>
 
       {!shouldShowPlanBasisGate && !shouldShowPlanningGuide ? (
-        <PlannerChatInput
-          attachments={draftAttachments}
-          disabled={!canSendMessage}
-          inputDisabled={hasPendingConfirmation || isGeneratingResponse}
-          maxAttachments={MAX_CHAT_ATTACHMENTS}
-          onAddAttachment={pickAttachment}
-          onChangeText={setDraftMessage}
-          onRemoveAttachment={removeAttachment}
-          onSubmit={submitMessage}
-          placeholder={
-            hasPendingConfirmation
-              ? "제안을 먼저 승인하거나 다시 제안받아 주세요."
-              : isGeneratingResponse
-                ? "플랜 제안을 만드는 중이에요..."
-                : "편하게 이야기해 주세요..."
-          }
-          value={draftMessage}
-        />
+        <View>
+          <View style={styles.chatQuickActionPanel}>
+            {chatQuickActions.map((action) => (
+              <Pressable
+                accessibilityRole="button"
+                disabled={hasPendingConfirmation || isGeneratingResponse}
+                key={action.label}
+                onPress={() => {
+                  void selectChatQuickAction(action);
+                }}
+                style={[
+                  styles.chatQuickActionChip,
+                  draftMessage === action.message && styles.chatQuickActionChipActive,
+                  (hasPendingConfirmation || isGeneratingResponse) &&
+                    styles.chatQuickActionChipDisabled,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.chatQuickActionText,
+                    draftMessage === action.message && styles.chatQuickActionTextActive,
+                  ]}
+                >
+                  {action.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          <PlannerChatInput
+            attachments={draftAttachments}
+            disabled={!canSendMessage}
+            inputDisabled={hasPendingConfirmation || isGeneratingResponse}
+            maxAttachments={MAX_CHAT_ATTACHMENTS}
+            onAddAttachment={pickAttachment}
+            onChangeText={setDraftMessage}
+            onRemoveAttachment={removeAttachment}
+            onSubmit={submitMessage}
+            placeholder={
+              hasPendingConfirmation
+                ? "제안을 먼저 승인하거나 다시 제안받아 주세요."
+                : isGeneratingResponse
+                  ? "플랜 제안을 만드는 중이에요..."
+                  : "편하게 이야기해 주세요..."
+            }
+            value={draftMessage}
+          />
+        </View>
       ) : null}
     </View>
   );
@@ -879,6 +945,40 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: 12,
     lineHeight: 18,
+  },
+  chatQuickActionPanel: {
+    backgroundColor: theme.colors.background,
+    borderTopColor: "rgba(42, 61, 46, 0.07)",
+    borderTopWidth: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.space.xs,
+    paddingHorizontal: theme.space.md,
+    paddingTop: theme.space.sm,
+  },
+  chatQuickActionChip: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: 999,
+    borderWidth: 1,
+    minHeight: 32,
+    justifyContent: "center",
+    paddingHorizontal: theme.space.sm,
+  },
+  chatQuickActionChipActive: {
+    backgroundColor: theme.colors.primarySoft,
+    borderColor: theme.colors.primary,
+  },
+  chatQuickActionChipDisabled: {
+    opacity: 0.45,
+  },
+  chatQuickActionText: {
+    color: theme.colors.inkSoft,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  chatQuickActionTextActive: {
+    color: theme.colors.primaryPressed,
   },
   contextRow: {
     alignItems: "flex-start",

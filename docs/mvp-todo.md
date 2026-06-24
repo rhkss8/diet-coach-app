@@ -156,7 +156,7 @@ Todos:
   - [x] Use choice chips plus free text for management intent.
   - [x] Capture food preferences, foods to keep, avoided foods, allergies, and routine context.
   - [x] Feed captured context into initial plan and chat recommendation prompts.
-  - [ ] Add chat quick actions for meal, exercise, today adjustment, and food-based adjustment.
+  - [x] Add chat quick actions for meal, exercise, today adjustment, and food-based adjustment.
   - [ ] Add QA checks that recommendations cite user traits and avoid hard exclusions.
 - [ ] Complete Figma Make publishing parity before tester recruitment.
 - [ ] Recruit first tester cohort.
