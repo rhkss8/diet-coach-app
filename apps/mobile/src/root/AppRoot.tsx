@@ -8,6 +8,7 @@ import type {
   ChatPlannerAttachment,
   ChatPlannerMessage,
   ChatPlannerResponse,
+  GenerateInitialPlanOutput,
   PlanningContext,
 } from "@diet-coach/ai";
 import type { AdjustmentReason } from "@diet-coach/core";
@@ -23,17 +24,19 @@ import {
   applyChatPlannerResponseToPlan,
   ConsultationChatScreen,
   createInitialConsultationMessages,
+  deriveLifestyleAnswersFromPlanningContext,
   saveChatMessage,
   savePlanningContext,
   uploadChatAttachments,
 } from "../features/consultation";
-import { useApprovedPlanPersistence } from "../features/plan";
-import { SettingsScreen, usePlanBasisPersistence } from "../features/settings";
+import { PlanApprovalScreen, useApprovedPlanPersistence } from "../features/plan";
+import { SettingsScreen, type PlanBasis, usePlanBasisPersistence } from "../features/settings";
 import { TodayScreen } from "../features/today";
 import { getTodayPlanDate, getTodayPlanItems } from "../features/today";
 import {
   adjustTodayPlanWithAiFunction,
   generateChatPlannerResponseWithAiFunction,
+  generateInitialPlanWithAiFunction,
 } from "../shared/lib/ai-plan-function";
 import { trackAnalyticsEvent } from "../shared/lib/analytics";
 import {
@@ -71,8 +74,12 @@ export function AppRoot() {
   >();
   const [adjustedPlanOutput, setAdjustedPlanOutput] = useState<AdjustTodayPlanOutput | null>(null);
   const [adjustmentGenerationError, setAdjustmentGenerationError] = useState<string | undefined>();
+  const [initialPlanOutput, setInitialPlanOutput] = useState<GenerateInitialPlanOutput | null>(
+    null,
+  );
   const [isGeneratingAdjustedPlan, setIsGeneratingAdjustedPlan] = useState(false);
   const [isGeneratingChatResponse, setIsGeneratingChatResponse] = useState(false);
+  const [isGeneratingInitialPlan, setIsGeneratingInitialPlan] = useState(false);
   const [isApprovingAdjustedPlan, setIsApprovingAdjustedPlan] = useState(false);
   const { latestRevisionSnapshot, persistPlanRevision } = usePlanRevisionPersistence({
     userId: session?.user.id,
@@ -80,8 +87,13 @@ export function AppRoot() {
   const { isHydratingPlanBasis, persistPlanBasis, planBasis } = usePlanBasisPersistence({
     userId: session?.user.id,
   });
-  const { applyApprovedRevision, approvedPlanSnapshot, isHydratingApprovedPlan, saveApprovedPlan } =
-    useApprovedPlanPersistence({ userId: session?.user.id });
+  const {
+    applyApprovedRevision,
+    approvePlan,
+    approvedPlanSnapshot,
+    isHydratingApprovedPlan,
+    saveApprovedPlan,
+  } = useApprovedPlanPersistence({ userId: session?.user.id });
 
   useEffect(() => {
     trackAnalyticsEvent("CHAT_CONSULTATION_STARTED", {
@@ -131,6 +143,19 @@ export function AppRoot() {
           onClose={goBack}
           onSavePlanBasis={persistPlanBasis}
           planBasis={planBasis}
+        />
+      ) : isGeneratingInitialPlan ? (
+        <GeneratingInitialPlan />
+      ) : initialPlanOutput ? (
+        <PlanApprovalScreen
+          onApprove={() => {
+            void approveInitialPlan(initialPlanOutput, {
+              approvePlan,
+              setInitialPlanOutput,
+              navigateToToday: () => navigateTo("today"),
+            });
+          }}
+          output={initialPlanOutput}
         />
       ) : currentRoute === "adjustment" ? (
         isGeneratingAdjustedPlan ? (
@@ -272,11 +297,14 @@ export function AppRoot() {
               currentMessages: consultationMessages,
               currentPlan: approvedPlanSnapshot?.plan,
               message,
+              planBasis,
               planningContext,
               saveChatMessage: (chatMessage) =>
                 saveChatMessage({ message: chatMessage, userId: session?.user.id }),
               setConsultationMessages,
+              setInitialPlanOutput,
               setIsGeneratingChatResponse,
+              setIsGeneratingInitialPlan,
               setPendingChatResponse,
               setPlanningContext,
               submittedPlanningContext,
@@ -306,10 +334,13 @@ type SendConsultationMessageActions = {
   currentMessages: ChatPlannerMessage[];
   currentPlan?: AiPlan;
   message: string;
+  planBasis: PlanBasis | null;
   planningContext?: PlanningContext;
   saveChatMessage: (message: ChatPlannerMessage) => Promise<boolean>;
   setConsultationMessages: Dispatch<SetStateAction<ChatPlannerMessage[]>>;
+  setInitialPlanOutput: (output: GenerateInitialPlanOutput | null) => void;
   setIsGeneratingChatResponse: (isGenerating: boolean) => void;
+  setIsGeneratingInitialPlan: (isGenerating: boolean) => void;
   setPendingChatResponse: (response: ChatPlannerResponse | null) => void;
   setPlanningContext: (context: PlanningContext) => void;
   submittedPlanningContext?: PlanningContext;
@@ -336,6 +367,19 @@ async function sendConsultationMessage(actions: SendConsultationMessageActions) 
 
   actions.setConsultationMessages(nextMessages);
   void actions.saveChatMessage(userMessage);
+
+  if (actions.submittedPlanningContext && actions.planBasis && !actions.currentPlan) {
+    void generateInitialPlan({
+      planBasis: actions.planBasis,
+      planningContext: actions.submittedPlanningContext,
+      saveChatMessage: actions.saveChatMessage,
+      setConsultationMessages: actions.setConsultationMessages,
+      setInitialPlanOutput: actions.setInitialPlanOutput,
+      setIsGeneratingInitialPlan: actions.setIsGeneratingInitialPlan,
+    });
+    return;
+  }
+
   void generateChatResponse({
     currentPlan: actions.currentPlan,
     messages: nextMessages,
@@ -345,6 +389,44 @@ async function sendConsultationMessage(actions: SendConsultationMessageActions) 
     setIsGeneratingChatResponse: actions.setIsGeneratingChatResponse,
     setPendingChatResponse: actions.setPendingChatResponse,
     todayDate: actions.todayDate,
+  });
+}
+
+type GenerateInitialPlanActions = {
+  planBasis: PlanBasis;
+  planningContext: PlanningContext;
+  saveChatMessage: (message: ChatPlannerMessage) => Promise<boolean>;
+  setConsultationMessages: Dispatch<SetStateAction<ChatPlannerMessage[]>>;
+  setInitialPlanOutput: (output: GenerateInitialPlanOutput | null) => void;
+  setIsGeneratingInitialPlan: (isGenerating: boolean) => void;
+};
+
+async function generateInitialPlan(actions: GenerateInitialPlanActions) {
+  actions.setIsGeneratingInitialPlan(true);
+
+  const result = await generateInitialPlanWithAiFunction({
+    goal: actions.planBasis.goal,
+    lifestyleAnswers: deriveLifestyleAnswersFromPlanningContext(actions.planningContext),
+    planningContext: actions.planningContext,
+    profile: actions.planBasis.profile,
+  });
+
+  actions.setIsGeneratingInitialPlan(false);
+
+  if (!result.ok) {
+    const assistantMessage = createChatMessage("assistant", getAiFailureMessage(result.errorCode));
+
+    actions.setConsultationMessages((messages) => [...messages, assistantMessage]);
+    void actions.saveChatMessage(assistantMessage);
+    return;
+  }
+
+  actions.setInitialPlanOutput(result.output);
+  trackAnalyticsEvent("INITIAL_PLAN_GENERATION_SUCCEEDED", {
+    userId: "local-user",
+    goalId: result.output.plan.goalId,
+    itemCount: result.output.plan.items.length,
+    planId: result.output.plan.id ?? "initial-plan",
   });
 }
 
@@ -461,6 +543,21 @@ type ApproveAdjustedPlanActions = {
   trackRevisionApproved: (revisionId: string) => void;
 };
 
+type ApproveInitialPlanActions = {
+  approvePlan: (plan: AiPlan) => Promise<void>;
+  navigateToToday: () => void;
+  setInitialPlanOutput: (output: GenerateInitialPlanOutput | null) => void;
+};
+
+async function approveInitialPlan(
+  output: GenerateInitialPlanOutput,
+  actions: ApproveInitialPlanActions,
+) {
+  await actions.approvePlan(output.plan);
+  actions.setInitialPlanOutput(null);
+  actions.navigateToToday();
+}
+
 async function approveAdjustedPlan(
   revision: AdjustTodayPlanOutput["revision"],
   actions: ApproveAdjustedPlanActions,
@@ -565,6 +662,15 @@ function GeneratingAdjustedPlan() {
     <View style={styles.completedContent}>
       <Text style={styles.eyebrow}>조정안 생성 중</Text>
       <Text style={styles.title}>오늘 플랜을 다시 맞추고 있어요</Text>
+    </View>
+  );
+}
+
+function GeneratingInitialPlan() {
+  return (
+    <View style={styles.completedContent}>
+      <Text style={styles.eyebrow}>첫 플랜 생성 중</Text>
+      <Text style={styles.title}>입력한 기준으로 7일 플랜을 맞추고 있어요</Text>
     </View>
   );
 }
