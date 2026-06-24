@@ -21,6 +21,7 @@ import {
 } from "../../shared/ui/planner-components";
 
 type AdjustmentReasonSelectionScreenProps = {
+  errorMessage?: string;
   onBack: () => void;
   onSelectReason: (reason: AdjustmentReason) => void;
   onSubmitReason: () => void;
@@ -91,6 +92,7 @@ const recoveryReasonOptions = [
  * Maps the adjustment entry route to the Figma Make recovery-reasons source screen.
  */
 export function AdjustmentReasonSelectionScreen({
+  errorMessage,
   onBack,
   onSelectReason,
   onSubmitReason,
@@ -134,6 +136,7 @@ export function AdjustmentReasonSelectionScreen({
       </ScrollView>
 
       <View style={styles.bottomPanel}>
+        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
         <Pressable
           accessibilityRole="button"
           disabled={!canSubmit}
@@ -192,9 +195,17 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     borderTopColor: "rgba(42, 61, 46, 0.07)",
     borderTopWidth: 1,
+    gap: theme.space.sm,
     paddingBottom: 40,
     paddingHorizontal: theme.space.xl,
     paddingTop: theme.space.sm,
+  },
+  errorText: {
+    color: theme.colors.danger,
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 17,
+    textAlign: "center",
   },
   submitButton: {
     alignItems: "center",

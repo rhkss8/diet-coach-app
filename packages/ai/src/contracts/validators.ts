@@ -9,6 +9,7 @@ import type {
 import type {
   AdjustTodayPlanOutput,
   AiValidationResult,
+  ChatPlannerResponse,
   GenerateInitialPlanOutput,
   PlanningContext,
   PlanningCoachingPreference,
@@ -88,6 +89,54 @@ export function validateAdjustTodayPlanOutput(
 
     if (revision.updatedFutureItems !== undefined) {
       validateAiPlanItems(revision.updatedFutureItems, "revision.updatedFutureItems", errors);
+    }
+  }
+
+  return toValidationResult(value, errors);
+}
+
+export function validateChatPlannerResponse(
+  value: unknown,
+): AiValidationResult<ChatPlannerResponse> {
+  const errors: string[] = [];
+  const response = asRecord(value, "response", errors);
+
+  if (response) {
+    requireOneOf(
+      response.type,
+      [
+        "meal_plan_suggestion",
+        "exercise_plan_suggestion",
+        "plan_revision_suggestion",
+        "clarification_question",
+      ],
+      "type",
+      errors,
+    );
+    validateUserFacingCopy(response.message, "message", errors);
+
+    if (response.type === "meal_plan_suggestion") {
+      validateAiPlanItems(response.suggestedItems, "suggestedItems", errors, { minLength: 1 });
+      validateConfirmation(response.confirmation, "confirmation", "add_to_meal_plan", errors);
+    }
+
+    if (response.type === "exercise_plan_suggestion") {
+      validateAiPlanItems(response.suggestedItems, "suggestedItems", errors, { minLength: 1 });
+      validateConfirmation(response.confirmation, "confirmation", "add_to_exercise_plan", errors);
+    }
+
+    if (response.type === "plan_revision_suggestion") {
+      const revisionResult = validateAdjustTodayPlanOutput({ revision: response.revision });
+
+      if (!revisionResult.ok) {
+        errors.push(...revisionResult.errors.map((error) => `revision.${error}`));
+      }
+
+      validateConfirmation(response.confirmation, "confirmation", "revise_plan", errors);
+    }
+
+    if (response.type === "clarification_question") {
+      validateUserFacingCopy(response.question, "question", errors);
     }
   }
 
@@ -203,6 +252,22 @@ export function validateUserFacingCopy(value: unknown, path: string, errors: str
       errors.push(`${path} contains banned coaching copy: ${bannedCopyFragment}`);
     }
   }
+}
+
+function validateConfirmation(
+  value: unknown,
+  path: string,
+  action: "add_to_meal_plan" | "add_to_exercise_plan" | "revise_plan",
+  errors: string[],
+) {
+  const confirmation = asRecord(value, path, errors);
+
+  if (!confirmation) {
+    return;
+  }
+
+  requireOneOf(confirmation.action, [action], `${path}.action`, errors);
+  requireString(confirmation.label, `${path}.label`, errors);
 }
 
 function validateAiPlan(value: unknown, path: string, errors: string[]) {

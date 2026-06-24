@@ -1,5 +1,14 @@
-import type { AdjustTodayPlanOutput, AiValidationResult, GenerateInitialPlanOutput } from "./types";
-import { validateAdjustTodayPlanOutput, validateGenerateInitialPlanOutput } from "./validators";
+import type {
+  AdjustTodayPlanOutput,
+  AiValidationResult,
+  ChatPlannerResponse,
+  GenerateInitialPlanOutput,
+} from "./types";
+import {
+  validateAdjustTodayPlanOutput,
+  validateChatPlannerResponse,
+  validateGenerateInitialPlanOutput,
+} from "./validators";
 
 export function parseGenerateInitialPlanResponse(
   value: string,
@@ -11,6 +20,10 @@ export function parseAdjustTodayPlanResponse(
   value: string,
 ): AiValidationResult<AdjustTodayPlanOutput> {
   return parseAndValidateAiResponse(value, validateAdjustTodayPlanOutput);
+}
+
+export function parseChatPlannerResponse(value: string): AiValidationResult<ChatPlannerResponse> {
+  return parseAndValidateAiResponse(value, validateChatPlannerResponse);
 }
 
 function parseAndValidateAiResponse<T>(

@@ -8,10 +8,11 @@ import type {
   ChatPlannerAttachment,
   ChatPlannerMessage,
   ChatPlannerResponse,
+  OpenAiRuntimeConfig,
 } from "@diet-coach/ai";
 import type { AdjustmentReason } from "@diet-coach/core";
 
-import { generateMockAdjustedPlan, generateMockChatPlannerResponse } from "@diet-coach/ai";
+import { adjustTodayPlanWithOpenAi, generateChatPlannerResponseWithOpenAi } from "@diet-coach/ai";
 import {
   AdjustmentReasonSelectionScreen,
   createPlanRevisionId,
@@ -59,6 +60,9 @@ export function AppRoot() {
     AdjustmentReason | undefined
   >();
   const [adjustedPlanOutput, setAdjustedPlanOutput] = useState<AdjustTodayPlanOutput | null>(null);
+  const [adjustmentGenerationError, setAdjustmentGenerationError] = useState<string | undefined>();
+  const [isGeneratingAdjustedPlan, setIsGeneratingAdjustedPlan] = useState(false);
+  const [isGeneratingChatResponse, setIsGeneratingChatResponse] = useState(false);
   const [isApprovingAdjustedPlan, setIsApprovingAdjustedPlan] = useState(false);
   const { latestRevisionSnapshot, persistPlanRevision } = usePlanRevisionPersistence();
   const { applyApprovedRevision, approvedPlanSnapshot, isHydratingApprovedPlan, saveApprovedPlan } =
@@ -108,7 +112,9 @@ export function AppRoot() {
           onClose={goBack}
         />
       ) : currentRoute === "adjustment" ? (
-        isApprovingAdjustedPlan ? (
+        isGeneratingAdjustedPlan ? (
+          <GeneratingAdjustedPlan />
+        ) : isApprovingAdjustedPlan ? (
           <ApprovingAdjustedPlan />
         ) : adjustedPlanOutput ? (
           <RevisedPlanReviewScreen
@@ -154,8 +160,10 @@ export function AppRoot() {
           />
         ) : (
           <AdjustmentReasonSelectionScreen
+            errorMessage={adjustmentGenerationError}
             onBack={goBack}
             onSelectReason={(reason) => {
+              setAdjustmentGenerationError(undefined);
               setSelectedAdjustmentReason(reason);
               trackAnalyticsEvent("ADJUSTMENT_REASON_SELECTED", {
                 userId: "local-user",
@@ -183,32 +191,13 @@ export function AppRoot() {
                 affectedDate: approvedPlanSnapshot?.plan.startDate ?? "local-date",
                 reason,
               });
-              const output = generateMockAdjustedPlan({
-                currentPlan: approvedPlanSnapshot?.plan ?? {
-                  goalId: "local-goal",
-                  startDate: "local-date",
-                  endDate: "local-date",
-                  summary: "local plan",
-                  items: [],
-                },
-                todayItems: approvedPlanSnapshot
-                  ? getTodayPlanItems(approvedPlanSnapshot.plan)
-                  : [],
-                completedItemIds: [],
-                request: {
-                  planId: approvedPlanSnapshot?.plan.id ?? "local-plan",
-                  affectedDate: approvedPlanSnapshot?.plan.startDate ?? "local-date",
-                  reason,
-                },
+              void generateAdjustedPlan(reason, {
+                approvedPlan: approvedPlanSnapshot?.plan ?? null,
+                setAdjustedPlanOutput,
+                setAdjustmentGenerationError,
+                setConsultationMessages,
+                setIsGeneratingAdjustedPlan,
               });
-              trackAnalyticsEvent("PLAN_ADJUSTMENT_GENERATION_SUCCEEDED", {
-                userId: "local-user",
-                planId: output.revision.planId,
-                affectedDate: output.revision.affectedDate,
-                revisionId: "mock-revision-1",
-                reason,
-              });
-              setAdjustedPlanOutput(output);
             }}
             selectedReason={selectedAdjustmentReason}
           />
@@ -256,28 +245,139 @@ export function AppRoot() {
           onSendMessage={(message, attachments) => {
             const userMessage = createChatMessage("user", message, attachments);
             const nextMessages = [...consultationMessages, userMessage];
-            const response = generateMockChatPlannerResponse({
+            setConsultationMessages(nextMessages);
+            void generateChatResponse({
               currentPlan: approvedPlanSnapshot?.plan,
               messages: nextMessages,
+              setConsultationMessages,
+              setIsGeneratingChatResponse,
+              setPendingChatResponse,
               todayDate: getActivePlanDate(approvedPlanSnapshot?.plan),
             });
-
-            setConsultationMessages([
-              ...nextMessages,
-              createChatMessage("assistant", response.message),
-            ]);
-            setPendingChatResponse(response);
-            trackAnalyticsEvent("CHAT_PLANNER_RESPONSE_GENERATED", {
-              userId: "local-user",
-              responseType: response.type,
-            });
           }}
+          isGeneratingResponse={isGeneratingChatResponse}
           pendingResponse={pendingChatResponse}
           showPlanAction={Boolean(approvedPlanSnapshot)}
         />
       )}
     </SafeAreaView>
   );
+}
+
+type GenerateAdjustedPlanActions = {
+  approvedPlan: AiPlan | null;
+  setAdjustedPlanOutput: (output: AdjustTodayPlanOutput | null) => void;
+  setAdjustmentGenerationError: (message: string | undefined) => void;
+  setConsultationMessages: Dispatch<SetStateAction<ChatPlannerMessage[]>>;
+  setIsGeneratingAdjustedPlan: (isGenerating: boolean) => void;
+};
+
+async function generateAdjustedPlan(
+  reason: AdjustmentReason,
+  actions: GenerateAdjustedPlanActions,
+) {
+  const approvedPlan = actions.approvedPlan;
+
+  if (!approvedPlan) {
+    trackAnalyticsEvent("PLAN_ADJUSTMENT_GENERATION_FAILED", {
+      userId: "local-user",
+      planId: "local-plan",
+      affectedDate: "local-date",
+      reason,
+      errorCode: "plan_not_available",
+    });
+    actions.setAdjustmentGenerationError(
+      "승인된 플랜을 찾지 못했어요. 플랜을 먼저 만든 뒤 다시 시도해 주세요.",
+    );
+    return;
+  }
+
+  actions.setAdjustmentGenerationError(undefined);
+  actions.setIsGeneratingAdjustedPlan(true);
+
+  const result = await adjustTodayPlanWithOpenAi(
+    {
+      completedItemIds: [],
+      currentPlan: approvedPlan,
+      request: {
+        affectedDate: getTodayPlanDate(approvedPlan),
+        planId: approvedPlan.id ?? "local-plan",
+        reason,
+      },
+      todayItems: getTodayPlanItems(approvedPlan),
+    },
+    getOpenAiRuntimeConfig(),
+  );
+
+  actions.setIsGeneratingAdjustedPlan(false);
+
+  if (!result.ok) {
+    trackAnalyticsEvent("PLAN_ADJUSTMENT_GENERATION_FAILED", {
+      userId: "local-user",
+      planId: approvedPlan.id ?? "local-plan",
+      affectedDate: getTodayPlanDate(approvedPlan),
+      reason,
+      errorCode: result.errorCode,
+    });
+    actions.setConsultationMessages((messages) => [
+      ...messages,
+      createChatMessage("assistant", getAiFailureMessage(result.errorCode)),
+    ]);
+    actions.setAdjustmentGenerationError(getAiFailureMessage(result.errorCode));
+    return;
+  }
+
+  trackAnalyticsEvent("PLAN_ADJUSTMENT_GENERATION_SUCCEEDED", {
+    userId: "local-user",
+    planId: result.output.revision.planId,
+    affectedDate: result.output.revision.affectedDate,
+    revisionId: createPlanRevisionId(result.output.revision),
+    reason,
+  });
+  actions.setAdjustedPlanOutput(result.output);
+}
+
+type GenerateChatResponseActions = {
+  currentPlan?: AiPlan;
+  messages: ChatPlannerMessage[];
+  setConsultationMessages: Dispatch<SetStateAction<ChatPlannerMessage[]>>;
+  setIsGeneratingChatResponse: (isGenerating: boolean) => void;
+  setPendingChatResponse: (response: ChatPlannerResponse | null) => void;
+  todayDate: string;
+};
+
+async function generateChatResponse(actions: GenerateChatResponseActions) {
+  actions.setIsGeneratingChatResponse(true);
+  actions.setPendingChatResponse(null);
+
+  const result = await generateChatPlannerResponseWithOpenAi(
+    {
+      currentPlan: actions.currentPlan,
+      messages: actions.messages,
+      todayDate: actions.todayDate,
+    },
+    getOpenAiRuntimeConfig(),
+  );
+
+  actions.setIsGeneratingChatResponse(false);
+
+  if (!result.ok) {
+    actions.setConsultationMessages((messages) => [
+      ...messages,
+      createChatMessage("assistant", getAiFailureMessage(result.errorCode)),
+    ]);
+    return;
+  }
+
+  actions.setConsultationMessages((messages) => [
+    ...messages,
+    createChatMessage("assistant", result.output.message),
+  ]);
+  actions.setPendingChatResponse(result.output);
+  trackAnalyticsEvent("CHAT_PLANNER_RESPONSE_GENERATED", {
+    userId: "local-user",
+    responseType: result.output.type,
+  });
 }
 
 type ApproveAdjustedPlanActions = {
@@ -373,6 +473,42 @@ function getTodayDate() {
 
 function getActivePlanDate(plan: AiPlan | undefined) {
   return plan ? getTodayPlanDate(plan) : getTodayDate();
+}
+
+function getOpenAiRuntimeConfig(): OpenAiRuntimeConfig {
+  const env = getRuntimeEnv();
+
+  return {
+    apiKey: env.OPENAI_API_KEY,
+    model: env.EXPO_PUBLIC_OPENAI_MODEL ?? env.OPENAI_MODEL,
+  };
+}
+
+function getRuntimeEnv(): Record<string, string | undefined> {
+  return globalThisWithProcess.process?.env ?? {};
+}
+
+const globalThisWithProcess = globalThis as typeof globalThis & {
+  process?: {
+    env?: Record<string, string | undefined>;
+  };
+};
+
+function getAiFailureMessage(errorCode: string) {
+  if (errorCode === "ai_not_configured") {
+    return "실제 플랜 생성 연결이 아직 설정되지 않았어요. OpenAI 실행 환경을 확인한 뒤 다시 시도해 주세요.";
+  }
+
+  return "지금은 플랜 제안을 만들지 못했어요. 잠시 후 다시 시도해 주세요.";
+}
+
+function GeneratingAdjustedPlan() {
+  return (
+    <View style={styles.completedContent}>
+      <Text style={styles.eyebrow}>조정안 생성 중</Text>
+      <Text style={styles.title}>오늘 플랜을 다시 맞추고 있어요</Text>
+    </View>
+  );
 }
 
 function ApprovingAdjustedPlan() {
