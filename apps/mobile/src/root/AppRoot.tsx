@@ -50,6 +50,7 @@ export function AppRoot() {
     requestMagicLink,
     requestSocialLogin,
     returnToLogin,
+    session,
     submittingAuthMethod,
   } = useAuthSession();
   const [routeHistory, setRouteHistory] = useState<AppRoute[]>(initialAppRouteHistory);
@@ -68,7 +69,7 @@ export function AppRoot() {
   const [isApprovingAdjustedPlan, setIsApprovingAdjustedPlan] = useState(false);
   const { latestRevisionSnapshot, persistPlanRevision } = usePlanRevisionPersistence();
   const { applyApprovedRevision, approvedPlanSnapshot, isHydratingApprovedPlan, saveApprovedPlan } =
-    useApprovedPlanPersistence();
+    useApprovedPlanPersistence({ userId: session?.user.id });
 
   useEffect(() => {
     trackAnalyticsEvent("CHAT_CONSULTATION_STARTED", {

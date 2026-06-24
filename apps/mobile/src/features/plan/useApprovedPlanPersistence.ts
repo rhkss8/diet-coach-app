@@ -1,13 +1,27 @@
 import { useEffect, useState } from "react";
 
 import type { AdjustTodayPlanOutput, AiPlan } from "@diet-coach/ai";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { getMobileSupabaseClient } from "../../shared/lib/supabase";
 import { trackAnalyticsEvent } from "../../shared/lib/analytics";
 import { applyPlanRevisionToPlan } from "./apply-plan-revision";
 import { type ApprovedPlanSnapshot, createApprovedPlanSnapshot } from "./approved-plan-snapshot";
-import { loadApprovedPlanSnapshot, saveApprovedPlanSnapshot } from "./approvedPlanStorage";
+import {
+  loadApprovedPlanSnapshot,
+  loadLocalApprovedPlanSnapshot,
+  saveApprovedPlanSnapshot,
+} from "./approvedPlanStorage";
 
-export function useApprovedPlanPersistence() {
+type ApprovedPlanPersistenceOptions = {
+  supabaseClient?: SupabaseClient | null;
+  userId?: string;
+};
+
+export function useApprovedPlanPersistence({
+  supabaseClient = getMobileSupabaseClient(),
+  userId,
+}: ApprovedPlanPersistenceOptions = {}) {
   const [approvedPlanSnapshot, setApprovedPlanSnapshot] = useState<ApprovedPlanSnapshot | null>(
     null,
   );
@@ -16,7 +30,7 @@ export function useApprovedPlanPersistence() {
   useEffect(() => {
     let isMounted = true;
 
-    loadApprovedPlanSnapshot()
+    loadApprovedPlanSnapshotForUser(supabaseClient, userId)
       .then((snapshot) => {
         if (isMounted) {
           setApprovedPlanSnapshot(snapshot);
@@ -31,7 +45,7 @@ export function useApprovedPlanPersistence() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [supabaseClient, userId]);
 
   async function approvePlan(plan: AiPlan) {
     await saveApprovedPlan(plan);
@@ -63,7 +77,7 @@ export function useApprovedPlanPersistence() {
   }
 
   async function persistApprovedPlanSnapshot(snapshot: ApprovedPlanSnapshot) {
-    await saveApprovedPlanSnapshot(snapshot);
+    await saveApprovedPlanSnapshot(snapshot, { supabaseClient, userId });
     setApprovedPlanSnapshot(snapshot);
   }
 
@@ -74,4 +88,27 @@ export function useApprovedPlanPersistence() {
     saveApprovedPlan,
     isHydratingApprovedPlan,
   };
+}
+
+async function loadApprovedPlanSnapshotForUser(
+  supabaseClient: SupabaseClient | null,
+  userId: string | undefined,
+) {
+  if (!supabaseClient || !userId) {
+    return loadApprovedPlanSnapshot();
+  }
+
+  const remoteSnapshot = await loadApprovedPlanSnapshot({ supabaseClient, userId });
+
+  if (remoteSnapshot) {
+    return remoteSnapshot;
+  }
+
+  const localSnapshot = await loadLocalApprovedPlanSnapshot();
+
+  if (localSnapshot) {
+    await saveApprovedPlanSnapshot(localSnapshot, { supabaseClient, userId });
+  }
+
+  return localSnapshot;
 }
