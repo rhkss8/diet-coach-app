@@ -2,6 +2,7 @@ import type {
   AiPlanItem,
   ChatPlannerResponse,
   GenerateChatPlannerResponseInput,
+  PlanningContext,
 } from "../contracts";
 
 export function generateMockChatPlannerResponse(
@@ -49,7 +50,9 @@ export function generateMockChatPlannerResponse(
     return {
       type: "meal_plan_suggestion",
       message: `첨부한 ${formatAttachmentNames(attachments)} 기준으로 식단에 반영하기 쉬운 항목을 제안할게요.`,
-      suggestedItems: [createAttachmentMealItem(input.todayDate, attachments)],
+      suggestedItems: [
+        createAttachmentMealItem(input.todayDate, attachments, input.planningContext),
+      ],
       confirmation: {
         action: "add_to_meal_plan",
         label: "식단에 추가하시겠습니까?",
@@ -60,8 +63,8 @@ export function generateMockChatPlannerResponse(
   if (isExerciseIntent(latestMessage)) {
     return {
       type: "exercise_plan_suggestion",
-      message: "좋아요. 지금은 무리하지 않고 바로 시작할 수 있는 운동으로 잡아볼게요.",
-      suggestedItems: [createExerciseItem(input.todayDate)],
+      message: createExerciseMessage(input.planningContext),
+      suggestedItems: [createExerciseItem(input.todayDate, input.planningContext)],
       confirmation: {
         action: "add_to_exercise_plan",
         label: "운동에 추가하시겠습니까?",
@@ -100,8 +103,8 @@ export function generateMockChatPlannerResponse(
   if (isMealIntent(latestMessage)) {
     return {
       type: "meal_plan_suggestion",
-      message: "좋아요. 식단은 지키기 쉬운 한 끼부터 플랜에 넣어볼게요.",
-      suggestedItems: [createMealItem(input.todayDate)],
+      message: createMealMessage(input.planningContext),
+      suggestedItems: [createMealItem(input.todayDate, input.planningContext)],
       confirmation: {
         action: "add_to_meal_plan",
         label: "식단에 추가하시겠습니까?",
@@ -128,7 +131,29 @@ function isRevisionIntent(message: string) {
   return /수정|바꿔|조정|회식|야근|망|깨졌|못/.test(message);
 }
 
-function createMealItem(date: string): AiPlanItem {
+function createMealItem(date: string, planningContext?: PlanningContext): AiPlanItem {
+  const preferredFood = getFirstAllowedFood(
+    planningContext?.foodContext.foodsToKeep,
+    planningContext,
+  );
+  const preferredFoodEntry = preferredFood
+    ? {
+        name: preferredFood,
+        amount: "1회분",
+        caloriesKcal: 220,
+        proteinG: 8,
+        carbsG: 32,
+        fatG: 6,
+      }
+    : {
+        name: "삶은 계란",
+        amount: "2개",
+        caloriesKcal: 156,
+        proteinG: 12,
+        carbsG: 1,
+        fatG: 10,
+      };
+
   return {
     id: `chat-${date}-dinner`,
     planId: "chat-plan",
@@ -136,9 +161,9 @@ function createMealItem(date: string): AiPlanItem {
     type: "meal",
     slot: "dinner",
     title: "상담 기반 저녁 식단",
-    description: "대화에서 나온 생활 패턴을 반영해 부담 없는 단백질 중심으로 구성해요.",
+    description: createMealDescription(planningContext, preferredFood),
     foods: [
-      { name: "삶은 계란", amount: "2개", caloriesKcal: 156, proteinG: 12, carbsG: 1, fatG: 10 },
+      preferredFoodEntry,
       { name: "샐러드 채소", amount: "150g", caloriesKcal: 35, proteinG: 2, carbsG: 7, fatG: 0 },
       { name: "무가당 두유", amount: "1팩", caloriesKcal: 120, proteinG: 9, carbsG: 8, fatG: 5 },
     ],
@@ -147,7 +172,19 @@ function createMealItem(date: string): AiPlanItem {
   };
 }
 
-function createAttachmentMealItem(date: string, attachments: { name: string }[]): AiPlanItem {
+function createAttachmentMealItem(
+  date: string,
+  attachments: { name: string }[],
+  planningContext?: PlanningContext,
+): AiPlanItem {
+  const preferredFood = getFirstAllowedFood(
+    planningContext?.foodContext.preferredFoods,
+    planningContext,
+  );
+  const firstFood = preferredFood
+    ? { name: preferredFood, amount: "1회분", caloriesKcal: 220, proteinG: 8, carbsG: 32, fatG: 6 }
+    : { name: "두부", amount: "150g", caloriesKcal: 180, proteinG: 16, carbsG: 5, fatG: 11 };
+
   return {
     id: `chat-${date}-attachment-meal`,
     planId: "chat-plan",
@@ -155,9 +192,9 @@ function createAttachmentMealItem(date: string, attachments: { name: string }[])
     type: "meal",
     slot: "dinner",
     title: "첨부 분석 기반 식단",
-    description: `${formatAttachmentNames(attachments)} 내용을 참고해 오늘 실행 가능한 식단으로 반영해요.`,
+    description: createAttachmentMealDescription(attachments, planningContext, preferredFood),
     foods: [
-      { name: "두부", amount: "150g", caloriesKcal: 180, proteinG: 16, carbsG: 5, fatG: 11 },
+      firstFood,
       { name: "샐러드 채소", amount: "150g", caloriesKcal: 35, proteinG: 2, carbsG: 7, fatG: 0 },
       { name: "삶은 계란", amount: "1개", caloriesKcal: 78, proteinG: 6, carbsG: 1, fatG: 5 },
     ],
@@ -166,7 +203,7 @@ function createAttachmentMealItem(date: string, attachments: { name: string }[])
   };
 }
 
-function createExerciseItem(date: string): AiPlanItem {
+function createExerciseItem(date: string, planningContext?: PlanningContext): AiPlanItem {
   return {
     id: `chat-${date}-workout`,
     planId: "chat-plan",
@@ -174,10 +211,82 @@ function createExerciseItem(date: string): AiPlanItem {
     type: "exercise",
     slot: "workout",
     title: "20분 빠르게 걷기",
-    description: "운동 루틴이 부담스럽지 않게 바로 실행 가능한 걷기로 시작해요.",
+    description: createExerciseDescription(planningContext),
     intensity: "light",
     status: "pending",
   };
+}
+
+function createMealMessage(planningContext?: PlanningContext) {
+  const trait = getPlanningTrait(planningContext);
+
+  return trait
+    ? `좋아요. ${trait} 기준으로 지키기 쉬운 한 끼부터 플랜에 넣어볼게요.`
+    : "좋아요. 식단은 지키기 쉬운 한 끼부터 플랜에 넣어볼게요.";
+}
+
+function createExerciseMessage(planningContext?: PlanningContext) {
+  const trait = planningContext?.routineContext.rawRoutineText.trim();
+
+  return trait
+    ? `좋아요. 알려준 하루 흐름(${trait})을 기준으로 바로 시작할 수 있는 운동으로 잡아볼게요.`
+    : "좋아요. 지금은 무리하지 않고 바로 시작할 수 있는 운동으로 잡아볼게요.";
+}
+
+function createMealDescription(planningContext?: PlanningContext, preferredFood?: string) {
+  if (!planningContext) {
+    return "대화에서 나온 생활 패턴을 반영해 부담 없는 단백질 중심으로 구성해요.";
+  }
+
+  const keepFood = preferredFood ? `${preferredFood}은 살리고 ` : "";
+  const routine = planningContext.routineContext.rawRoutineText;
+
+  return `${keepFood}${routine} 흐름에 맞춰 부담 없는 단백질 중심으로 구성해요.`;
+}
+
+function createAttachmentMealDescription(
+  attachments: { name: string }[],
+  planningContext?: PlanningContext,
+  preferredFood?: string,
+) {
+  const base = `${formatAttachmentNames(attachments)} 내용을 참고해 오늘 실행 가능한 식단으로 반영해요.`;
+
+  if (!planningContext) {
+    return base;
+  }
+
+  return preferredFood
+    ? `${base} 좋아하는 ${preferredFood}은 가능한 범위에서 살려요.`
+    : `${base} 입력한 음식 제외 기준과 하루 루틴을 함께 반영해요.`;
+}
+
+function createExerciseDescription(planningContext?: PlanningContext) {
+  const routine = planningContext?.routineContext.rawRoutineText.trim();
+
+  return routine
+    ? `${routine} 흐름을 고려해 부담스럽지 않게 바로 실행 가능한 걷기로 시작해요.`
+    : "운동 루틴이 부담스럽지 않게 바로 실행 가능한 걷기로 시작해요.";
+}
+
+function getPlanningTrait(planningContext?: PlanningContext) {
+  return (
+    planningContext?.foodContext.foodsToKeep.at(0) ??
+    planningContext?.foodContext.preferredFoods.at(0) ??
+    planningContext?.routineContext.rawRoutineText
+  );
+}
+
+function getFirstAllowedFood(foods: string[] = [], planningContext?: PlanningContext) {
+  return foods.find((food) => !isFoodExcluded(food, planningContext));
+}
+
+function isFoodExcluded(food: string, planningContext?: PlanningContext) {
+  const excludedFoods = [
+    ...(planningContext?.foodContext.allergies ?? []),
+    ...(planningContext?.foodContext.avoidedFoods ?? []),
+  ];
+
+  return excludedFoods.some((excludedFood) => food.includes(excludedFood));
 }
 
 function findDinnerItem(items: AiPlanItem[]) {

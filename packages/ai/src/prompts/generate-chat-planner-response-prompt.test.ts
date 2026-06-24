@@ -59,4 +59,46 @@ describe("buildGenerateChatPlannerResponsePrompt", () => {
 
     expect(typeof prompt.messages.at(1)?.content).toBe("string");
   });
+
+  it("passes planning context and personalization rules to the chat planner", () => {
+    const prompt = buildGenerateChatPlannerResponsePrompt({
+      messages: [
+        {
+          content: "저녁 식단 추천해줘",
+          id: "message-1",
+          role: "user",
+        },
+      ],
+      planningContext: {
+        foodContext: {
+          allergies: ["새우"],
+          avoidedFoods: ["크림소스"],
+          foodsToKeep: ["삼각김밥"],
+          preferredFoods: ["라면"],
+        },
+        managementIntent: {
+          goalTypes: ["weight_loss"],
+          preferredMethods: ["간헐적 단식"],
+          reasonText: "체중 감량이 필요해요",
+        },
+        routineContext: {
+          exerciseWindows: [],
+          mealWindows: {},
+          rawRoutineText: "8시 기상, 11시 점심, 21시 퇴근",
+          riskMoments: [],
+        },
+      },
+      todayDate: "2026-06-24",
+    });
+
+    const systemMessage = prompt.messages.at(0)?.content;
+    const userMessage = prompt.messages.at(1)?.content;
+
+    expect(systemMessage).toContain("primary personalization source");
+    expect(userMessage).toContain('"planningContext"');
+    expect(userMessage).toContain('"foodsToKeep"');
+    expect(userMessage).toContain("삼각김밥");
+    expect(userMessage).toContain("Never suggest foods listed in planningContext");
+    expect(userMessage).toContain("cite at least one captured user trait");
+  });
 });

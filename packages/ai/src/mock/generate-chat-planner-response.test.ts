@@ -17,6 +17,42 @@ describe("generateMockChatPlannerResponse", () => {
     }
   });
 
+  it("uses planning context when suggesting meals", () => {
+    const response = generateMockChatPlannerResponse({
+      todayDate,
+      messages: [{ id: "1", role: "user", content: "저녁 식단 추천해줘" }],
+      planningContext: {
+        foodContext: {
+          allergies: ["새우"],
+          avoidedFoods: ["라면"],
+          foodsToKeep: ["삼각김밥"],
+          preferredFoods: ["라면"],
+        },
+        managementIntent: {
+          goalTypes: ["weight_loss"],
+          preferredMethods: ["간헐적 단식"],
+          reasonText: "체중 감량이 필요해요",
+        },
+        routineContext: {
+          exerciseWindows: [],
+          mealWindows: {},
+          rawRoutineText: "8시 기상, 11시 점심, 21시 퇴근",
+          riskMoments: [],
+        },
+      },
+    });
+
+    expect(response.type).toBe("meal_plan_suggestion");
+    if (response.type === "meal_plan_suggestion") {
+      expect(response.message).toContain("삼각김밥");
+      expect(response.suggestedItems[0]?.description).toContain("삼각김밥");
+      expect(response.suggestedItems[0]?.description).toContain("21시 퇴근");
+      expect(response.suggestedItems[0]?.foods?.some((food) => food.name.includes("라면"))).toBe(
+        false,
+      );
+    }
+  });
+
   it("returns an exercise suggestion action from exercise intent", () => {
     const response = generateMockChatPlannerResponse({
       todayDate,
