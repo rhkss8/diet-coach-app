@@ -24,6 +24,8 @@ The release cannot ship unless this flow passes:
 
 - First screen is chat consultation, not a form wizard.
 - User can send text without losing previous messages.
+- Chat quick actions are visible after the first planning context is submitted.
+- Meal, exercise, today adjustment, and food-based adjustment quick actions prefill useful prompts.
 - Meal suggestion shows "식단에 추가하시겠습니까?" before mutating the plan.
 - Exercise suggestion shows "운동에 추가하시겠습니까?" before mutating the plan.
 - Revision suggestion shows "플랜을 수정하시겠습니까?" before mutating the plan.
@@ -64,10 +66,19 @@ The release cannot ship unless this flow passes:
 
 - Invalid JSON is handled.
 - Missing plan items are handled.
+- Initial plan and chat recommendation prompts include `planningContext` when it exists.
+- Recommendations cite at least one captured user trait such as food preference, food to keep, routine, or management intent.
+- Recommendations never suggest foods listed as allergies or hard exclusions.
 - User-facing copy is non-judgmental.
 - AI does not claim exact calorie precision.
 - AI does not present medical diagnosis.
 - Hard-tone coaching copy is not used by default.
+
+Automated coverage:
+
+- `packages/ai/src/prompts/generate-initial-plan-prompt.test.ts`
+- `packages/ai/src/prompts/generate-chat-planner-response-prompt.test.ts`
+- `packages/ai/src/mock/generate-chat-planner-response.test.ts`
 
 ## Frontend QA
 
