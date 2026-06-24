@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getAuthGateState, isValidAuthEmail } from "./auth-session";
+import { getAuthGateState, isValidAuthEmail, parseAuthCallbackUrl } from "./auth-session";
 
 describe("auth session helpers", () => {
   it("validates email before requesting a magic link", () => {
@@ -18,5 +18,22 @@ describe("auth session helpers", () => {
 
   it("requires auth when there is no session or guest choice", () => {
     expect(getAuthGateState({ hasSession: false, isGuest: false })).toBe("requires_auth");
+  });
+
+  it("parses OAuth callback codes from redirect URLs", () => {
+    expect(parseAuthCallbackUrl("dietcoach://auth/callback?code=auth-code")).toEqual({
+      code: "auth-code",
+      type: "code",
+    });
+  });
+
+  it("parses OAuth callback tokens from hash redirects", () => {
+    expect(
+      parseAuthCallbackUrl("dietcoach://auth/callback#access_token=access&refresh_token=refresh"),
+    ).toEqual({
+      accessToken: "access",
+      refreshToken: "refresh",
+      type: "tokens",
+    });
   });
 });

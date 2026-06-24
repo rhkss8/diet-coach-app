@@ -48,7 +48,9 @@ export function AppRoot() {
     isHydratingAuth,
     isSubmittingAuth,
     requestMagicLink,
+    requestSocialLogin,
     returnToLogin,
+    submittingAuthMethod,
   } = useAuthSession();
   const [routeHistory, setRouteHistory] = useState<AppRoute[]>(initialAppRouteHistory);
   const currentRoute = routeHistory.at(-1) ?? "consultation";
@@ -103,6 +105,10 @@ export function AppRoot() {
           onRequestMagicLink={(email) => {
             void requestMagicLink(email);
           }}
+          onRequestSocialLogin={(provider) => {
+            void requestSocialLogin(provider);
+          }}
+          submittingAuthMethod={submittingAuthMethod}
         />
       ) : isHydratingApprovedPlan ? (
         <LoadingPlan />
