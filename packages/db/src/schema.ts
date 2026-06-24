@@ -11,6 +11,7 @@ export const dbTableNames = [
   "chat_messages",
   "attachments",
   "approved_plan_snapshots",
+  "plan_revision_snapshots",
   "analytics_events",
 ] as const;
 

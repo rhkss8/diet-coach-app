@@ -17,6 +17,7 @@ describe("database schema contract", () => {
       "chat_messages",
       "attachments",
       "approved_plan_snapshots",
+      "plan_revision_snapshots",
       "analytics_events",
     ]);
   });

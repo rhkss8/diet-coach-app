@@ -73,7 +73,9 @@ export function AppRoot() {
   const [isGeneratingAdjustedPlan, setIsGeneratingAdjustedPlan] = useState(false);
   const [isGeneratingChatResponse, setIsGeneratingChatResponse] = useState(false);
   const [isApprovingAdjustedPlan, setIsApprovingAdjustedPlan] = useState(false);
-  const { latestRevisionSnapshot, persistPlanRevision } = usePlanRevisionPersistence();
+  const { latestRevisionSnapshot, persistPlanRevision } = usePlanRevisionPersistence({
+    userId: session?.user.id,
+  });
   const { applyApprovedRevision, approvedPlanSnapshot, isHydratingApprovedPlan, saveApprovedPlan } =
     useApprovedPlanPersistence({ userId: session?.user.id });
 
