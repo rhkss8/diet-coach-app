@@ -9,6 +9,7 @@ describe("chat message storage", () => {
         {
           attachments: [
             {
+              analysisUrl: "https://signed.example.com/storage/meal.png",
               id: "attachment-1",
               name: "meal.png",
               mimeType: "image/png",

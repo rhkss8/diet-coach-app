@@ -1,6 +1,6 @@
 import type { ChatPlannerAttachment, ChatPlannerMessage } from "@diet-coach/ai";
 
-type StoredChatPlannerAttachment = Omit<ChatPlannerAttachment, "uri">;
+type StoredChatPlannerAttachment = Omit<ChatPlannerAttachment, "analysisUrl" | "uri">;
 
 export type ChatMessageRow = {
   attachments: StoredChatPlannerAttachment[];

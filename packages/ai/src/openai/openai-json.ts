@@ -1,3 +1,4 @@
+import type { AiPromptContent } from "../prompts";
 import type { AiPrompt } from "../prompts";
 import type { AiGenerationResult, OpenAiRuntimeConfig } from "./types";
 
@@ -6,7 +7,7 @@ const DEFAULT_OPENAI_MODEL = "gpt-4.1-mini";
 
 type OpenAiMessage = {
   role: "system" | "user";
-  content: string;
+  content: AiPromptContent[] | string;
 };
 
 type OpenAiResponsesBody = {
