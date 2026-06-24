@@ -49,3 +49,40 @@ Before linking cloud:
 ## MVP Default
 
 Until cloud is linked, development should continue against local Supabase config and checked-in migrations.
+
+## Auth Provider Setup
+
+The app already routes Supabase OAuth callbacks through:
+
+```text
+dietcoach://auth/callback
+```
+
+When the cloud project is ready, enable these providers in Supabase Dashboard > Authentication >
+Providers:
+
+- Email
+- Kakao
+- Google
+
+Register `dietcoach://auth/callback` as an allowed redirect URL in Supabase Dashboard >
+Authentication > URL Configuration. Keep the local Expo redirect URL for local web/native testing:
+
+```text
+exp://127.0.0.1:8081
+```
+
+Provider console checklist:
+
+- Kakao Developers: register the Supabase callback URL shown in the Kakao provider settings, then
+  copy the REST API key and client secret into Supabase.
+- Google Cloud Console: create OAuth credentials, register the Supabase callback URL shown in the
+  Google provider settings, then copy the client id and client secret into Supabase.
+- Email: keep magic-link enabled as the fallback login path for QA and users who cannot finish
+  social OAuth.
+
+Do not mark social login complete until it has been tested on the target build type:
+
+- Expo dev client or local Expo run
+- iOS build
+- Android build
