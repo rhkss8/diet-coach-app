@@ -3,9 +3,14 @@ export const dbTableNames = [
   "goals",
   "plans",
   "plan_items",
+  "plan_item_foods",
   "adjustment_requests",
   "plan_revisions",
   "daily_check_ins",
+  "planning_contexts",
+  "chat_messages",
+  "attachments",
+  "approved_plan_snapshots",
   "analytics_events",
 ] as const;
 
