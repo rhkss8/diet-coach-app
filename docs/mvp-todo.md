@@ -149,7 +149,7 @@ Todos:
 - [x] Run full manual QA.
 - [x] Run test suite.
 - [x] Create build.
-- [ ] Add guided planning context before tester recruitment.
+- [x] Add guided planning context before tester recruitment.
   - [x] Define recommendation algorithm and context requirements.
   - [x] Define `PlanningContext` domain and AI contract shape.
   - [x] Replace blank first-run chat with guided onboarding questions.
