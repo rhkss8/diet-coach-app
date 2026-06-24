@@ -120,6 +120,7 @@ export type ChatPlannerAttachment = {
   name: string;
   mimeType?: string;
   sizeBytes?: number;
+  storagePath?: string;
   uri?: string;
 };
 

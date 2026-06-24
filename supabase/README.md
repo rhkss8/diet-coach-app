@@ -54,3 +54,15 @@ supabase secrets set OPENAI_API_KEY=... OPENAI_MODEL=gpt-4.1-mini
 The current local function config allows unauthenticated calls so the guest MVP flow can still ask
 for a plan. Before public testing, add an abuse guard such as authenticated-only access, rate
 limiting, or a server-side usage budget.
+
+## Storage
+
+The `chat-attachments` bucket stores files uploaded from plan consultation messages. The bucket is
+private, limited to 10 MB per file, and scoped by the first path segment:
+
+```txt
+{auth.users.id}/{attachment-id}-{safe-file-name}
+```
+
+Keep message previews local in the app, but persist only attachment metadata and `storagePath` in
+`chat_messages.attachments`.

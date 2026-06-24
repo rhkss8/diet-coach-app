@@ -25,6 +25,7 @@ import {
   createInitialConsultationMessages,
   saveChatMessage,
   savePlanningContext,
+  uploadChatAttachments,
 } from "../features/consultation";
 import { useApprovedPlanPersistence } from "../features/plan";
 import { SettingsScreen } from "../features/settings";
@@ -259,30 +260,21 @@ export function AppRoot() {
             }
           }}
           onSendMessage={(message, attachments, submittedPlanningContext) => {
-            const userMessage = createChatMessage("user", message, attachments);
-            const nextMessages = [...consultationMessages, userMessage];
-            const nextPlanningContext = submittedPlanningContext ?? planningContext;
-
-            if (submittedPlanningContext) {
-              setPlanningContext(submittedPlanningContext);
-              void savePlanningContext({
-                context: submittedPlanningContext,
-                userId: session?.user.id,
-              });
-            }
-
-            setConsultationMessages(nextMessages);
-            void saveChatMessage({ message: userMessage, userId: session?.user.id });
-            void generateChatResponse({
+            void sendConsultationMessage({
+              attachments: attachments ?? [],
+              currentMessages: consultationMessages,
               currentPlan: approvedPlanSnapshot?.plan,
-              messages: nextMessages,
-              planningContext: nextPlanningContext,
+              message,
+              planningContext,
               saveChatMessage: (chatMessage) =>
                 saveChatMessage({ message: chatMessage, userId: session?.user.id }),
               setConsultationMessages,
               setIsGeneratingChatResponse,
               setPendingChatResponse,
+              setPlanningContext,
+              submittedPlanningContext,
               todayDate: getActivePlanDate(approvedPlanSnapshot?.plan),
+              userId: session?.user.id,
             });
           }}
           isGeneratingResponse={isGeneratingChatResponse}
@@ -301,6 +293,53 @@ type GenerateAdjustedPlanActions = {
   setConsultationMessages: Dispatch<SetStateAction<ChatPlannerMessage[]>>;
   setIsGeneratingAdjustedPlan: (isGenerating: boolean) => void;
 };
+
+type SendConsultationMessageActions = {
+  attachments: ChatPlannerAttachment[];
+  currentMessages: ChatPlannerMessage[];
+  currentPlan?: AiPlan;
+  message: string;
+  planningContext?: PlanningContext;
+  saveChatMessage: (message: ChatPlannerMessage) => Promise<boolean>;
+  setConsultationMessages: Dispatch<SetStateAction<ChatPlannerMessage[]>>;
+  setIsGeneratingChatResponse: (isGenerating: boolean) => void;
+  setPendingChatResponse: (response: ChatPlannerResponse | null) => void;
+  setPlanningContext: (context: PlanningContext) => void;
+  submittedPlanningContext?: PlanningContext;
+  todayDate: string;
+  userId?: string;
+};
+
+async function sendConsultationMessage(actions: SendConsultationMessageActions) {
+  const uploadedAttachments = await uploadChatAttachments({
+    attachments: actions.attachments,
+    userId: actions.userId,
+  });
+  const userMessage = createChatMessage("user", actions.message, uploadedAttachments);
+  const nextMessages = [...actions.currentMessages, userMessage];
+  const nextPlanningContext = actions.submittedPlanningContext ?? actions.planningContext;
+
+  if (actions.submittedPlanningContext) {
+    actions.setPlanningContext(actions.submittedPlanningContext);
+    void savePlanningContext({
+      context: actions.submittedPlanningContext,
+      userId: actions.userId,
+    });
+  }
+
+  actions.setConsultationMessages(nextMessages);
+  void actions.saveChatMessage(userMessage);
+  void generateChatResponse({
+    currentPlan: actions.currentPlan,
+    messages: nextMessages,
+    planningContext: nextPlanningContext,
+    saveChatMessage: actions.saveChatMessage,
+    setConsultationMessages: actions.setConsultationMessages,
+    setIsGeneratingChatResponse: actions.setIsGeneratingChatResponse,
+    setPendingChatResponse: actions.setPendingChatResponse,
+    todayDate: actions.todayDate,
+  });
+}
 
 async function generateAdjustedPlan(
   reason: AdjustmentReason,
