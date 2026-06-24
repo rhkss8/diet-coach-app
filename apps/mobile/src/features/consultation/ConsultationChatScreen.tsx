@@ -30,10 +30,12 @@ import {
 } from "./planning-context";
 
 type ConsultationChatScreenProps = {
+  hasPlanBasis: boolean;
   messages: ChatPlannerMessage[];
   onApproveResponse: (response: ChatPlannerResponse) => void;
   onBack?: () => void;
   onDismissPendingResponse: () => void;
+  onOpenPlanBasisSettings: () => void;
   onOpenPlan: () => void;
   onSendMessage: (
     message: string,
@@ -51,10 +53,12 @@ const MAX_CHAT_ATTACHMENTS = 3;
  * Maps the active consultation route to the Figma Make chat and chat-proposal source screens.
  */
 export function ConsultationChatScreen({
+  hasPlanBasis,
   messages,
   onApproveResponse,
   onBack,
   onDismissPendingResponse,
+  onOpenPlanBasisSettings,
   onOpenPlan,
   onSendMessage,
   pendingResponse,
@@ -67,10 +71,12 @@ export function ConsultationChatScreen({
   const [hasSubmittedPlanningContext, setHasSubmittedPlanningContext] = useState(false);
   const [planningStep, setPlanningStep] = useState<PlanningContextGuideStep>("intent");
   const hasPendingConfirmation = pendingResponse ? "confirmation" in pendingResponse : false;
-  const shouldShowPlanningGuide = !hasSubmittedPlanningContext;
+  const shouldShowPlanBasisGate = !hasPlanBasis && !showPlanAction;
+  const shouldShowPlanningGuide = !shouldShowPlanBasisGate && !hasSubmittedPlanningContext;
   const canSendMessage =
     !hasPendingConfirmation &&
     !isGeneratingResponse &&
+    !shouldShowPlanBasisGate &&
     !shouldShowPlanningGuide &&
     (draftMessage.trim().length > 0 || draftAttachments.length > 0);
 
@@ -284,6 +290,38 @@ export function ConsultationChatScreen({
             {message.content}
           </ChatBubble>
         ))}
+
+        {shouldShowPlanBasisGate ? (
+          <>
+            <ChatBubble
+              role="assistant"
+              showAvatar={messages[messages.length - 1]?.role !== "assistant"}
+            >
+              첫 플랜을 계산하려면 나이, 키, 현재 체중, 목표 체중이 먼저 필요해요.
+            </ChatBubble>
+            <View style={styles.contextRow}>
+              <View style={styles.contextAvatar} />
+              <View style={styles.planBasisGateCard}>
+                <View style={styles.contextDockHeader}>
+                  <Text style={styles.contextDockKicker}>플랜 계산 기준</Text>
+                  <Text style={styles.contextDockStep}>설정 필요</Text>
+                </View>
+                <Text style={styles.planBasisGateTitle}>기본 정보를 먼저 저장해 주세요.</Text>
+                <Text style={styles.planBasisGateDescription}>
+                  이 값은 설정에서 언제든 바꿀 수 있어요. 이미 승인된 플랜은 사용자가 다시 맞추기
+                  전까지 자동으로 바뀌지 않습니다.
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={onOpenPlanBasisSettings}
+                  style={styles.contextAction}
+                >
+                  <Text style={styles.contextActionText}>설정에서 입력하기</Text>
+                </Pressable>
+              </View>
+            </View>
+          </>
+        ) : null}
 
         {shouldShowPlanningGuide ? (
           <>
@@ -543,7 +581,7 @@ export function ConsultationChatScreen({
         ) : null}
       </ScrollView>
 
-      {!shouldShowPlanningGuide ? (
+      {!shouldShowPlanBasisGate && !shouldShowPlanningGuide ? (
         <PlannerChatInput
           attachments={draftAttachments}
           disabled={!canSendMessage}
@@ -860,6 +898,23 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: theme.space.sm,
     padding: theme.space.sm,
+  },
+  planBasisGateCard: {
+    backgroundColor: "rgba(254, 252, 248, 0.78)",
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.medium,
+    borderWidth: 1,
+    flex: 1,
+    gap: theme.space.md,
+    padding: theme.space.sm,
+  },
+  planBasisGateTitle: {
+    ...theme.type.sectionTitle,
+    color: theme.colors.ink,
+  },
+  planBasisGateDescription: {
+    ...theme.type.supporting,
+    color: theme.colors.inkSoft,
   },
   contextDockHeader: {
     alignItems: "center",

@@ -28,7 +28,7 @@ import {
   uploadChatAttachments,
 } from "../features/consultation";
 import { useApprovedPlanPersistence } from "../features/plan";
-import { SettingsScreen } from "../features/settings";
+import { SettingsScreen, usePlanBasisPersistence } from "../features/settings";
 import { TodayScreen } from "../features/today";
 import { getTodayPlanDate, getTodayPlanItems } from "../features/today";
 import {
@@ -77,6 +77,9 @@ export function AppRoot() {
   const { latestRevisionSnapshot, persistPlanRevision } = usePlanRevisionPersistence({
     userId: session?.user.id,
   });
+  const { isHydratingPlanBasis, persistPlanBasis, planBasis } = usePlanBasisPersistence({
+    userId: session?.user.id,
+  });
   const { applyApprovedRevision, approvedPlanSnapshot, isHydratingApprovedPlan, saveApprovedPlan } =
     useApprovedPlanPersistence({ userId: session?.user.id });
 
@@ -120,12 +123,14 @@ export function AppRoot() {
           }}
           submittingAuthMethod={submittingAuthMethod}
         />
-      ) : isHydratingApprovedPlan ? (
+      ) : isHydratingApprovedPlan || isHydratingPlanBasis ? (
         <LoadingPlan />
       ) : currentRoute === "settings" ? (
         <SettingsScreen
           authMode={authGateState === "guest" ? "guest" : "authenticated"}
           onClose={goBack}
+          onSavePlanBasis={persistPlanBasis}
+          planBasis={planBasis}
         />
       ) : currentRoute === "adjustment" ? (
         isGeneratingAdjustedPlan ? (
@@ -259,6 +264,8 @@ export function AppRoot() {
               navigateTo("today");
             }
           }}
+          hasPlanBasis={Boolean(planBasis)}
+          onOpenPlanBasisSettings={() => navigateTo("settings")}
           onSendMessage={(message, attachments, submittedPlanningContext) => {
             void sendConsultationMessage({
               attachments: attachments ?? [],
