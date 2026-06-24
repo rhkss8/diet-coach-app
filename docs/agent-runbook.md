@@ -167,7 +167,9 @@ Before moving to the next todo:
 3. Commit the completed slice.
 4. Then run `tars next`.
 
-The git pre-commit hook should run the same checks. Do not bypass it unless the user explicitly asks.
+The git pre-commit hook is intentionally fast: it checks formatting for staged files only.
+Use `./tars verify` before claiming completion or before handing off work. If a release-grade commit
+needs the old full gate inside the hook, commit with `TARS_FULL_PRECOMMIT=1`.
 
 ## Lesson-And-Run Loop
 

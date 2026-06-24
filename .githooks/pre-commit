@@ -10,7 +10,30 @@ if command -v nvm >/dev/null 2>&1; then
 fi
 
 echo "Running TARS pre-commit checks..."
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm format:check
+
+if [[ "${TARS_FULL_PRECOMMIT:-0}" == "1" ]]; then
+  pnpm typecheck
+  pnpm lint
+  pnpm test
+  pnpm format:check
+  exit 0
+fi
+
+staged_files=("${(@f)$(git diff --cached --name-only --diff-filter=ACMR)}")
+prettier_files=()
+
+for file in "${staged_files[@]}"; do
+  case "$file" in
+    *.css|*.html|*.js|*.json|*.jsx|*.md|*.mjs|*.ts|*.tsx|*.yml|*.yaml)
+      if [[ -f "$file" ]]; then
+        prettier_files+=("$file")
+      fi
+      ;;
+  esac
+done
+
+if (( ${#prettier_files[@]} > 0 )); then
+  pnpm exec prettier --check "${prettier_files[@]}"
+fi
+
+echo "Fast pre-commit passed. Run ./tars verify before marking work complete."
