@@ -40,14 +40,33 @@ describe("plan item display helpers", () => {
     ]);
   });
 
-  it("keeps legacy items renderable without nutrition fields", () => {
+  it("backfills legacy meal items with app-level nutrition estimates", () => {
+    const legacyBreakfastItem = {
+      date: "2026-06-16",
+      type: "meal",
+      slot: "breakfast",
+      title: "아침",
+      description: "가볍게 시작",
+    } satisfies AiPlanItem;
+
+    expect(getPlanItemFoodLines(legacyBreakfastItem)).toEqual([
+      "호두 2알",
+      "삶은 계란 2개",
+      "단백질 음료 1병",
+    ]);
+    expect(getPlanItemNutritionSummary(legacyBreakfastItem)).toBe(
+      "373kcal · 단백질 34g · 탄수화물 12g · 지방 21g",
+    );
+  });
+
+  it("keeps non-meal legacy items renderable without nutrition fields", () => {
     expect(
       getPlanItemNutritionSummary({
         date: "2026-06-16",
-        type: "meal",
-        slot: "breakfast",
-        title: "아침",
-        description: "가볍게 시작",
+        type: "exercise",
+        slot: "workout",
+        title: "산책",
+        description: "10분 걷기",
       }),
     ).toBeUndefined();
   });

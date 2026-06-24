@@ -16,7 +16,6 @@ import {
   SectionHeader,
 } from "../../shared/ui/planner-components";
 import {
-  createEstimatedNutrition,
   getPlanItemDetail,
   getPlanItemFoodLines,
   getPlanItemNutritionSummary,
@@ -56,9 +55,7 @@ export function TodayScreen({
   revisionContext,
 }: TodayScreenProps) {
   const todayPlanDate = getTodayPlanDate(plan);
-  const [todayItems, setTodayItems] = useState(() =>
-    ensureReferenceTodayBoardItems(getTodayPlanItems(plan), todayPlanDate),
-  );
+  const [todayItems, setTodayItems] = useState(() => sortTodayItems(getTodayPlanItems(plan)));
   const progressSummary = getDailyProgressSummary(todayItems);
   const { exercises, meals } = groupTodayPlanItemsByType(todayItems);
 
@@ -193,127 +190,6 @@ function TodayPlanSection({
       </View>
     </View>
   );
-}
-
-/**
- * Backfills sparse legacy/demo plans so the main board keeps the Figma Make six-item structure.
- */
-function ensureReferenceTodayBoardItems(items: AiPlanItem[], todayDate: string) {
-  if (items.length >= 6) {
-    return sortTodayItems(items);
-  }
-
-  if (items.length < 4) {
-    return createReferenceTodayItems(todayDate);
-  }
-
-  const itemBySlot = new Map(items.map((item) => [getReferenceMergeKey(item), item]));
-  const referenceItems = createReferenceTodayItems(todayDate).map((referenceItem) => {
-    return itemBySlot.get(getReferenceMergeKey(referenceItem)) ?? referenceItem;
-  });
-  const referenceIds = new Set(referenceItems.map((item) => item.id));
-  const extraItems = items.filter((item) => item.id && !referenceIds.has(item.id));
-
-  return sortTodayItems([...referenceItems, ...extraItems]);
-}
-
-function createReferenceTodayItems(todayDate: string): AiPlanItem[] {
-  return [
-    {
-      id: `reference-${todayDate}-breakfast`,
-      date: todayDate,
-      type: "meal",
-      slot: "breakfast",
-      title: "호두 계란 단백질 쉐이크",
-      description: "오전 8시 · 앱 기준 추정치",
-      foods: [
-        { name: "호두", amount: "2알", caloriesKcal: 52, proteinG: 1, carbsG: 1, fatG: 5 },
-        { name: "삶은 계란", amount: "2개", caloriesKcal: 156, proteinG: 12, carbsG: 1, fatG: 10 },
-        {
-          name: "단백질 음료",
-          amount: "1병",
-          caloriesKcal: 165,
-          proteinG: 21,
-          carbsG: 10,
-          fatG: 6,
-        },
-      ],
-      nutrition: createEstimatedNutrition(373, 34, 12, 21),
-      status: "completed",
-    },
-    {
-      id: `reference-${todayDate}-lunch`,
-      date: todayDate,
-      type: "meal",
-      slot: "lunch",
-      title: "닭가슴살 샐러드",
-      description: "오후 12시 30분 · 단백질 우선 일반식",
-      foods: [
-        { name: "닭가슴살", amount: "120g", caloriesKcal: 198, proteinG: 37, carbsG: 0, fatG: 4 },
-        { name: "현미밥", amount: "120g", caloriesKcal: 180, proteinG: 4, carbsG: 38, fatG: 1 },
-        { name: "샐러드 채소", amount: "150g", caloriesKcal: 35, proteinG: 2, carbsG: 7, fatG: 0 },
-      ],
-      nutrition: createEstimatedNutrition(413, 43, 45, 5),
-      status: "completed",
-    },
-    {
-      id: `reference-${todayDate}-dinner`,
-      date: todayDate,
-      type: "meal",
-      slot: "dinner",
-      title: "현미밥 + 두부구이",
-      description: "오후 7시 · 부담 낮춘 균형 저녁",
-      foods: [
-        { name: "현미밥", amount: "150g", caloriesKcal: 225, proteinG: 5, carbsG: 48, fatG: 2 },
-        { name: "두부구이", amount: "150g", caloriesKcal: 180, proteinG: 16, carbsG: 5, fatG: 11 },
-        { name: "데친 채소", amount: "120g", caloriesKcal: 45, proteinG: 3, carbsG: 8, fatG: 0 },
-      ],
-      nutrition: createEstimatedNutrition(450, 24, 61, 13),
-      status: "pending",
-    },
-    {
-      id: `reference-${todayDate}-snack`,
-      date: todayDate,
-      type: "meal",
-      slot: "snack",
-      title: "삼각김밥 + 두유",
-      description: "야근 대비 · 편의점 선택지",
-      foods: [
-        { name: "삼각김밥", amount: "1개", caloriesKcal: 210, proteinG: 5, carbsG: 39, fatG: 4 },
-        { name: "무가당 두유", amount: "1팩", caloriesKcal: 120, proteinG: 9, carbsG: 8, fatG: 5 },
-      ],
-      nutrition: createEstimatedNutrition(330, 14, 47, 9),
-      status: "pending",
-    },
-    {
-      id: `reference-${todayDate}-walk`,
-      date: todayDate,
-      type: "exercise",
-      slot: "workout",
-      title: "저녁 산책",
-      description: "30분 · 약 120kcal 소모",
-      intensity: "light",
-      status: "pending",
-    },
-    {
-      id: `reference-${todayDate}-stretch`,
-      date: todayDate,
-      type: "exercise",
-      slot: "workout",
-      title: "스트레칭 루틴",
-      description: "10분 · 취침 전",
-      intensity: "light",
-      status: "pending",
-    },
-  ];
-}
-
-function getReferenceMergeKey(item: AiPlanItem) {
-  if (item.type === "exercise") {
-    return item.title.includes("스트레칭") ? "exercise-stretch" : "exercise-walk";
-  }
-
-  return `${item.type}-${item.slot}`;
 }
 
 function sortTodayItems(items: AiPlanItem[]) {
