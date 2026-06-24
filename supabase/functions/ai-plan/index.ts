@@ -1,11 +1,13 @@
 import {
   adjustTodayPlanWithOpenAi,
   generateChatPlannerResponseWithOpenAi,
+  generateInitialPlanWithOpenAi,
 } from "../../../packages/ai/src/openai/index.ts";
 
 import type {
   AdjustTodayPlanInput,
   GenerateChatPlannerResponseInput,
+  GenerateInitialPlanInput,
 } from "../../../packages/ai/src/contracts/index.ts";
 
 const corsHeaders = {
@@ -14,6 +16,10 @@ const corsHeaders = {
 };
 
 type AiPlanFunctionRequest =
+  | {
+      input: GenerateInitialPlanInput;
+      type: "generate_initial_plan";
+    }
   | {
       input: GenerateChatPlannerResponseInput;
       type: "generate_chat_response";
@@ -41,7 +47,12 @@ Deno.serve(async (request) => {
 
   const body = (await request.json().catch(() => null)) as AiPlanFunctionRequest | null;
 
-  if (!body || (body.type !== "generate_chat_response" && body.type !== "adjust_today_plan")) {
+  if (
+    !body ||
+    (body.type !== "generate_initial_plan" &&
+      body.type !== "generate_chat_response" &&
+      body.type !== "adjust_today_plan")
+  ) {
     return createJsonResponse(
       {
         errors: ["Invalid AI function request"],
@@ -57,10 +68,7 @@ Deno.serve(async (request) => {
     model: Deno.env.get("OPENAI_MODEL"),
   };
 
-  const result =
-    body.type === "generate_chat_response"
-      ? await generateChatPlannerResponseWithOpenAi(body.input, config)
-      : await adjustTodayPlanWithOpenAi(body.input, config);
+  const result = await invokeAiPlanner(body, config);
 
   return createJsonResponse(result);
 });
@@ -73,4 +81,22 @@ function createJsonResponse(body: unknown, status = 200) {
     },
     status,
   });
+}
+
+function invokeAiPlanner(
+  body: AiPlanFunctionRequest,
+  config: {
+    apiKey?: string;
+    model?: string;
+  },
+) {
+  if (body.type === "generate_initial_plan") {
+    return generateInitialPlanWithOpenAi(body.input, config);
+  }
+
+  if (body.type === "generate_chat_response") {
+    return generateChatPlannerResponseWithOpenAi(body.input, config);
+  }
+
+  return adjustTodayPlanWithOpenAi(body.input, config);
 }

@@ -4,11 +4,17 @@ import type {
   AiGenerationResult,
   ChatPlannerResponse,
   GenerateChatPlannerResponseInput,
+  GenerateInitialPlanInput,
+  GenerateInitialPlanOutput,
 } from "@diet-coach/ai";
 
 import { getMobileSupabaseClient } from "./supabase";
 
 type AiPlanFunctionRequest =
+  | {
+      input: GenerateInitialPlanInput;
+      type: "generate_initial_plan";
+    }
   | {
       input: GenerateChatPlannerResponseInput;
       type: "generate_chat_response";
@@ -24,6 +30,13 @@ export async function generateChatPlannerResponseWithAiFunction(
   return invokeAiPlanFunction<ChatPlannerResponse>({
     input,
     type: "generate_chat_response",
+  });
+}
+
+export async function generateInitialPlanWithAiFunction(input: GenerateInitialPlanInput) {
+  return invokeAiPlanFunction<GenerateInitialPlanOutput>({
+    input,
+    type: "generate_initial_plan",
   });
 }
 
