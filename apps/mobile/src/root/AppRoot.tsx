@@ -22,6 +22,7 @@ import {
   applyChatPlannerResponseToPlan,
   ConsultationChatScreen,
   createInitialConsultationMessages,
+  saveChatMessage,
 } from "../features/consultation";
 import { useApprovedPlanPersistence } from "../features/plan";
 import { SettingsScreen } from "../features/settings";
@@ -236,6 +237,7 @@ export function AppRoot() {
               currentPlan: approvedPlanSnapshot?.plan ?? null,
               persistPlanRevision,
               saveApprovedPlan,
+              saveChatMessage: (message) => saveChatMessage({ message, userId: session?.user.id }),
               setConsultationMessages,
               setPendingChatResponse,
               todayDate: getActivePlanDate(approvedPlanSnapshot?.plan),
@@ -255,9 +257,12 @@ export function AppRoot() {
             const userMessage = createChatMessage("user", message, attachments);
             const nextMessages = [...consultationMessages, userMessage];
             setConsultationMessages(nextMessages);
+            void saveChatMessage({ message: userMessage, userId: session?.user.id });
             void generateChatResponse({
               currentPlan: approvedPlanSnapshot?.plan,
               messages: nextMessages,
+              saveChatMessage: (chatMessage) =>
+                saveChatMessage({ message: chatMessage, userId: session?.user.id }),
               setConsultationMessages,
               setIsGeneratingChatResponse,
               setPendingChatResponse,
@@ -346,6 +351,7 @@ async function generateAdjustedPlan(
 type GenerateChatResponseActions = {
   currentPlan?: AiPlan;
   messages: ChatPlannerMessage[];
+  saveChatMessage: (message: ChatPlannerMessage) => Promise<boolean>;
   setConsultationMessages: Dispatch<SetStateAction<ChatPlannerMessage[]>>;
   setIsGeneratingChatResponse: (isGenerating: boolean) => void;
   setPendingChatResponse: (response: ChatPlannerResponse | null) => void;
@@ -365,17 +371,17 @@ async function generateChatResponse(actions: GenerateChatResponseActions) {
   actions.setIsGeneratingChatResponse(false);
 
   if (!result.ok) {
-    actions.setConsultationMessages((messages) => [
-      ...messages,
-      createChatMessage("assistant", getAiFailureMessage(result.errorCode)),
-    ]);
+    const assistantMessage = createChatMessage("assistant", getAiFailureMessage(result.errorCode));
+
+    actions.setConsultationMessages((messages) => [...messages, assistantMessage]);
+    void actions.saveChatMessage(assistantMessage);
     return;
   }
 
-  actions.setConsultationMessages((messages) => [
-    ...messages,
-    createChatMessage("assistant", result.output.message),
-  ]);
+  const assistantMessage = createChatMessage("assistant", result.output.message);
+
+  actions.setConsultationMessages((messages) => [...messages, assistantMessage]);
+  void actions.saveChatMessage(assistantMessage);
   actions.setPendingChatResponse(result.output);
   trackAnalyticsEvent("CHAT_PLANNER_RESPONSE_GENERATED", {
     userId: "local-user",
@@ -412,6 +418,7 @@ type ApproveChatPlannerResponseActions = {
   navigateToToday: () => void;
   persistPlanRevision: (revision: AdjustTodayPlanOutput["revision"]) => Promise<void>;
   saveApprovedPlan: (plan: AiPlan) => Promise<void>;
+  saveChatMessage: (message: ChatPlannerMessage) => Promise<boolean>;
   setConsultationMessages: Dispatch<SetStateAction<ChatPlannerMessage[]>>;
   setPendingChatResponse: (response: ChatPlannerResponse | null) => void;
   todayDate: string;
@@ -440,10 +447,13 @@ async function approveChatPlannerResponse(
 
   await actions.saveApprovedPlan(nextPlan);
   actions.setPendingChatResponse(null);
-  actions.setConsultationMessages((messages) => [
-    ...messages,
-    createChatMessage("assistant", "좋아요. 승인한 내용을 플랜에 반영했어요."),
-  ]);
+  const assistantMessage = createChatMessage(
+    "assistant",
+    "좋아요. 승인한 내용을 플랜에 반영했어요.",
+  );
+
+  actions.setConsultationMessages((messages) => [...messages, assistantMessage]);
+  void actions.saveChatMessage(assistantMessage);
   trackAnalyticsEvent("CHAT_PLANNER_ACTION_APPROVED", {
     userId: "local-user",
     action: response.confirmation.action,
