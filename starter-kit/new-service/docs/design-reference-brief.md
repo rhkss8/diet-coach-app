@@ -17,6 +17,8 @@ What works:
 What fails:
 Should borrow:
 Should avoid:
+What is visible before reading:
+How it shows state, priority, or action:
 ```
 
 ### Adjacent Products
@@ -36,6 +38,8 @@ Relevant interaction:
 What works:
 What fails:
 Applicable pattern:
+What is visible before reading:
+How it structures the main object:
 ```
 
 ### Emotional Tone References
@@ -48,6 +52,7 @@ Feeling:
 How it creates that feeling:
 Transferable design move:
 Risk if copied too closely:
+What the layout makes visible without explanation:
 ```
 
 ### Anti-References
@@ -58,6 +63,7 @@ Anti-references prevent drift.
 Reference or category:
 Why it is wrong for this product:
 Specific pattern to avoid:
+How the layout hides state, priority, or action:
 ```
 
 ## Visual Territory Options
@@ -74,6 +80,8 @@ Type:
 Layout density:
 Component style:
 Motion:
+Visibility strategy:
+Primary object treatment:
 ```
 
 ### Territory B
@@ -88,6 +96,8 @@ Type:
 Layout density:
 Component style:
 Motion:
+Visibility strategy:
+Primary object treatment:
 ```
 
 ### Territory C
@@ -102,6 +112,8 @@ Type:
 Layout density:
 Component style:
 Motion:
+Visibility strategy:
+Primary object treatment:
 ```
 
 ## Direction Decision
@@ -113,6 +125,7 @@ Rejected territory:
 Reason:
 Non-negotiable visual rules:
 Open questions:
+Three-second visibility promise:
 ```
 
 ## Implementation Brief
@@ -124,4 +137,7 @@ Shared components needed:
 Token decisions:
 States to include:
 Design QA focus:
+Primary objects:
+Text budget:
+Layout anti-patterns to avoid:
 ```

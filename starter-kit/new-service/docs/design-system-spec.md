@@ -13,6 +13,8 @@ Before defining UI tokens, read:
 - `docs/design-philosophy.md`
 - `docs/design-tone-and-manner.md`
 - `docs/interaction-principles.md`
+- `docs/ui-quality-philosophy.md`
+- `docs/visual-composition-rules.md`
 - `docs/service-definition.md`
 - `docs/g-stack.md`
 - `docs/superpowers.md`
@@ -34,6 +36,15 @@ Examples:
 ## Token Requirements
 
 Define tokens before building repeated UI.
+
+Before choosing token values, define what the screen must make visible without relying on explanatory copy:
+
+- Current user state.
+- Primary object.
+- Primary action.
+- Review, progress, risk, or completion state.
+
+If the screen needs paragraphs to make these clear, fix the layout and object model before tuning colors, type, or radius.
 
 ### Color
 
@@ -144,11 +155,15 @@ Every important UI component should define:
 ## Layout Rules
 
 - Build the actual product experience as the first screen, not a marketing page.
+- Make current state, primary object, and next action visible in the first viewport.
+- Use visual hierarchy, state, grouping, progress, and object structure before helper copy.
 - Keep operational tools dense but readable.
 - Keep consumer apps warm but not decorative.
 - Do not use generic chatbot layout if chat is only one input method.
 - Do not use a dashboard when the product's core promise is a guided flow.
 - Keep primary action visible without drowning the user in actions.
+- Avoid title, paragraph, card-stack screens unless the product object genuinely requires that format.
+- Avoid repeated same-weight text blocks; convert them into structured objects, status rows, or direct manipulation controls.
 
 ## Design System Done Criteria
 
@@ -156,6 +171,8 @@ The design system is ready for MVP implementation when:
 
 - Tokens exist for color, type, spacing, and state.
 - The core loop can be represented with the component inventory.
+- The first viewport passes the three-second visibility test.
+- Important UI objects have visible states and clear actions.
 - Primary, secondary, and destructive actions are visually distinct.
 - AI or automation outputs are reviewable before they mutate user data.
 - Mobile and desktop constraints are documented when relevant.

@@ -41,6 +41,7 @@ Questions:
 - Is the first viewport clear?
 - Is the primary action obvious?
 - Is hierarchy visible without reading every line?
+- Can the user identify current state, primary object, and next action within three seconds?
 
 Score:
 
@@ -57,6 +58,7 @@ Questions:
 - Does the user know what happens next?
 - Are review, approval, undo, and error states clear?
 - Does the flow preserve context?
+- Are important generated, selected, or editable things shown as clear objects rather than loose text?
 
 Score:
 
@@ -90,6 +92,7 @@ Questions:
 - Are controls sized well?
 - Is spacing deliberate?
 - Does the screen feel finished rather than scaffolded?
+- Are alignment, rhythm, and visual weight strong enough to avoid an old form/list/card-stack feel?
 
 Score:
 
@@ -111,6 +114,40 @@ Score:
 
 ```txt
 Distinctiveness:
+Evidence:
+Fix:
+```
+
+### 7. Visibility and Scanability
+
+Questions:
+
+- What is visible before reading body copy?
+- Does the screen communicate state, priority, and action through structure?
+- Is the interface over-dependent on helper text?
+- Are repeated text blocks replaced with useful objects, states, progress, comparison, or controls?
+
+Score:
+
+```txt
+Visibility and scanability:
+Evidence:
+Fix:
+```
+
+### 8. Composition Modernity
+
+Questions:
+
+- Does the layout avoid title, paragraph, card-stack defaults?
+- Does it avoid generic chatbot, dashboard, or form patterns when those are not the core product?
+- Does the screen use space to guide action instead of merely filling sections?
+- Does the responsive layout preserve hierarchy instead of stretching mobile UI awkwardly?
+
+Score:
+
+```txt
+Composition modernity:
 Evidence:
 Fix:
 ```
