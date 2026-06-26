@@ -247,3 +247,29 @@ Tradeoff:
 Review Trigger:
 
 - After guided planning context becomes the first-run path and Figma Make parity is rechecked.
+
+## 2026-06-26 - Keep Chat-First Entry As The Figma Parity Exception
+
+Status: accepted
+Area: product
+
+Decision:
+
+- Keep chat-first guest entry for tester recruitment.
+- Do not restore the Figma Make single-screen onboarding route only to satisfy visual parity.
+- Treat Figma Make onboarding as superseded by the current product flow: plan-basis settings gate plus first-plan preparation card inside consultation.
+
+Reason:
+
+- The current product thesis is that consultation is the primary surface, not a preliminary form wizard.
+- Guided planning context now collects management intent, food preferences, exclusions, preferred methods, and routine before the first AI-generated plan.
+- Restoring single-screen onboarding would make the app more visually aligned with the old prototype but would weaken the chat-first learning goal for testers.
+
+Tradeoff:
+
+- Phase 9 parity can be marked complete with a documented onboarding exception.
+- The tester MVP has a clearer consultation-centered entry, but Figma Make's onboarding state will remain uncaptured unless tester feedback says the chat-first entry lacks enough profile context.
+
+Review Trigger:
+
+- After the first tester cohort reports whether the initial consultation flow collects enough user context without feeling confusing or too long.

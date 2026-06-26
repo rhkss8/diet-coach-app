@@ -158,7 +158,7 @@ Todos:
   - [x] Feed captured context into initial plan and chat recommendation prompts.
   - [x] Add chat quick actions for meal, exercise, today adjustment, and food-based adjustment.
   - [x] Add QA checks that recommendations cite user traits and avoid hard exclusions.
-- [ ] Complete Figma Make publishing parity before tester recruitment.
+- [x] Complete Figma Make publishing parity before tester recruitment.
 - [ ] Recruit first tester cohort.
   - [x] Prepare recruiting message.
   - [x] Prepare first 10 tester operating packet.
@@ -238,7 +238,7 @@ Todos:
   - [x] Keep domain mapping internal when multiple UI reasons map to one adjustment reason.
 - [x] Rebuild the revised plan approval screen.
   - [x] Match assistant bubble, before/after comparison card, divider, badges, reassurance row, approve button, and secondary "다시 제안받기" button.
-- [ ] Run visual QA before marking this phase done.
+- [x] Run visual QA before marking this phase done.
   - [x] Export web build.
   - [x] Capture screenshots for login, chat, chat-proposal, today, recovery-reasons, and plan-approval.
   - [x] Decide whether RN should restore a routable onboarding screen or keep the chat-first guest entry before capturing onboarding.
