@@ -165,7 +165,7 @@ Todos:
   - [ ] Confirm distribution path.
   - [ ] Confirm feedback URL.
   - [ ] Fill first tester list.
-  - [ ] Decide privacy/legal review scope before inviting non-close-contact users.
+  - [x] Decide privacy/legal review scope before inviting non-close-contact users.
 
 Exit criteria:
 

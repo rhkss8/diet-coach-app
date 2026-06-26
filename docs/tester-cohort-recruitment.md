@@ -15,7 +15,7 @@ Best-fit testers:
 - Have tried calorie trackers, diet coaching, or meal-plan apps before.
 - Want to lose weight but often break plans because of work, meals, energy, or schedule.
 - Can test for 4 weeks.
-- Are willing to give short feedback after onboarding and after at least one plan adjustment.
+- Are willing to give short feedback after first-plan setup and after at least one plan adjustment.
 
 Avoid for first cohort:
 
@@ -40,9 +40,9 @@ Purpose: observe product comprehension before scaling to 50.
 Watch or interview at least 5 of the first 10 users while they:
 
 1. Start as a new user.
-2. Complete onboarding.
+2. Enter through chat-first consultation.
 3. Approve the first plan.
-4. Find "오늘 계획 조정".
+4. Find Today plan and "오늘 계획 조정".
 5. Approve one revised plan.
 
 Pass signal:
@@ -119,7 +119,7 @@ Short version:
 이 앱은 칼로리를 완벽하게 맞추는 앱이 아니라, 회식/야근/폭식/운동 실패처럼 계획이 깨졌을 때 남은 하루 계획을 다시 맞춰서 포기하지 않게 도와주는 앱이에요.
 
 조건은 간단해요.
-- 첫 온보딩과 플랜 승인까지 해보기
+- 첫 상담에서 플랜 준비와 승인까지 해보기
 - 계획이 틀어진 날 "오늘 계획 조정"을 한 번 써보기
 - 짧은 피드백 몇 개 남기기
 
@@ -137,8 +137,8 @@ Long version:
 계획이 한 번 틀어진 뒤에도 사용자가 다시 앱으로 돌아와 이어갈 수 있는가.
 
 테스트 기간은 4주이고, 처음에는 아래 흐름만 보면 됩니다.
-1. 기본 정보 입력
-2. 첫 7일 플랜 확인
+1. 상담 화면에서 기본 정보와 플랜 준비 입력
+2. 첫 플랜 확인과 승인
 3. 오늘 플랜 체크
 4. 회식/야근/운동 미실행 같은 상황에서 오늘 계획 조정
 5. 짧은 피드백 남기기
@@ -158,6 +158,7 @@ Use this packet before scaling to the full 50-user cohort.
 - Confirm the feedback URL and add it to `EXPO_PUBLIC_FEEDBACK_URL`.
 - Prepare a first 10 tester list with persona fit and invite channel.
 - Decide whether the user can be observed live, async by screen recording, or async by written notes.
+- Keep the first 10 limited to close contacts or warm introductions until privacy/legal review is upgraded.
 - Send the short recruiting message first. Send the long version only when the tester asks for more context.
 
 ### First 10 Tracker
@@ -187,10 +188,11 @@ Ask before they start:
 Watch these moments:
 
 1. Does the user understand that the app creates a plan through conversation?
-2. Does the user understand that approved suggestions become plan items?
-3. Can the user find the Today plan after approving a suggestion?
-4. Can the user find a way to adjust the plan when reality changes?
-5. Does the revised plan feel like continuation rather than punishment?
+2. Does the user understand why plan-basis settings are needed before the first generated plan?
+3. Does the user understand that approved suggestions become plan items?
+4. Can the user find the Today plan after approving a suggestion?
+5. Can the user find a way to adjust the plan when reality changes?
+6. Does the revised plan feel like continuation rather than punishment?
 
 Ask after the first run:
 
@@ -230,8 +232,18 @@ Pause and fix before scaling if:
    - Include name, channel, persona fit, invite status, onboarding status, and adjustment status.
 
 4. Privacy/legal review
-   - Required before sending beyond close contacts.
+   - First 10 scope: close contacts and warm introductions only.
+   - Do not invite public communities, cold users, or non-close-contact cohorts until privacy/legal review is upgraded.
    - Current privacy policy and terms are MVP drafts.
+
+## Launch Decision Status
+
+| Decision             | Status                 | Current stance                                                                               | Next action                                                             |
+| -------------------- | ---------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Distribution path    | Not confirmed          | Native TestFlight or Expo EAS preview is preferred; web export is internal walkthrough only. | User must choose the build/distribution path before invites are sent.   |
+| Feedback URL         | Not confirmed          | Use one private feedback destination for the first cohort.                                   | Add the chosen URL to `EXPO_PUBLIC_FEEDBACK_URL`.                       |
+| First 10 tester list | Not filled             | Use close contacts and warm introductions that match the persona.                            | Fill T01-T10 before sending the recruiting message.                     |
+| Privacy/legal scope  | Confirmed for first 10 | Close contacts or warm introductions only; no public/community recruiting yet.               | Upgrade privacy/legal review before inviting non-close-contact testers. |
 
 ## Tester Tracker Template
 

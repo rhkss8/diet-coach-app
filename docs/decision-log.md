@@ -273,3 +273,29 @@ Tradeoff:
 Review Trigger:
 
 - After the first tester cohort reports whether the initial consultation flow collects enough user context without feeling confusing or too long.
+
+## 2026-06-26 - Limit First Tester Invites To Close Contacts
+
+Status: accepted
+Area: release
+
+Decision:
+
+- Recruit the first 10 testers only from close contacts or warm introductions.
+- Do not send invites to public communities, cold users, or broad non-close-contact cohorts until privacy/legal review is upgraded.
+- Keep the current privacy policy and terms as MVP drafts for the first 10 only.
+
+Reason:
+
+- The MVP collects diet, body-metric, food preference, routine, and adjustment context.
+- The product still needs real-world feedback, but public recruiting raises privacy, legal, and support expectations before the first install path and feedback channel are fully confirmed.
+- Close-contact testing lets the team observe comprehension and core-loop blockers while keeping the blast radius small.
+
+Tradeoff:
+
+- Slower path to 50 testers.
+- Safer first learning loop and clearer responsibility for observation, support, and feedback follow-up.
+
+Review Trigger:
+
+- Before inviting non-close-contact users or posting in any public community.
