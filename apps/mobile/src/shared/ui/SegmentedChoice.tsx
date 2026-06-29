@@ -30,6 +30,7 @@ export function SegmentedChoice<TValue extends string>({
           return (
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
               key={option.value}
               onPress={() => onChange(option.value)}
               style={[styles.option, isSelected && styles.selectedOption]}

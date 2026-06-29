@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import type { Sex } from "@diet-coach/core";
 
-import { commonStyles, theme } from "../../shared/ui/design-system";
-import { BackButton } from "../../shared/ui/planner-components";
+import { theme } from "../../shared/ui/design-system";
+import { PrimaryButton } from "../../shared/ui/PrimaryButton";
+import { SegmentedChoice } from "../../shared/ui/SegmentedChoice";
+import { CalendarDatePicker } from "../onboarding/CalendarDatePicker";
+import { getTargetDateRange } from "../onboarding/goal-step";
 import {
   canSavePlanBasisDraft,
   createPlanBasis,
@@ -18,7 +21,6 @@ import { getBasicSettingsItems, getReleaseLinks } from "./settings-items";
 
 type SettingsScreenProps = {
   authMode: "authenticated" | "guest";
-  onClose: () => void;
   onSavePlanBasis: (planBasis: PlanBasis) => Promise<void>;
   planBasis: PlanBasis | null;
 };
@@ -30,18 +32,15 @@ const sexOptions = [
   { label: "기타", value: "other" },
 ] satisfies { label: string; value: Sex }[];
 
-export function SettingsScreen({
-  authMode,
-  onClose,
-  onSavePlanBasis,
-  planBasis,
-}: SettingsScreenProps) {
+export function SettingsScreen({ authMode, onSavePlanBasis, planBasis }: SettingsScreenProps) {
   const settingsItems = getBasicSettingsItems(getReleaseLinks());
+  const targetDateRange = getTargetDateRange();
   const [draft, setDraft] = useState<PlanBasisDraft>(() => createPlanBasisDraft(planBasis));
   const [isSavingPlanBasis, setIsSavingPlanBasis] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const fieldErrors = validatePlanBasisDraft(draft);
   const canSavePlanBasis = canSavePlanBasisDraft(draft) && !isSavingPlanBasis;
+  const sessionLabel = authMode === "guest" ? "게스트 모드" : "로그인 세션";
 
   useEffect(() => {
     setDraft(createPlanBasisDraft(planBasis));
@@ -75,19 +74,26 @@ export function SettingsScreen({
 
   return (
     <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
-      <View style={styles.topBar}>
-        <BackButton onPress={onClose} />
-        <Text style={styles.eyebrow}>설정</Text>
-      </View>
-
       <View style={styles.header}>
-        <Text style={styles.title}>테스트 준비를 확인해요</Text>
-        <Text style={styles.description}>
-          현재는 {authMode === "guest" ? "게스트 모드" : "로그인 세션"}로 진행 중입니다.
-        </Text>
+        <Text style={styles.eyebrow}>설정</Text>
+        <Text style={styles.title}>플랜 기준 관리</Text>
+        <Text style={styles.description}>플랜 계산에 쓰는 기본 정보와 앱 정보를 관리해요.</Text>
       </View>
 
-      <View style={styles.planBasisCard}>
+      <View style={styles.list}>
+        <Text style={styles.listTitle}>계정</Text>
+        <View style={styles.listRows}>
+          <View style={[styles.itemRow, styles.itemRowLast]}>
+            <SettingsItemContent
+              description="현재 앱을 사용하는 방식입니다."
+              meta={sessionLabel}
+              title="세션 상태"
+            />
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.planBasisSection}>
         <View style={styles.cardHeader}>
           <View>
             <Text style={styles.sectionKicker}>플랜 계산 기준</Text>
@@ -151,65 +157,88 @@ export function SettingsScreen({
             placeholder="어떻게 불러드릴까요?"
             value={draft.name}
           />
-          <PlanBasisInput
+          <CalendarDatePicker
             error={fieldErrors.targetDate}
             label="목표 날짜"
-            onChangeText={(value) => updateDraft("targetDate", value)}
-            placeholder="2026-09-24"
+            maxDate={targetDateRange.maxDate}
+            minDate={targetDateRange.minDate}
+            onChange={(value) => updateDraft("targetDate", value ?? "")}
             value={draft.targetDate}
           />
-          <View style={styles.sexOptions}>
-            {sexOptions.map((option) => {
-              const isSelected = draft.sex === option.value;
-
-              return (
-                <Pressable
-                  accessibilityRole="button"
-                  key={option.value}
-                  onPress={() => updateDraft("sex", option.value)}
-                  style={[styles.sexChip, isSelected && styles.sexChipActive]}
-                >
-                  <Text style={[styles.sexChipText, isSelected && styles.sexChipTextActive]}>
-                    {option.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+          <SegmentedChoice
+            label="성별"
+            onChange={(value) => updateDraft("sex", value)}
+            options={sexOptions}
+            value={draft.sex}
+          />
         </View>
 
         {saveMessage ? <Text style={styles.saveMessage}>{saveMessage}</Text> : null}
-        <Pressable
-          accessibilityRole="button"
+        <PrimaryButton
           disabled={!canSavePlanBasis}
+          fullWidth
+          label={isSavingPlanBasis ? "저장 중" : "플랜 계산 기준 저장"}
           onPress={submitPlanBasis}
-          style={[styles.saveButton, !canSavePlanBasis && styles.saveButtonDisabled]}
-        >
-          <Text style={styles.saveButtonText}>
-            {isSavingPlanBasis ? "저장 중" : "플랜 계산 기준 저장"}
-          </Text>
-        </Pressable>
+        />
       </View>
 
       <View style={styles.list}>
-        {settingsItems.map((item) => (
-          <Pressable
-            accessibilityRole={item.url ? "link" : undefined}
-            disabled={!item.url}
-            key={item.id}
-            onPress={() => {
-              if (item.url) {
-                void Linking.openURL(item.url);
-              }
-            }}
-            style={styles.item}
-          >
-            <Text style={styles.itemTitle}>{item.title}</Text>
-            <Text style={styles.itemDescription}>{item.description}</Text>
-          </Pressable>
-        ))}
+        <Text style={styles.listTitle}>지원 및 정보</Text>
+        <View style={styles.listRows}>
+          {settingsItems.map((item, index) => {
+            const itemUrl = item.url;
+            const isLastItem = index === settingsItems.length - 1;
+
+            return itemUrl ? (
+              <Pressable
+                accessibilityRole="link"
+                key={item.id}
+                onPress={() => {
+                  void Linking.openURL(itemUrl);
+                }}
+                style={[styles.itemRow, isLastItem && styles.itemRowLast]}
+              >
+                <SettingsItemContent
+                  description={item.description}
+                  meta="열기"
+                  title={item.title}
+                />
+              </Pressable>
+            ) : (
+              <View
+                accessibilityRole="text"
+                key={item.id}
+                style={[styles.itemRow, isLastItem && styles.itemRowLast, styles.itemRowReadOnly]}
+              >
+                <SettingsItemContent
+                  description={item.description}
+                  meta="정보"
+                  title={item.title}
+                />
+              </View>
+            );
+          })}
+        </View>
       </View>
     </ScrollView>
+  );
+}
+
+type SettingsItemContentProps = {
+  description: string;
+  meta: string;
+  title: string;
+};
+
+function SettingsItemContent({ description, meta, title }: SettingsItemContentProps) {
+  return (
+    <>
+      <View style={styles.itemCopy}>
+        <Text style={styles.itemTitle}>{title}</Text>
+        <Text style={styles.itemDescription}>{description}</Text>
+      </View>
+      <Text style={styles.itemMeta}>{meta}</Text>
+    </>
   );
 }
 
@@ -257,40 +286,44 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    gap: theme.space.xl,
+    gap: theme.space.lg,
     padding: theme.space.xl,
     paddingBottom: 36,
   },
-  topBar: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
   eyebrow: {
     ...theme.type.eyebrow,
-    color: theme.colors.primary,
+    color: theme.colors.muted,
   },
   header: {
-    backgroundColor: theme.colors.ink,
-    borderRadius: theme.radius.large,
-    gap: theme.space.sm,
-    padding: theme.space.lg,
+    gap: theme.space.xs,
   },
   title: {
     ...theme.type.title,
-    color: theme.colors.white,
+    color: theme.colors.ink,
   },
   description: {
     ...theme.type.body,
-    color: "#D8E0DA",
+    color: theme.colors.inkSoft,
   },
   list: {
     gap: theme.space.sm,
   },
-  planBasisCard: {
-    ...commonStyles.card,
+  listTitle: {
+    ...theme.type.eyebrow,
+    color: theme.colors.muted,
+  },
+  listRows: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.medium,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  planBasisSection: {
+    borderTopColor: theme.colors.borderStrong,
+    borderTopWidth: 1,
     gap: theme.space.md,
-    padding: theme.space.lg,
+    paddingTop: theme.space.lg,
   },
   cardHeader: {
     alignItems: "flex-start",
@@ -364,54 +397,31 @@ const styles = StyleSheet.create({
     ...theme.type.caption,
     color: theme.colors.danger,
   },
-  sexOptions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: theme.space.xs,
-  },
-  sexChip: {
-    borderColor: theme.colors.borderStrong,
-    borderRadius: theme.radius.small,
-    borderWidth: 1,
-    paddingHorizontal: theme.space.sm,
-    paddingVertical: theme.space.xs,
-  },
-  sexChipActive: {
-    backgroundColor: theme.colors.primarySoft,
-    borderColor: theme.colors.primary,
-  },
-  sexChipText: {
-    ...theme.type.caption,
-    color: theme.colors.muted,
-    fontWeight: "800",
-  },
-  sexChipTextActive: {
-    color: theme.colors.primaryPressed,
-  },
   saveMessage: {
     ...theme.type.caption,
     color: theme.colors.success,
     fontWeight: "800",
   },
-  saveButton: {
+  itemRow: {
     alignItems: "center",
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.radius.small,
-    minHeight: 50,
-    justifyContent: "center",
+    borderBottomColor: theme.colors.border,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: theme.space.md,
+    justifyContent: "space-between",
+    minHeight: 74,
     paddingHorizontal: theme.space.md,
+    paddingVertical: theme.space.sm,
   },
-  saveButtonDisabled: {
+  itemRowReadOnly: {
     backgroundColor: theme.colors.surfaceMuted,
   },
-  saveButtonText: {
-    ...theme.type.button,
-    color: theme.colors.white,
+  itemRowLast: {
+    borderBottomWidth: 0,
   },
-  item: {
-    ...commonStyles.card,
-    gap: theme.space.xs,
-    padding: theme.space.md,
+  itemCopy: {
+    flex: 1,
+    gap: theme.space.xxs,
   },
   itemTitle: {
     ...theme.type.body,
@@ -421,5 +431,10 @@ const styles = StyleSheet.create({
   itemDescription: {
     ...theme.type.supporting,
     color: theme.colors.muted,
+  },
+  itemMeta: {
+    ...theme.type.caption,
+    color: theme.colors.primary,
+    fontWeight: "800",
   },
 });

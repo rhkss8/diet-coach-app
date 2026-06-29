@@ -160,9 +160,23 @@ function isDateInRange(date: Date, minDate: Date, maxDate: Date) {
 }
 
 function parseISODate(value: string) {
-  const [year, month, day] = value.split("-").map(Number);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
 
-  return new Date(year, month - 1, day);
+  if (!match) {
+    return null;
+  }
+
+  const [, yearValue, monthValue, dayValue] = match;
+  const year = Number(yearValue);
+  const month = Number(monthValue);
+  const day = Number(dayValue);
+  const date = new Date(year, month - 1, day);
+
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
+
+  return date;
 }
 
 function startOfDay(date: Date) {

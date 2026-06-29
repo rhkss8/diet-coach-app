@@ -14,7 +14,6 @@ import { theme } from "../../shared/ui/design-system";
 import {
   AppHeader,
   ChatBubble,
-  HeaderAction,
   PlanProposalCard,
   PlannerChatInput,
 } from "../../shared/ui/planner-components";
@@ -36,7 +35,6 @@ type ConsultationChatScreenProps = {
   onBack?: () => void;
   onDismissPendingResponse: () => void;
   onOpenPlanBasisSettings: () => void;
-  onOpenPlan: () => void;
   onSendMessage: (
     message: string,
     attachments?: ChatPlannerAttachment[],
@@ -44,7 +42,6 @@ type ConsultationChatScreenProps = {
   ) => void;
   pendingResponse: ChatPlannerResponse | null;
   isGeneratingResponse?: boolean;
-  showPlanAction: boolean;
 };
 
 const MAX_CHAT_ATTACHMENTS = 3;
@@ -84,11 +81,9 @@ export function ConsultationChatScreen({
   onBack,
   onDismissPendingResponse,
   onOpenPlanBasisSettings,
-  onOpenPlan,
   onSendMessage,
   pendingResponse,
   isGeneratingResponse = false,
-  showPlanAction,
 }: ConsultationChatScreenProps) {
   const [draftMessage, setDraftMessage] = useState("");
   const [draftAttachments, setDraftAttachments] = useState<ChatPlannerAttachment[]>([]);
@@ -96,7 +91,7 @@ export function ConsultationChatScreen({
   const [hasSubmittedPlanningContext, setHasSubmittedPlanningContext] = useState(false);
   const [planningStep, setPlanningStep] = useState<PlanningContextGuideStep>("intent");
   const hasPendingConfirmation = pendingResponse ? "confirmation" in pendingResponse : false;
-  const shouldShowPlanBasisGate = !hasPlanBasis && !showPlanAction;
+  const shouldShowPlanBasisGate = !hasPlanBasis;
   const shouldShowPlanningGuide = !shouldShowPlanBasisGate && !hasSubmittedPlanningContext;
   const canSendMessage =
     !hasPendingConfirmation &&
@@ -307,11 +302,7 @@ export function ConsultationChatScreen({
   return (
     <View style={styles.screen}>
       <View style={styles.topBar}>
-        <AppHeader
-          actions={showPlanAction ? <HeaderAction label="오늘 플랜" onPress={onOpenPlan} /> : null}
-          kicker="TARS · 플랜 상담"
-          onBack={onBack}
-        />
+        <AppHeader kicker="TARS · 플랜 상담" onBack={onBack} />
       </View>
 
       <ScrollView contentContainerStyle={styles.messages} style={styles.messageList}>

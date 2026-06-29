@@ -1,6 +1,7 @@
 import { StatusBar } from "expo-status-bar";
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { CalendarDays, MessageCircle, Settings } from "lucide-react-native";
+import { type Dispatch, type ReactNode, type SetStateAction, useEffect, useState } from "react";
+import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 
 import type {
   AdjustTodayPlanOutput,
@@ -46,6 +47,8 @@ import {
   popAppRoute,
   pushAppRoute,
 } from "./app-route-history";
+
+type PrimaryTabRoute = "consultation" | "settings" | "today";
 
 export function AppRoot() {
   const {
@@ -106,6 +109,15 @@ export function AppRoot() {
     setRouteHistory((history) => pushAppRoute(history, route));
   }
 
+  function switchPrimaryTab(route: PrimaryTabRoute) {
+    if (route === "today" && !approvedPlanSnapshot) {
+      setRouteHistory(initialAppRouteHistory);
+      return;
+    }
+
+    setRouteHistory(route === "consultation" ? initialAppRouteHistory : ["consultation", route]);
+  }
+
   function goBack() {
     if (canPopAppRoute(routeHistory)) {
       navigateBack(setRouteHistory);
@@ -139,12 +151,17 @@ export function AppRoot() {
       ) : isHydratingApprovedPlan || isHydratingPlanBasis ? (
         <LoadingPlan />
       ) : currentRoute === "settings" ? (
-        <SettingsScreen
-          authMode={authGateState === "guest" ? "guest" : "authenticated"}
-          onClose={goBack}
-          onSavePlanBasis={persistPlanBasis}
-          planBasis={planBasis}
-        />
+        <MainTabScaffold
+          activeRoute="settings"
+          hasApprovedPlan={Boolean(approvedPlanSnapshot)}
+          onSelectRoute={switchPrimaryTab}
+        >
+          <SettingsScreen
+            authMode={authGateState === "guest" ? "guest" : "authenticated"}
+            onSavePlanBasis={persistPlanBasis}
+            planBasis={planBasis}
+          />
+        </MainTabScaffold>
       ) : isGeneratingInitialPlan ? (
         <GeneratingInitialPlan />
       ) : initialPlanOutput ? (
@@ -251,76 +268,162 @@ export function AppRoot() {
           />
         )
       ) : currentRoute === "today" && approvedPlanSnapshot ? (
-        <TodayScreen
-          onAdjustToday={() => {
-            navigateTo("adjustment");
-          }}
-          onOpenConsultation={goBack}
-          onOpenSettings={() => navigateTo("settings")}
-          onPlanChange={updateApprovedPlan}
-          plan={approvedPlanSnapshot.plan}
-          revisionContext={
-            latestRevisionSnapshot
-              ? {
-                  revisedPlanItemIds: latestRevisionSnapshot.revision.changedItemIds,
-                  revisionId: latestRevisionSnapshot.revisionId,
-                }
-              : undefined
-          }
-        />
-      ) : (
-        <ConsultationChatScreen
-          messages={consultationMessages}
-          onApproveResponse={(response) => {
-            void approveChatPlannerResponse(response, {
-              currentPlan: approvedPlanSnapshot?.plan ?? null,
-              persistPlanRevision,
-              saveApprovedPlan,
-              saveChatMessage: (message) => saveChatMessage({ message, userId: session?.user.id }),
-              setConsultationMessages,
-              setPendingChatResponse,
-              todayDate: getActivePlanDate(approvedPlanSnapshot?.plan),
-              navigateToToday: () => navigateTo("today"),
-            });
-          }}
-          onBack={goBack}
-          onDismissPendingResponse={() => {
-            setPendingChatResponse(null);
-          }}
-          onOpenPlan={() => {
-            if (approvedPlanSnapshot) {
-              navigateTo("today");
+        <MainTabScaffold
+          activeRoute="today"
+          hasApprovedPlan={Boolean(approvedPlanSnapshot)}
+          onSelectRoute={switchPrimaryTab}
+        >
+          <TodayScreen
+            onAdjustToday={() => {
+              navigateTo("adjustment");
+            }}
+            onOpenConsultation={() => switchPrimaryTab("consultation")}
+            onOpenSettings={() => switchPrimaryTab("settings")}
+            onPlanChange={updateApprovedPlan}
+            plan={approvedPlanSnapshot.plan}
+            revisionContext={
+              latestRevisionSnapshot
+                ? {
+                    revisedPlanItemIds: latestRevisionSnapshot.revision.changedItemIds,
+                    revisionId: latestRevisionSnapshot.revisionId,
+                  }
+                : undefined
             }
-          }}
-          hasPlanBasis={Boolean(planBasis)}
-          onOpenPlanBasisSettings={() => navigateTo("settings")}
-          onSendMessage={(message, attachments, submittedPlanningContext) => {
-            void sendConsultationMessage({
-              attachments: attachments ?? [],
-              currentMessages: consultationMessages,
-              currentPlan: approvedPlanSnapshot?.plan,
-              message,
-              planBasis,
-              planningContext,
-              saveChatMessage: (chatMessage) =>
-                saveChatMessage({ message: chatMessage, userId: session?.user.id }),
-              setConsultationMessages,
-              setInitialPlanOutput,
-              setIsGeneratingChatResponse,
-              setIsGeneratingInitialPlan,
-              setPendingChatResponse,
-              setPlanningContext,
-              submittedPlanningContext,
-              todayDate: getActivePlanDate(approvedPlanSnapshot?.plan),
-              userId: session?.user.id,
-            });
-          }}
-          isGeneratingResponse={isGeneratingChatResponse}
-          pendingResponse={pendingChatResponse}
-          showPlanAction={Boolean(approvedPlanSnapshot)}
-        />
+          />
+        </MainTabScaffold>
+      ) : (
+        <MainTabScaffold
+          activeRoute="consultation"
+          hasApprovedPlan={Boolean(approvedPlanSnapshot)}
+          onSelectRoute={switchPrimaryTab}
+        >
+          <ConsultationChatScreen
+            messages={consultationMessages}
+            onApproveResponse={(response) => {
+              void approveChatPlannerResponse(response, {
+                currentPlan: approvedPlanSnapshot?.plan ?? null,
+                persistPlanRevision,
+                saveApprovedPlan,
+                saveChatMessage: (message) =>
+                  saveChatMessage({ message, userId: session?.user.id }),
+                setConsultationMessages,
+                setPendingChatResponse,
+                todayDate: getActivePlanDate(approvedPlanSnapshot?.plan),
+                navigateToToday: () => navigateTo("today"),
+              });
+            }}
+            onBack={goBack}
+            onDismissPendingResponse={() => {
+              setPendingChatResponse(null);
+            }}
+            hasPlanBasis={Boolean(planBasis)}
+            onOpenPlanBasisSettings={() => switchPrimaryTab("settings")}
+            onSendMessage={(message, attachments, submittedPlanningContext) => {
+              void sendConsultationMessage({
+                attachments: attachments ?? [],
+                currentMessages: consultationMessages,
+                currentPlan: approvedPlanSnapshot?.plan,
+                message,
+                planBasis,
+                planningContext,
+                saveChatMessage: (chatMessage) =>
+                  saveChatMessage({ message: chatMessage, userId: session?.user.id }),
+                setConsultationMessages,
+                setInitialPlanOutput,
+                setIsGeneratingChatResponse,
+                setIsGeneratingInitialPlan,
+                setPendingChatResponse,
+                setPlanningContext,
+                submittedPlanningContext,
+                todayDate: getActivePlanDate(approvedPlanSnapshot?.plan),
+                userId: session?.user.id,
+              });
+            }}
+            isGeneratingResponse={isGeneratingChatResponse}
+            pendingResponse={pendingChatResponse}
+          />
+        </MainTabScaffold>
       )}
     </SafeAreaView>
+  );
+}
+
+type MainTabScaffoldProps = {
+  activeRoute: PrimaryTabRoute;
+  children: ReactNode;
+  hasApprovedPlan: boolean;
+  onSelectRoute: (route: PrimaryTabRoute) => void;
+};
+
+function MainTabScaffold({
+  activeRoute,
+  children,
+  hasApprovedPlan,
+  onSelectRoute,
+}: MainTabScaffoldProps) {
+  return (
+    <View style={styles.mainScaffold}>
+      <View style={styles.mainContent}>{children}</View>
+      <View style={styles.bottomNav}>
+        <BottomNavItem
+          icon={MessageCircle}
+          isActive={activeRoute === "consultation"}
+          label="상담"
+          onPress={() => onSelectRoute("consultation")}
+        />
+        <BottomNavItem
+          icon={CalendarDays}
+          isActive={activeRoute === "today"}
+          isUnavailable={!hasApprovedPlan}
+          label="플랜"
+          onPress={() => onSelectRoute("today")}
+        />
+        <BottomNavItem
+          icon={Settings}
+          isActive={activeRoute === "settings"}
+          label="설정"
+          onPress={() => onSelectRoute("settings")}
+        />
+      </View>
+    </View>
+  );
+}
+
+type BottomNavItemProps = {
+  icon: typeof MessageCircle;
+  isActive: boolean;
+  isUnavailable?: boolean;
+  label: string;
+  onPress: () => void;
+};
+
+function BottomNavItem({
+  icon: Icon,
+  isActive,
+  isUnavailable = false,
+  label,
+  onPress,
+}: BottomNavItemProps) {
+  const tintColor = isActive ? "#2F4D33" : isUnavailable ? "#B0A898" : "#5E7664";
+
+  return (
+    <Pressable
+      accessibilityRole="tab"
+      accessibilityState={{ selected: isActive, disabled: isUnavailable }}
+      onPress={onPress}
+      style={[styles.bottomNavItem, isActive && styles.bottomNavItemActive]}
+    >
+      <Icon color={tintColor} size={18} strokeWidth={2.3} />
+      <Text
+        style={[
+          styles.bottomNavLabel,
+          isActive && styles.bottomNavLabelActive,
+          isUnavailable && styles.bottomNavLabelUnavailable,
+        ]}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -710,6 +813,49 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#F8F7F4",
+  },
+  mainScaffold: {
+    backgroundColor: "#F8F7F4",
+    flex: 1,
+  },
+  mainContent: {
+    flex: 1,
+  },
+  bottomNav: {
+    alignItems: "center",
+    backgroundColor: "#FEFCF8",
+    borderTopColor: "rgba(42, 61, 46, 0.09)",
+    borderTopWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "space-around",
+    minHeight: 64,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  bottomNavItem: {
+    alignItems: "center",
+    borderRadius: 8,
+    flex: 1,
+    gap: 3,
+    justifyContent: "center",
+    minHeight: 46,
+  },
+  bottomNavItemActive: {
+    backgroundColor: "#E6EFE6",
+  },
+  bottomNavLabel: {
+    color: "#5E7664",
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 0,
+    lineHeight: 16,
+  },
+  bottomNavLabelActive: {
+    color: "#2F4D33",
+  },
+  bottomNavLabelUnavailable: {
+    color: "#B0A898",
   },
   completedContent: {
     flex: 1,

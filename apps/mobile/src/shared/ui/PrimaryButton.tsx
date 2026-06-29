@@ -4,15 +4,17 @@ import { Pressable, StyleSheet, Text } from "react-native";
 import { theme } from "./design-system";
 
 type PrimaryButtonProps = {
+  disabled?: boolean;
+  fullWidth?: boolean;
   iconRight?: ReactNode;
   label: string;
-  variant?: "ghost" | "primary" | "secondary";
-  disabled?: boolean;
   onPress: () => void;
+  variant?: "ghost" | "primary" | "secondary";
 };
 
 export function PrimaryButton({
   disabled = false,
+  fullWidth = false,
   iconRight,
   label,
   onPress,
@@ -27,6 +29,7 @@ export function PrimaryButton({
         styles.button,
         variant === "secondary" && styles.secondaryButton,
         variant === "ghost" && styles.ghostButton,
+        fullWidth && styles.fullWidthButton,
         disabled && styles.disabledButton,
       ]}
     >
@@ -56,6 +59,9 @@ const styles = StyleSheet.create({
     minHeight: 48,
     justifyContent: "center",
     paddingHorizontal: theme.space.lg,
+  },
+  fullWidthButton: {
+    alignSelf: "stretch",
   },
   label: {
     ...theme.type.button,
