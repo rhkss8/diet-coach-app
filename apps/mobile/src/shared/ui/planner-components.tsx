@@ -551,11 +551,13 @@ export function PlannerProgress({
 type PlannerItemCardProps = {
   detail: string;
   foodLines?: string[];
+  isActionable?: boolean;
   isCompleted: boolean;
   isSkipped: boolean;
   nutritionSummary?: string;
   onComplete: () => void;
   onSkip: () => void;
+  statusLabel?: string;
   title: string;
 };
 
@@ -565,11 +567,13 @@ type PlannerItemCardProps = {
 export function PlannerItemCard({
   detail,
   foodLines = [],
+  isActionable = true,
   isCompleted,
   isSkipped,
   nutritionSummary,
   onComplete,
   onSkip,
+  statusLabel,
   title,
 }: PlannerItemCardProps) {
   return (
@@ -582,9 +586,13 @@ export function PlannerItemCard({
     >
       <Pressable
         accessibilityRole="button"
-        disabled={isSkipped}
+        disabled={!isActionable || isSkipped}
         onPress={onComplete}
-        style={[styles.checkButton, isCompleted && styles.checkedButton]}
+        style={[
+          styles.checkButton,
+          isCompleted && styles.checkedButton,
+          !isActionable && styles.disabledCheckButton,
+        ]}
       >
         {isCompleted ? <Check color={theme.colors.surface} size={12} strokeWidth={3} /> : null}
       </Pressable>
@@ -602,12 +610,15 @@ export function PlannerItemCard({
         ) : null}
         <Text style={styles.planItemDetail}>{detail}</Text>
       </View>
-      {!isCompleted && !isSkipped ? (
+      {isActionable && !isCompleted && !isSkipped ? (
         <Pressable accessibilityRole="button" onPress={onSkip} style={styles.skipButton}>
           <Text style={styles.skipButtonText}>건너뜀</Text>
         </Pressable>
       ) : null}
       {isSkipped ? <Text style={styles.skippedLabel}>건너뜀</Text> : null}
+      {!isActionable && !isSkipped && statusLabel ? (
+        <Text style={styles.skippedLabel}>{statusLabel}</Text>
+      ) : null}
     </View>
   );
 }
@@ -1157,6 +1168,10 @@ const styles = StyleSheet.create({
   checkedButton: {
     backgroundColor: theme.colors.primary,
     borderColor: theme.colors.primary,
+  },
+  disabledCheckButton: {
+    backgroundColor: theme.colors.backgroundAlt,
+    borderColor: theme.colors.border,
   },
   planItemCopy: {
     flex: 1,

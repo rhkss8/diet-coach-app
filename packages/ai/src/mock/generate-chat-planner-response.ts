@@ -13,9 +13,11 @@ export function generateMockChatPlannerResponse(
   const attachments = latestChatMessage?.attachments ?? [];
 
   if (attachments.length > 0 && isRevisionIntent(latestMessage) && input.currentPlan) {
-    const dinnerItem = findDinnerItem(input.currentPlan.items);
+    const targetDate = getRevisionTargetDate(latestMessage, input);
+    const dinnerItem = findDinnerItem(input.currentPlan.items, targetDate);
     const revisedDinnerItem = {
       ...(dinnerItem ?? createAttachmentMealItem(input.todayDate, attachments)),
+      date: targetDate,
       title: "첨부 분석 반영 저녁 플랜",
       description: `${formatAttachmentNames(attachments)} 내용을 기준으로 오늘 식단 부담을 낮춰 조정해요.`,
       foods: [
@@ -32,12 +34,13 @@ export function generateMockChatPlannerResponse(
       message: `첨부한 ${formatAttachmentNames(attachments)} 기준으로 오늘 플랜을 다시 맞춰볼게요.`,
       revision: {
         planId: input.currentPlan.id ?? "chat-plan",
-        affectedDate: input.todayDate,
+        affectedDate: targetDate,
         reason: "want_replan",
         summary: "첨부 분석 기반 플랜 수정",
         userMessage: "업로드한 자료를 참고해서 오늘 플랜을 조정했어요.",
         changedItemIds: [revisedDinnerItem.id ?? `chat-${input.todayDate}-dinner`],
-        updatedTodayItems: [revisedDinnerItem],
+        updatedTodayItems: targetDate <= input.todayDate ? [revisedDinnerItem] : [],
+        updatedFutureItems: targetDate > input.todayDate ? [revisedDinnerItem] : undefined,
       },
       confirmation: {
         action: "revise_plan",
@@ -60,7 +63,7 @@ export function generateMockChatPlannerResponse(
     };
   }
 
-  if (isExerciseIntent(latestMessage)) {
+  if (isExerciseIntent(latestMessage) && !isRevisionIntent(latestMessage)) {
     return {
       type: "exercise_plan_suggestion",
       message: createExerciseMessage(input.planningContext),
@@ -73,25 +76,25 @@ export function generateMockChatPlannerResponse(
   }
 
   if (isRevisionIntent(latestMessage) && input.currentPlan) {
-    const dinnerItem = findDinnerItem(input.currentPlan.items);
-    const revisedDinnerItem = {
-      ...(dinnerItem ?? createMealItem(input.todayDate)),
-      title: "상담 반영 저녁 플랜",
-      description: "오늘 상황을 반영해서 단백질과 채소 중심으로 가볍게 조정해요.",
-      status: "adjusted" as const,
-    };
+    const revisionItems = createRevisionItems(latestMessage, input);
+    const updatedTodayItems = revisionItems.filter((item) => item.date <= input.todayDate);
+    const updatedFutureItems = revisionItems.filter((item) => item.date > input.todayDate);
+    const affectedDate = revisionItems[0]?.date ?? input.todayDate;
 
     return {
       type: "plan_revision_suggestion",
-      message: "괜찮아요. 지금 대화 내용을 기준으로 오늘 플랜을 다시 맞춰볼게요.",
+      message: createRevisionMessage(latestMessage),
       revision: {
         planId: input.currentPlan.id ?? "chat-plan",
-        affectedDate: input.todayDate,
+        affectedDate,
         reason: "want_replan",
         summary: "채팅 상담 기반 플랜 수정",
-        userMessage: "대화에서 나온 상황을 반영해서 오늘 플랜을 조정했어요.",
-        changedItemIds: [revisedDinnerItem.id ?? `chat-${input.todayDate}-dinner`],
-        updatedTodayItems: [revisedDinnerItem],
+        userMessage: "대화에서 나온 상황을 반영해서 플랜을 조정했어요.",
+        changedItemIds: revisionItems
+          .map((item) => item.id)
+          .filter((id): id is string => Boolean(id)),
+        updatedTodayItems,
+        updatedFutureItems: updatedFutureItems.length > 0 ? updatedFutureItems : undefined,
       },
       confirmation: {
         action: "revise_plan",
@@ -128,7 +131,7 @@ function isExerciseIntent(message: string) {
 }
 
 function isRevisionIntent(message: string) {
-  return /수정|바꿔|조정|회식|야근|망|깨졌|못/.test(message);
+  return /수정|바꿔|조정|회식|야근|망|깨졌|못|내일|이번 주|이번주/.test(message);
 }
 
 function createMealItem(date: string, planningContext?: PlanningContext): AiPlanItem {
@@ -289,8 +292,96 @@ function isFoodExcluded(food: string, planningContext?: PlanningContext) {
   return excludedFoods.some((excludedFood) => food.includes(excludedFood));
 }
 
-function findDinnerItem(items: AiPlanItem[]) {
-  return items.find((item) => item.type === "meal" && item.slot === "dinner");
+function createRevisionItems(
+  latestMessage: string,
+  input: GenerateChatPlannerResponseInput,
+): AiPlanItem[] {
+  const planItems = input.currentPlan?.items ?? [];
+  const targetDate = getRevisionTargetDate(latestMessage, input);
+  const targetItems = isWeekRevisionIntent(latestMessage)
+    ? planItems.filter((item) => item.date >= input.todayDate && isAdjustablePlanItem(item))
+    : planItems.filter(
+        (item) => item.date === targetDate && item.type === "meal" && item.slot === "dinner",
+      );
+
+  const sourceItems = targetItems.length > 0 ? targetItems : [createMealItem(targetDate)];
+
+  return sourceItems.map((item) => ({
+    ...item,
+    date: item.date ?? targetDate,
+    title: getRevisedItemTitle(item),
+    description: getRevisedItemDescription(item, targetDate, input.todayDate),
+    status: "adjusted" as const,
+  }));
+}
+
+function getRevisionTargetDate(latestMessage: string, input: GenerateChatPlannerResponseInput) {
+  if (isTomorrowIntent(latestMessage)) {
+    return getNextPlanDate(input.currentPlan?.items ?? [], input.todayDate);
+  }
+
+  return input.todayDate;
+}
+
+function getNextPlanDate(items: AiPlanItem[], todayDate: string) {
+  return (
+    Array.from(new Set(items.map((item) => item.date)))
+      .filter((date) => date > todayDate)
+      .sort()[0] ?? addDays(todayDate, 1)
+  );
+}
+
+function addDays(date: string, days: number) {
+  const [year, month, day] = date.split("-").map(Number);
+  const nextDate = new Date(Date.UTC(year, month - 1, day + days));
+
+  return nextDate.toISOString().slice(0, 10);
+}
+
+function isTomorrowIntent(message: string) {
+  return /내일|낼/.test(message);
+}
+
+function isWeekRevisionIntent(message: string) {
+  return /이번 주|이번주|남은 주|주간/.test(message);
+}
+
+function isAdjustablePlanItem(item: AiPlanItem) {
+  return item.slot === "dinner" || item.slot === "workout";
+}
+
+function getRevisedItemTitle(item: AiPlanItem) {
+  if (item.type === "exercise") {
+    return "상담 반영 가벼운 운동";
+  }
+
+  return "상담 반영 저녁 플랜";
+}
+
+function getRevisedItemDescription(item: AiPlanItem, targetDate: string, todayDate: string) {
+  const dateScope = targetDate > todayDate ? "예정된 날의 상황" : "오늘 상황";
+
+  if (item.type === "exercise") {
+    return `${dateScope}을 반영해서 무리 없는 강도로 조정해요.`;
+  }
+
+  return `${dateScope}을 반영해서 단백질과 채소 중심으로 가볍게 조정해요.`;
+}
+
+function createRevisionMessage(message: string) {
+  if (isWeekRevisionIntent(message)) {
+    return "좋아요. 이번 주 남은 플랜을 대화 내용 기준으로 다시 맞춰볼게요.";
+  }
+
+  if (isTomorrowIntent(message)) {
+    return "좋아요. 내일 플랜을 대화 내용 기준으로 다시 맞춰볼게요.";
+  }
+
+  return "괜찮아요. 지금 대화 내용을 기준으로 오늘 플랜을 다시 맞춰볼게요.";
+}
+
+function findDinnerItem(items: AiPlanItem[], date: string) {
+  return items.find((item) => item.date === date && item.type === "meal" && item.slot === "dinner");
 }
 
 function createEstimatedNutrition(

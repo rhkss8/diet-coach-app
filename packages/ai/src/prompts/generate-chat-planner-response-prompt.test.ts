@@ -101,4 +101,40 @@ describe("buildGenerateChatPlannerResponsePrompt", () => {
     expect(userMessage).toContain("Never suggest foods listed in planningContext");
     expect(userMessage).toContain("cite at least one captured user trait");
   });
+
+  it("allows chat revisions to target future dates and weekly ranges", () => {
+    const prompt = buildGenerateChatPlannerResponsePrompt({
+      currentPlan: {
+        goalId: "goal-1",
+        startDate: "2026-06-24",
+        endDate: "2026-06-30",
+        summary: "7일 플랜",
+        items: [
+          {
+            id: "tomorrow-dinner",
+            date: "2026-06-25",
+            type: "meal",
+            slot: "dinner",
+            title: "내일 저녁",
+            description: "기존 저녁",
+          },
+        ],
+      },
+      messages: [
+        {
+          content: "내일 회식이라 내일 저녁 바꿔줘",
+          id: "message-1",
+          role: "user",
+        },
+      ],
+      todayDate: "2026-06-24",
+    });
+
+    const userMessage = prompt.messages.at(1)?.content;
+
+    expect(userMessage).toContain('"updatedFutureItems"');
+    expect(userMessage).toContain("future date such as tomorrow");
+    expect(userMessage).toContain("week-level revisions");
+    expect(userMessage).toContain("Set affectedDate to the first changed plan date");
+  });
 });

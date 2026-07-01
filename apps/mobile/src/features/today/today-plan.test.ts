@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 import type { AiPlan } from "@diet-coach/ai";
 
 import {
+  canUpdatePlanItemStatusForDate,
   countPendingTodayItems,
   getInitialSelectedPlanDate,
+  getDateMonthKey,
+  getMonthCalendarDates,
   getPlanDateCursor,
   getPlanDateRelationLabel,
   getPlanDates,
@@ -13,6 +16,7 @@ import {
   getTodayPlanItems,
   getDailyProgressSummary,
   getPlanItemStatusEventName,
+  getWeekCalendarDates,
   groupTodayPlanItemsByType,
   shouldTrackPlanItemCompletedAfterRevision,
   updatePlanItemStatus,
@@ -74,6 +78,30 @@ describe("today plan helpers", () => {
     expect(getPlanDates(plan)).toEqual(["2026-06-16", "2026-06-17"]);
   });
 
+  it("builds a Sunday-first week calendar around the selected date", () => {
+    expect(getWeekCalendarDates("2026-06-17")).toEqual([
+      "2026-06-14",
+      "2026-06-15",
+      "2026-06-16",
+      "2026-06-17",
+      "2026-06-18",
+      "2026-06-19",
+      "2026-06-20",
+    ]);
+  });
+
+  it("builds a full month calendar grid including leading and trailing days", () => {
+    const dates = getMonthCalendarDates("2026-06-17");
+
+    expect(dates.at(0)).toBe("2026-05-31");
+    expect(dates.at(-1)).toBe("2026-07-04");
+    expect(dates).toHaveLength(35);
+  });
+
+  it("returns a stable month key for calendar cell dimming", () => {
+    expect(getDateMonthKey("2026-06-17")).toBe("2026-06");
+  });
+
   it("starts from the real today when the plan contains that date", () => {
     expect(getInitialSelectedPlanDate(plan, "2026-06-17")).toBe("2026-06-17");
   });
@@ -95,6 +123,12 @@ describe("today plan helpers", () => {
     expect(getPlanDateRelationLabel("2026-06-16", "2026-06-17")).toBe("지난 플랜");
     expect(getPlanDateRelationLabel("2026-06-17", "2026-06-17")).toBe("오늘");
     expect(getPlanDateRelationLabel("2026-06-18", "2026-06-17")).toBe("예정 플랜");
+  });
+
+  it("allows status updates for past and today, not future plan dates", () => {
+    expect(canUpdatePlanItemStatusForDate("2026-06-16", "2026-06-17")).toBe(true);
+    expect(canUpdatePlanItemStatusForDate("2026-06-17", "2026-06-17")).toBe(true);
+    expect(canUpdatePlanItemStatusForDate("2026-06-18", "2026-06-17")).toBe(false);
   });
 
   it("counts pending today items", () => {

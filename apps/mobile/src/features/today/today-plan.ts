@@ -12,6 +12,41 @@ export function getPlanDates(plan: AiPlan) {
   return uniqueDates.sort();
 }
 
+export function getWeekCalendarDates(selectedDate: string) {
+  const date = parseDateKey(selectedDate);
+  const weekStart = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
+  weekStart.setUTCDate(weekStart.getUTCDate() - weekStart.getUTCDay());
+
+  return Array.from({ length: 7 }, (_, index) => addDaysToDateKey(formatDateKey(weekStart), index));
+}
+
+export function getMonthCalendarDates(selectedDate: string) {
+  const date = parseDateKey(selectedDate);
+  const monthStart = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+  const calendarStart = new Date(monthStart);
+  calendarStart.setUTCDate(calendarStart.getUTCDate() - calendarStart.getUTCDay());
+
+  const monthEnd = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
+  const calendarEnd = new Date(monthEnd);
+  calendarEnd.setUTCDate(calendarEnd.getUTCDate() + (6 - calendarEnd.getUTCDay()));
+
+  const dates: string[] = [];
+  const cursor = new Date(calendarStart);
+
+  while (cursor <= calendarEnd) {
+    dates.push(formatDateKey(cursor));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  return dates;
+}
+
+export function getDateMonthKey(date: string) {
+  return date.slice(0, 7);
+}
+
 export function getInitialSelectedPlanDate(plan: AiPlan, todayDate = getSystemTodayDate()) {
   const planDates = getPlanDates(plan);
 
@@ -74,6 +109,10 @@ export function getPlanDateRelationLabel(date: string, todayDate = getSystemToda
   }
 
   return relation === "past" ? "지난 플랜" : "예정 플랜";
+}
+
+export function canUpdatePlanItemStatusForDate(date: string, todayDate = getSystemTodayDate()) {
+  return getPlanDateRelation(date, todayDate) !== "future";
 }
 
 export function countPendingTodayItems(planItems: AiPlanItem[]) {
@@ -139,4 +178,21 @@ export function shouldTrackPlanItemCompletedAfterRevision(
 
 function getSystemTodayDate() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function addDaysToDateKey(date: string, days: number) {
+  const parsedDate = parseDateKey(date);
+  parsedDate.setUTCDate(parsedDate.getUTCDate() + days);
+
+  return formatDateKey(parsedDate);
+}
+
+function parseDateKey(date: string) {
+  const [year, month, day] = date.split("-").map(Number);
+
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+function formatDateKey(date: Date) {
+  return date.toISOString().slice(0, 10);
 }

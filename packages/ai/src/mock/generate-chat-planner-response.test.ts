@@ -85,6 +85,82 @@ describe("generateMockChatPlannerResponse", () => {
     }
   });
 
+  it("targets tomorrow when the user asks to revise a future plan date", () => {
+    const response = generateMockChatPlannerResponse({
+      todayDate,
+      currentPlan: {
+        id: "chat-plan",
+        goalId: "chat-goal",
+        startDate: todayDate,
+        endDate: "2026-06-18",
+        summary: "기존 플랜",
+        items: [
+          {
+            id: "tomorrow-dinner",
+            date: "2026-06-18",
+            type: "meal",
+            slot: "dinner",
+            title: "내일 저녁",
+            description: "기존 저녁",
+          },
+        ],
+      },
+      messages: [{ id: "1", role: "user", content: "내일 회식이라 내일 저녁 바꿔줘" }],
+    });
+
+    expect(response.type).toBe("plan_revision_suggestion");
+    if (response.type === "plan_revision_suggestion") {
+      expect(response.revision.affectedDate).toBe("2026-06-18");
+      expect(response.revision.updatedTodayItems).toHaveLength(0);
+      expect(response.revision.updatedFutureItems?.[0]).toEqual(
+        expect.objectContaining({
+          id: "tomorrow-dinner",
+          date: "2026-06-18",
+          status: "adjusted",
+        }),
+      );
+    }
+  });
+
+  it("creates a weekly revision from chat when the user asks for this week", () => {
+    const response = generateMockChatPlannerResponse({
+      todayDate,
+      currentPlan: {
+        id: "chat-plan",
+        goalId: "chat-goal",
+        startDate: todayDate,
+        endDate: "2026-06-19",
+        summary: "기존 플랜",
+        items: [
+          {
+            id: "today-dinner",
+            date: todayDate,
+            type: "meal",
+            slot: "dinner",
+            title: "오늘 저녁",
+            description: "기존 저녁",
+          },
+          {
+            id: "future-workout",
+            date: "2026-06-19",
+            type: "exercise",
+            slot: "workout",
+            title: "미래 운동",
+            description: "기존 운동",
+          },
+        ],
+      },
+      messages: [{ id: "1", role: "user", content: "이번 주 운동이랑 저녁 좀 줄여줘" }],
+    });
+
+    expect(response.type).toBe("plan_revision_suggestion");
+    if (response.type === "plan_revision_suggestion") {
+      expect(response.revision.changedItemIds).toEqual(["today-dinner", "future-workout"]);
+      expect(response.revision.updatedTodayItems).toHaveLength(1);
+      expect(response.revision.updatedFutureItems).toHaveLength(1);
+    }
+  });
+
   it("returns a meal suggestion from uploaded context", () => {
     const response = generateMockChatPlannerResponse({
       todayDate,
