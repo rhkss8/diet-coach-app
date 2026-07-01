@@ -1,6 +1,7 @@
 import type { GenerateInitialPlanOutput } from "@diet-coach/ai";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { PrimaryButton } from "../../shared/ui/PrimaryButton";
 import {
   ChatBubble,
   PlannerItemCard,
@@ -72,9 +73,7 @@ export function PlanApprovalScreen({ onApprove, output }: PlanApprovalScreenProp
       </ScrollView>
 
       <View style={styles.bottomPanel}>
-        <Pressable accessibilityRole="button" onPress={onApprove} style={styles.approveButton}>
-          <Text style={styles.approveButtonText}>이 플랜으로 시작하기</Text>
-        </Pressable>
+        <PrimaryButton fullWidth label="이 플랜으로 시작하기" onPress={onApprove} />
         <Text style={styles.helperText}>
           승인 후에도 회식, 야근, 운동 미실행이 생기면 오늘 기준으로 다시 맞출 수 있어요.
         </Text>
@@ -155,19 +154,6 @@ const styles = StyleSheet.create({
     paddingBottom: 34,
     paddingHorizontal: theme.space.xl,
     paddingTop: theme.space.sm,
-  },
-  approveButton: {
-    alignItems: "center",
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.radius.large,
-    minHeight: 52,
-    justifyContent: "center",
-  },
-  approveButtonText: {
-    color: theme.colors.surface,
-    fontSize: 13,
-    fontWeight: "700",
-    lineHeight: 18,
   },
   helperText: {
     color: theme.colors.muted,

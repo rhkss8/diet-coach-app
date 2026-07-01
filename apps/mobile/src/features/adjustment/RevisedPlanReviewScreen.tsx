@@ -1,7 +1,8 @@
 import type { AdjustTodayPlanOutput } from "@diet-coach/ai";
 import { ArrowRight, Check } from "lucide-react-native";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { PrimaryButton } from "../../shared/ui/PrimaryButton";
 import { BackButton, ChatBubble } from "../../shared/ui/planner-components";
 import { theme } from "../../shared/ui/design-system";
 import { getChangeBadgeLabel, getChangedTodayItems } from "./revised-plan-review";
@@ -92,13 +93,13 @@ export function RevisedPlanReviewScreen({
       </ScrollView>
 
       <View style={styles.bottomPanel}>
-        <Pressable accessibilityRole="button" onPress={onApprove} style={styles.approveButton}>
-          <Check color={theme.colors.surface} size={15} strokeWidth={2.5} />
-          <Text style={styles.approveButtonText}>이 수정안 승인하기</Text>
-        </Pressable>
-        <Pressable accessibilityRole="button" onPress={onDismiss} style={styles.secondaryButton}>
-          <Text style={styles.secondaryButtonText}>다시 제안받기</Text>
-        </Pressable>
+        <PrimaryButton
+          fullWidth
+          iconRight={<Check color={theme.colors.surface} size={15} strokeWidth={2.5} />}
+          label="이 수정안 승인하기"
+          onPress={onApprove}
+        />
+        <PrimaryButton fullWidth label="다시 제안받기" onPress={onDismiss} variant="ghost" />
       </View>
     </View>
   );
@@ -291,34 +292,5 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     paddingHorizontal: theme.space.xl,
     paddingTop: theme.space.sm,
-  },
-  approveButton: {
-    alignItems: "center",
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.radius.large,
-    flexDirection: "row",
-    gap: theme.space.xs,
-    minHeight: 52,
-    justifyContent: "center",
-  },
-  approveButtonText: {
-    color: theme.colors.surface,
-    fontSize: 13,
-    fontWeight: "700",
-    lineHeight: 18,
-  },
-  secondaryButton: {
-    alignItems: "center",
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.large,
-    borderWidth: 1,
-    minHeight: 46,
-    justifyContent: "center",
-  },
-  secondaryButtonText: {
-    color: theme.colors.inkSoft,
-    fontSize: 13,
-    fontWeight: "500",
-    lineHeight: 18,
   },
 });

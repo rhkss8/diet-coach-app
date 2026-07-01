@@ -277,8 +277,6 @@ export function AppRoot() {
             onAdjustToday={() => {
               navigateTo("adjustment");
             }}
-            onOpenConsultation={() => switchPrimaryTab("consultation")}
-            onOpenSettings={() => switchPrimaryTab("settings")}
             onPlanChange={updateApprovedPlan}
             plan={approvedPlanSnapshot.plan}
             revisionContext={
@@ -312,7 +310,6 @@ export function AppRoot() {
                 navigateToToday: () => navigateTo("today"),
               });
             }}
-            onBack={goBack}
             onDismissPendingResponse={() => {
               setPendingChatResponse(null);
             }}

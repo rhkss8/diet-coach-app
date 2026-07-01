@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { Sex } from "@diet-coach/core";
 
 import { theme } from "../../shared/ui/design-system";
+import { FormTextField } from "../../shared/ui/FormTextField";
 import { PrimaryButton } from "../../shared/ui/PrimaryButton";
 import { SegmentedChoice } from "../../shared/ui/SegmentedChoice";
 import { CalendarDatePicker } from "../onboarding/CalendarDatePicker";
@@ -107,7 +108,7 @@ export function SettingsScreen({ authMode, onSavePlanBasis, planBasis }: Setting
         </Text>
 
         <View style={styles.formGrid}>
-          <PlanBasisInput
+          <FormTextField
             error={fieldErrors.age}
             keyboardType="number-pad"
             label="나이"
@@ -116,7 +117,7 @@ export function SettingsScreen({ authMode, onSavePlanBasis, planBasis }: Setting
             suffix="세"
             value={draft.age}
           />
-          <PlanBasisInput
+          <FormTextField
             error={fieldErrors.heightCm}
             keyboardType="number-pad"
             label="키"
@@ -125,7 +126,7 @@ export function SettingsScreen({ authMode, onSavePlanBasis, planBasis }: Setting
             suffix="cm"
             value={draft.heightCm}
           />
-          <PlanBasisInput
+          <FormTextField
             error={fieldErrors.currentWeightKg}
             keyboardType="decimal-pad"
             label="현재 체중"
@@ -136,7 +137,7 @@ export function SettingsScreen({ authMode, onSavePlanBasis, planBasis }: Setting
             suffix="kg"
             value={draft.currentWeightKg}
           />
-          <PlanBasisInput
+          <FormTextField
             error={fieldErrors.targetWeightKg}
             keyboardType="decimal-pad"
             label="목표 체중"
@@ -151,7 +152,7 @@ export function SettingsScreen({ authMode, onSavePlanBasis, planBasis }: Setting
 
         <View style={styles.optionalGroup}>
           <Text style={styles.optionalTitle}>선택 정보</Text>
-          <PlanBasisInput
+          <FormTextField
             label="호칭"
             onChangeText={(value) => updateDraft("name", value)}
             placeholder="어떻게 불러드릴까요?"
@@ -242,44 +243,6 @@ function SettingsItemContent({ description, meta, title }: SettingsItemContentPr
   );
 }
 
-type PlanBasisInputProps = {
-  error?: string;
-  keyboardType?: "decimal-pad" | "number-pad";
-  label: string;
-  onChangeText: (value: string) => void;
-  placeholder: string;
-  suffix?: string;
-  value: string;
-};
-
-function PlanBasisInput({
-  error,
-  keyboardType,
-  label,
-  onChangeText,
-  placeholder,
-  suffix,
-  value,
-}: PlanBasisInputProps) {
-  return (
-    <View style={styles.inputGroup}>
-      <Text style={styles.inputLabel}>{label}</Text>
-      <View style={[styles.inputShell, error && styles.inputShellError]}>
-        <TextInput
-          keyboardType={keyboardType}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={theme.colors.muted}
-          style={styles.input}
-          value={value}
-        />
-        {suffix ? <Text style={styles.inputSuffix}>{suffix}</Text> : null}
-      </View>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: theme.colors.background,
@@ -358,44 +321,6 @@ const styles = StyleSheet.create({
   optionalTitle: {
     ...theme.type.eyebrow,
     color: theme.colors.muted,
-  },
-  inputGroup: {
-    gap: theme.space.xs,
-  },
-  inputLabel: {
-    ...theme.type.caption,
-    color: theme.colors.inkSoft,
-    fontWeight: "800",
-  },
-  inputShell: {
-    alignItems: "center",
-    backgroundColor: theme.colors.background,
-    borderColor: theme.colors.borderStrong,
-    borderRadius: theme.radius.small,
-    borderWidth: 1,
-    flexDirection: "row",
-    minHeight: 48,
-    paddingHorizontal: theme.space.sm,
-  },
-  inputShellError: {
-    borderColor: theme.colors.danger,
-  },
-  input: {
-    ...theme.type.body,
-    color: theme.colors.ink,
-    flex: 1,
-    minHeight: 44,
-    outlineStyle: "none" as never,
-    paddingVertical: theme.space.xs,
-  },
-  inputSuffix: {
-    ...theme.type.supporting,
-    color: theme.colors.muted,
-    fontWeight: "800",
-  },
-  errorText: {
-    ...theme.type.caption,
-    color: theme.colors.danger,
   },
   saveMessage: {
     ...theme.type.caption,

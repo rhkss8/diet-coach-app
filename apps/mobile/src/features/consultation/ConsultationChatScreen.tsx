@@ -32,7 +32,6 @@ type ConsultationChatScreenProps = {
   hasPlanBasis: boolean;
   messages: ChatPlannerMessage[];
   onApproveResponse: (response: ChatPlannerResponse) => void;
-  onBack?: () => void;
   onDismissPendingResponse: () => void;
   onOpenPlanBasisSettings: () => void;
   onSendMessage: (
@@ -78,7 +77,6 @@ export function ConsultationChatScreen({
   hasPlanBasis,
   messages,
   onApproveResponse,
-  onBack,
   onDismissPendingResponse,
   onOpenPlanBasisSettings,
   onSendMessage,
@@ -302,7 +300,7 @@ export function ConsultationChatScreen({
   return (
     <View style={styles.screen}>
       <View style={styles.topBar}>
-        <AppHeader kicker="TARS · 플랜 상담" onBack={onBack} />
+        <AppHeader kicker="TARS · 플랜 상담" />
       </View>
 
       <ScrollView contentContainerStyle={styles.messages} style={styles.messageList}>
@@ -601,10 +599,10 @@ export function ConsultationChatScreen({
               typeLabel={getResponseTypeLabel(pendingResponse)}
             />
           ) : (
-            <Pressable style={styles.questionCard}>
+            <View style={styles.questionCard}>
               <Text style={styles.questionKicker}>추가 질문</Text>
               <Text style={styles.questionText}>{pendingResponse.question}</Text>
-            </Pressable>
+            </View>
           )
         ) : null}
       </ScrollView>

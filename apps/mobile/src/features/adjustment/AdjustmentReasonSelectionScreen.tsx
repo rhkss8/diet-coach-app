@@ -10,9 +10,10 @@ import {
   Plane,
   Utensils,
 } from "lucide-react-native";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { theme } from "../../shared/ui/design-system";
+import { PrimaryButton } from "../../shared/ui/PrimaryButton";
 import {
   BackButton,
   type PlannerIcon,
@@ -137,21 +138,19 @@ export function AdjustmentReasonSelectionScreen({
 
       <View style={styles.bottomPanel}>
         {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
-        <Pressable
-          accessibilityRole="button"
+        <PrimaryButton
           disabled={!canSubmit}
+          fullWidth
+          iconRight={
+            <ArrowRight
+              color={canSubmit ? theme.colors.surface : theme.colors.subtle}
+              size={15}
+              strokeWidth={2}
+            />
+          }
+          label="AI에게 조정 요청하기"
           onPress={onSubmitReason}
-          style={[styles.submitButton, !canSubmit && styles.disabledSubmitButton]}
-        >
-          <Text style={[styles.submitButtonText, !canSubmit && styles.disabledSubmitButtonText]}>
-            AI에게 조정 요청하기
-          </Text>
-          <ArrowRight
-            color={canSubmit ? theme.colors.surface : theme.colors.muted}
-            size={15}
-            strokeWidth={2}
-          />
-        </Pressable>
+        />
       </View>
     </View>
   );
@@ -206,26 +205,5 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 17,
     textAlign: "center",
-  },
-  submitButton: {
-    alignItems: "center",
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.radius.large,
-    flexDirection: "row",
-    gap: theme.space.xs,
-    minHeight: 52,
-    justifyContent: "center",
-  },
-  disabledSubmitButton: {
-    backgroundColor: theme.colors.backgroundAlt,
-  },
-  submitButtonText: {
-    color: theme.colors.surface,
-    fontSize: 13,
-    fontWeight: "700",
-    lineHeight: 18,
-  },
-  disabledSubmitButtonText: {
-    color: theme.colors.muted,
   },
 });
